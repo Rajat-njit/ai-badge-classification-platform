@@ -1,0 +1,1 @@
+# Badge Fact Sheet Schema
