@@ -1,0 +1,127 @@
+"""
+NLP Signal Extractor — orchestrates all four layers.
+
+Pipeline (.md Section 10):
+  Layer 1: PhraseExtractor   — exact keyword phrases (highest confidence)
+  Layer 2: PatternExtractor  — regex patterns for paraphrased language
+  Layer 3: BloomExtractor    — spaCy verb → Bloom level
+  Layer 4: LLMExtractor      — stub, enabled via USE_LLM=true
+
+After all layers run, the gap detector populates missing_signals and
+sets needs_followup_questions = True when critical fields are still absent.
+
+Critical fields checked (signals the rule engine cannot work without):
+  - assessment_evaluator : needed to distinguish Skill vs Achievement (S2R06/S2R07)
+  - audience_type        : needed for S1R01 vs S1R02 when issuer == "LDI"
+"""
+
+import os
+
+from app.models.badge_fact_sheet import BadgeFactSheet
+from app.services.nlp.bloom_extractor import BloomExtractor
+from app.services.nlp.llm_extractor import LLMExtractor
+from app.services.nlp.pattern_rules import PatternExtractor
+from app.services.nlp.phrase_dictionary import PhraseExtractor
+
+
+class SignalExtractor:
+    """
+    Orchestrates all 4 NLP layers in order.
+
+    Args:
+        use_llm: Override for USE_LLM env var. If None, reads from environment.
+    """
+
+    def __init__(self, use_llm: bool | None = None):
+        if use_llm is None:
+            use_llm = os.getenv("USE_LLM", "false").lower() == "true"
+        self.use_llm = use_llm
+
+        self.phrase_extractor = PhraseExtractor()
+        self.pattern_extractor = PatternExtractor()
+        self.bloom_extractor = BloomExtractor()
+        self.llm_extractor = LLMExtractor()
+
+    def extract_all(self, bfs: BadgeFactSheet) -> BadgeFactSheet:
+        """
+        Run all NLP layers against the badge text and return an updated BFS.
+
+        Text surface = badge_description + earning_criteria_text
+        (same surface used by all layers).
+        """
+        text = f"{bfs.badge_description} {bfs.earning_criteria_text}".strip()
+
+        # Layer 1 — exact phrase matching
+        bfs = self.phrase_extractor.extract(bfs, text)
+
+        # Layer 2 — regex patterns
+        bfs = self.pattern_extractor.extract(bfs, text)
+
+        # Layer 3 — spaCy Bloom verb extraction
+        bfs = self.bloom_extractor.extract(bfs, text)
+
+        # Layer 4 — LLM gap filling (only when enabled and signals are missing)
+        if self.use_llm and self._has_critical_missing(bfs):
+            bfs = self.llm_extractor.extract(bfs)
+
+        # Final gap assessment — adds to any missing_signals already set
+        # by the normalizer (e.g. "issuer", "badge_title")
+        self._check_missing_signals(bfs)
+
+        return bfs
+
+    # ------------------------------------------------------------------
+    # Gap detection
+    # ------------------------------------------------------------------
+
+    def _has_critical_missing(self, bfs: BadgeFactSheet) -> bool:
+        """True if any signal in the critical set is still unresolved."""
+        return bool(self._new_missing_signals(bfs))
+
+    def _check_missing_signals(self, bfs: BadgeFactSheet) -> None:
+        """
+        Populate bfs.missing_signals with any critical fields still absent
+        after all NLP layers have run.
+
+        Only adds new entries — does not duplicate signals already recorded
+        by the normalizer.
+        """
+        for field in self._new_missing_signals(bfs):
+            if field not in bfs.missing_signals:
+                bfs.missing_signals.append(field)
+
+        if bfs.missing_signals:
+            bfs.needs_followup_questions = True
+
+    def _new_missing_signals(self, bfs: BadgeFactSheet) -> list[str]:
+        """
+        Return critical fields that are still None after NLP extraction.
+
+        Checks only the fields the rule engine cannot fall back on —
+        avoiding false positives that would incorrectly degrade confidence.
+        """
+        missing: list[str] = []
+
+        # issuer — Stage 1 cannot classify without it (IR07 / S1R08)
+        if bfs.issuer is None and "issuer" not in bfs.missing_signals:
+            missing.append("issuer")
+
+        # assessment_evaluator — needed to distinguish Skill vs Achievement.
+        # Only flag as missing if assessment is required and evaluator unknown.
+        if (
+            bfs.assessment_required == "yes"
+            and bfs.assessment_evaluator is None
+            and "assessment_evaluator" not in bfs.missing_signals
+        ):
+            missing.append("assessment_evaluator")
+
+        # audience_type — needed when issuer is LDI to choose between
+        # S1R01 (Faculty & Staff) and S1R02 (Continuing Ed).
+        if (
+            bfs.issuer == "LDI"
+            and bfs.audience_type is None
+            and "audience_type" not in bfs.missing_signals
+        ):
+            missing.append("audience_type")
+
+        return missing
