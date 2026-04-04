@@ -677,3 +677,97 @@ def test_presentation_evidence_mapping():
 
 if __name__ == "__main__":
     test_classification_pipeline()
+
+
+def load_master_badges():
+    """Load the 28 real badges from master dataset."""
+    with open("data/master/master_badges.json", "r") as f:
+        data = json.load(f)
+    return data
+
+
+def test_master_badges_validation():
+    """Validate classification against 28 real NJIT badges with expected values."""
+    master_badges = load_master_badges()
+
+    cat_correct = cat_total = 0
+    type_correct = type_total = 0
+    level_correct = level_total = 0
+
+    for badge_data in master_badges:
+        fact_sheet = create_fact_sheet_from_dict(badge_data)
+
+        # Validate category
+        if badge_data.get("expected_category"):
+            cat_total += 1
+            pred_category = step1_category.classify_category(fact_sheet)
+            if badge_data["expected_category"].lower().replace(" & ", " and ") == str(pred_category).lower().replace(" & ", " and "):
+                cat_correct += 1
+
+        # Validate type
+        if badge_data.get("expected_type"):
+            type_total += 1
+            pred_type = step2_type.classify_type(fact_sheet)
+            if badge_data["expected_type"].lower() == str(pred_type).lower():
+                type_correct += 1
+
+        # Validate level
+        if badge_data.get("expected_level"):
+            level_total += 1
+            pred_type_for_level = step2_type.classify_type(fact_sheet)
+            pred_level = step3_level.classify_level(fact_sheet, pred_type_for_level)
+            if badge_data["expected_level"].lower() == str(pred_level).lower():
+                level_correct += 1
+
+    # Print summary
+    print(f"\n=== Master Badges Validation (28 real NJIT badges) ===")
+    print(f"Category Accuracy: {cat_correct}/{cat_total} = {cat_correct/cat_total*100:.1f}%" if cat_total else "Category: N/A")
+    print(f"Type Accuracy: {type_correct}/{type_total} = {type_correct/type_total*100:.1f}%" if type_total else "Type: N/A")
+    print(f"Level Accuracy: {level_correct}/{level_total} = {level_correct/level_total*100:.1f}%" if level_total else "Level: N/A")
+
+    # Assert reasonable accuracy (adjust thresholds based on results)
+    if cat_total:
+        assert cat_correct / cat_total >= 0.6, f"Category accuracy too low: {cat_correct/cat_total:.1%}"
+    if type_total:
+        assert type_correct / type_total >= 0.6, f"Type accuracy too low: {type_correct/type_total:.1%}"
+    if level_total:
+        assert level_correct / level_total >= 0.5, f"Level accuracy too low: {level_correct/level_total:.1%}"
+
+
+def test_all_48_badges():
+    """Test classification on all 48 badges (20 synthetic + 28 master)."""
+    with open("data/synthetic/all_badges_48.json", "r") as f:
+        all_badges = json.load(f)
+
+    assert len(all_badges) == 48 or len(all_badges) == 49, f"Expected 48-49 badges, got {len(all_badges)}"
+
+    results = []
+    for badge_data in all_badges:
+        fact_sheet = create_fact_sheet_from_dict(badge_data)
+        pred_category = step1_category.classify_category(fact_sheet)
+        pred_type = step2_type.classify_type(fact_sheet)
+        pred_level = step3_level.classify_level(fact_sheet, pred_type) 
+        result = {
+            "badge_name": badge_data["badge_name"],
+            "category": pred_category,
+            "type": pred_type,
+            "level": pred_level,
+        }
+        results.append(result)
+
+    # Verify we got results for all badges
+    assert len(results) == len(all_badges)
+
+    # Check that categories are valid
+    valid_categories = [
+        "Academic", "Co-Curricular and Extra-Curricular",
+        "Continuing & Professional Education", "Faculty & Staff Development",
+        "Uncategorized"
+    ]
+    category_counts = {}
+    for r in results:
+        assert r["category"] in valid_categories, f"Invalid category: {r['category']}"
+        category_counts[r["category"]] = category_counts.get(r["category"], 0) + 1
+
+    print(f"\nSuccessfully classified {len(results)} badges")
+    print(f"Category distribution: {category_counts}")

@@ -153,8 +153,7 @@ class BadgeFactSheet:
             description=form_data.get("description", ""),
             issuing_department=form_data.get("issuing_dept"),
         )
-
-        # Map category (Q9) to audience and context
+# Map category (Q9) to audience and context
         category = form_data.get("badge_category", "")
         if "Academic" in category:
             fact.audience = [Audience.STUDENT]
@@ -191,3 +190,94 @@ class BadgeFactSheet:
                 "Assessment type must be specified when has_assessment is True."
             )
         return errors
+
+
+def create_fact_sheet_from_dict(data: Dict[str, Any]) -> BadgeFactSheet:
+    """
+    Create a BadgeFactSheet from a dictionary (JSON format).
+    Used for loading badges from synthetic_badges.json or master_badges.json.
+    """
+    # Parse audience enum values
+    audience_list = []
+    for aud in data.get("audience", []):
+        try:
+            if isinstance(aud, str):
+                audience_list.append(Audience(aud.lower()))
+        except ValueError:
+            pass  # Skip invalid audience values
+
+    # Parse context enum
+    context_val = data.get("context")
+    context = None
+    if context_val:
+        try:
+            context = Context(context_val.lower())
+        except ValueError:
+            pass
+
+    # Parse assessment type
+    assessment_type = None
+    at = data.get("assessment_type")
+    if at:
+        at_map = {
+            "none": AssessmentType.NONE,
+            "auto_graded": AssessmentType.AUTO,
+            "expert_skill": AssessmentType.EXPERT_SKILL,
+            "expert_multi": AssessmentType.EXPERT_MULTI,
+        }
+        assessment_type = at_map.get(at.lower(), AssessmentType.AUTO)
+
+    # Parse evidence types
+    evidence_list = []
+    ev_map = {
+        "attendance_record": EvidenceType.ATTENDANCE,
+        "completion_record": EvidenceType.COMPLETION,
+        "quiz_result": EvidenceType.QUIZ,
+        "assignment_submission": EvidenceType.ASSIGNMENT,
+        "demonstration": EvidenceType.DEMONSTRATION,
+        "portfolio": EvidenceType.PORTFOLIO,
+        "project_artifact": EvidenceType.PROJECT,
+        "presentation": EvidenceType.PRESENTATION,
+        "expert_review": EvidenceType.EXPERT_REVIEW,
+        "peer_feedback": EvidenceType.PEER_FEEDBACK,
+        "external_evaluation": EvidenceType.EXTERNAL_EVAL,
+        "supervisor_evaluation": EvidenceType.SUPERVISOR_EVAL,
+        "concept_map": EvidenceType.CONCEPT_MAP,
+        "scenario_response": EvidenceType.SCENARIO_RESPONSE,
+        "capstone": EvidenceType.CAPSTONE,
+        "expert_rated_rubric": EvidenceType.RUBRIC,
+        "ksa_tagged_portfolio": EvidenceType.KSA_TAGGED_PORTFOLIO,
+        "case_study": EvidenceType.CASE_STUDY,
+        "leadership_evidence": EvidenceType.LEADERSHIP_EVIDENCE,
+        "360_feedback": EvidenceType._360_FEEDBACK,
+    }
+    for ev in data.get("evidence_required", []):
+        if isinstance(ev, str) and ev.lower() in ev_map:
+            evidence_list.append(ev_map[ev.lower()])
+
+    # Parse bloom levels
+    bloom_list = []
+    for bl in data.get("bloom_levels", []):
+        try:
+            if isinstance(bl, str):
+                bloom_list.append(BloomLevel(bl.lower()))
+        except ValueError:
+            pass
+
+    return BadgeFactSheet(
+        badge_name=data.get("badge_name", ""),
+        description=data.get("description", ""),
+        issuing_department=data.get("issuing_department"),
+        audience=audience_list,
+        context=context,
+        has_assessment=data.get("has_assessment", False),
+        assessment_type=assessment_type,
+        assessment_description=data.get("assessment_description"),
+        completion_criteria=data.get("completion_criteria"),
+        evidence_required=evidence_list,
+        bloom_levels=bloom_list,
+        prerequisites=data.get("prerequisites", []),
+        is_terminal=data.get("is_terminal", False),
+        hours_to_complete=data.get("hours_to_complete"),
+        source_format=data.get("source_format", "unknown"),
+    )
