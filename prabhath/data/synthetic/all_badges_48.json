@@ -1,0 +1,1307 @@
+[
+  {
+    "badge_name": "Data Science Fundamentals",
+    "description": "Introductory course covering Python, statistics, and basic ML.",
+    "issuing_department": "Computer Science",
+    "audience": [
+      "student"
+    ],
+    "context": "academic",
+    "has_assessment": true,
+    "assessment_type": "auto_graded",
+    "assessment_description": "Online quizzes and coding assignments",
+    "completion_criteria": "Complete all modules with 80% average",
+    "evidence_required": [
+      "quiz_result",
+      "assignment_submission"
+    ],
+    "bloom_levels": [
+      "remember",
+      "understand"
+    ],
+    "prerequisites": [],
+    "is_terminal": false,
+    "hours_to_complete": 30,
+    "source_format": "proposal_form"
+  },
+  {
+    "badge_name": "Leadership Workshop Series",
+    "description": "Series of workshops on team management and communication.",
+    "issuing_department": "Student Involvement",
+    "audience": [
+      "student"
+    ],
+    "context": "co_curricular",
+    "has_assessment": false,
+    "assessment_type": null,
+    "assessment_description": null,
+    "completion_criteria": "Attend at least 4 of 5 workshops",
+    "evidence_required": [
+      "attendance_record"
+    ],
+    "bloom_levels": [],
+    "prerequisites": [],
+    "is_terminal": false,
+    "hours_to_complete": 10,
+    "source_format": "proposal_form"
+  },
+  {
+    "badge_name": "Project Management Professional (PMP) Prep",
+    "description": "Non-credit course preparing for PMP certification.",
+    "issuing_department": "Continuing Education",
+    "audience": [
+      "external",
+      "professional"
+    ],
+    "context": "professional_ed",
+    "has_assessment": true,
+    "assessment_type": "auto_graded",
+    "assessment_description": "Practice exams and knowledge checks",
+    "completion_criteria": "Complete all modules and pass final practice exam",
+    "evidence_required": [
+      "quiz_result"
+    ],
+    "bloom_levels": [
+      "understand",
+      "apply"
+    ],
+    "prerequisites": [],
+    "is_terminal": false,
+    "hours_to_complete": 35,
+    "source_format": "proposal_form"
+  },
+  {
+    "badge_name": "Effective Teaching Strategies",
+    "description": "Workshop for faculty on active learning techniques.",
+    "issuing_department": "CEIE",
+    "audience": [
+      "faculty"
+    ],
+    "context": "employee_development",
+    "has_assessment": true,
+    "assessment_type": "expert_skill",
+    "assessment_description": "Peer observation and feedback",
+    "completion_criteria": "Attend workshop and submit teaching reflection",
+    "evidence_required": [
+      "attendance_record",
+      "expert_review"
+    ],
+    "bloom_levels": [
+      "apply",
+      "analyze"
+    ],
+    "prerequisites": [],
+    "is_terminal": false,
+    "hours_to_complete": 8,
+    "source_format": "proposal_form"
+  },
+  {
+    "badge_name": "Python Programming Skill",
+    "description": "Demonstrate ability to write Python scripts.",
+    "issuing_department": "Computer Science",
+    "audience": [
+      "student"
+    ],
+    "context": "academic",
+    "has_assessment": true,
+    "assessment_type": "expert_skill",
+    "assessment_description": "Code review by instructor",
+    "completion_criteria": "Submit working script and pass code review",
+    "evidence_required": [
+      "assignment_submission",
+      "expert_review"
+    ],
+    "bloom_levels": [
+      "apply"
+    ],
+    "prerequisites": [],
+    "is_terminal": false,
+    "hours_to_complete": 15,
+    "source_format": "proposal_form"
+  },
+  {
+    "badge_name": "Full Stack Web Development Competency",
+    "description": "Demonstrate ability to build a full web application.",
+    "issuing_department": "Informatics",
+    "audience": [
+      "student"
+    ],
+    "context": "academic",
+    "has_assessment": true,
+    "assessment_type": "expert_multi",
+    "assessment_description": "Project evaluated on design, functionality, and code quality",
+    "completion_criteria": "Submit project and pass expert rubric evaluation",
+    "evidence_required": [
+      "project_artifact",
+      "expert_rated_rubric"
+    ],
+    "bloom_levels": [
+      "analyze",
+      "evaluate",
+      "create"
+    ],
+    "prerequisites": [],
+    "is_terminal": true,
+    "hours_to_complete": 60,
+    "source_format": "proposal_form"
+  },
+  {
+    "badge_name": "Cybersecurity Awareness",
+    "description": "Basic understanding of security principles.",
+    "issuing_department": "Cybersecurity Center",
+    "audience": [
+      "student"
+    ],
+    "context": "academic",
+    "has_assessment": true,
+    "assessment_type": "expert_skill",
+    "assessment_description": "Oral explanation of security concepts",
+    "completion_criteria": "Meet with expert and explain core concepts",
+    "evidence_required": [
+      "expert_review"
+    ],
+    "bloom_levels": [
+      "understand"
+    ],
+    "prerequisites": [],
+    "is_terminal": false,
+    "hours_to_complete": 5,
+    "source_format": "proposal_form"
+  },
+  {
+    "badge_name": "Community Engagement",
+    "description": "Participation in community service events.",
+    "issuing_department": "Student Life",
+    "audience": [
+      "student"
+    ],
+    "context": "co_curricular",
+    "has_assessment": false,
+    "assessment_type": null,
+    "assessment_description": null,
+    "completion_criteria": "Complete 20 hours of community service",
+    "evidence_required": [
+      "attendance_record"
+    ],
+    "bloom_levels": [],
+    "prerequisites": [],
+    "is_terminal": false,
+    "hours_to_complete": 20,
+    "source_format": "proposal_form"
+  },
+  {
+    "badge_name": "Technical Writing Mastery",
+    "description": "Advanced skill in writing technical documentation.",
+    "issuing_department": "Humanities",
+    "audience": [
+      "student"
+    ],
+    "context": "academic",
+    "has_assessment": true,
+    "assessment_type": "expert_skill",
+    "assessment_description": "Portfolio review by expert",
+    "completion_criteria": "Submit portfolio of three technical documents",
+    "evidence_required": [
+      "portfolio",
+      "expert_review"
+    ],
+    "bloom_levels": [
+      "create"
+    ],
+    "prerequisites": [],
+    "is_terminal": true,
+    "hours_to_complete": 25,
+    "source_format": "proposal_form"
+  },
+  {
+    "badge_name": "Mentoring Excellence",
+    "description": "Recognizes faculty who have mentored student research.",
+    "issuing_department": "Undergraduate Research",
+    "audience": [
+      "faculty"
+    ],
+    "context": "employee_development",
+    "has_assessment": true,
+    "assessment_type": "expert_multi",
+    "assessment_description": "Evaluation by program director",
+    "completion_criteria": "Mentor at least two students through research projects",
+    "evidence_required": [
+      "supervisor_evaluation",
+      "portfolio"
+    ],
+    "bloom_levels": [
+      "evaluate",
+      "create"
+    ],
+    "prerequisites": [],
+    "is_terminal": false,
+    "hours_to_complete": 40,
+    "source_format": "proposal_form"
+  },
+  {
+    "badge_name": "Data Visualization with Tableau",
+    "description": "Skill in creating effective visualizations.",
+    "issuing_department": "Data Science",
+    "audience": [
+      "student"
+    ],
+    "context": "academic",
+    "has_assessment": true,
+    "assessment_type": "expert_skill",
+    "assessment_description": "Dashboard evaluation",
+    "completion_criteria": "Create and present a dashboard",
+    "evidence_required": [
+      "demonstration",
+      "expert_review"
+    ],
+    "bloom_levels": [
+      "apply"
+    ],
+    "prerequisites": [],
+    "is_terminal": false,
+    "hours_to_complete": 12,
+    "source_format": "proposal_form"
+  },
+  {
+    "badge_name": "Advanced Machine Learning Competency",
+    "description": "Demonstrate ability to design and implement ML models.",
+    "issuing_department": "Data Science",
+    "audience": [
+      "student"
+    ],
+    "context": "academic",
+    "has_assessment": true,
+    "assessment_type": "expert_multi",
+    "assessment_description": "Capstone project with rubric",
+    "completion_criteria": "Complete project with documentation and presentation",
+    "evidence_required": [
+      "project_artifact",
+      "expert_rated_rubric",
+      "presentation"
+    ],
+    "bloom_levels": [
+      "evaluate",
+      "create"
+    ],
+    "prerequisites": [
+      "Data Science Fundamentals"
+    ],
+    "is_terminal": true,
+    "hours_to_complete": 50,
+    "source_format": "proposal_form"
+  },
+  {
+    "badge_name": "Inclusive Teaching Practices",
+    "description": "Workshop on inclusive pedagogy.",
+    "issuing_department": "CEIE",
+    "audience": [
+      "faculty"
+    ],
+    "context": "employee_development",
+    "has_assessment": true,
+    "assessment_type": "auto_graded",
+    "assessment_description": "Reflection paper",
+    "completion_criteria": "Attend workshop and submit reflection",
+    "evidence_required": [
+      "attendance_record",
+      "assignment_submission"
+    ],
+    "bloom_levels": [
+      "understand",
+      "apply"
+    ],
+    "prerequisites": [],
+    "is_terminal": false,
+    "hours_to_complete": 6,
+    "source_format": "proposal_form"
+  },
+  {
+    "badge_name": "Grant Writing Certificate",
+    "description": "Professional development for staff.",
+    "issuing_department": "Research Office",
+    "audience": [
+      "staff"
+    ],
+    "context": "employee_development",
+    "has_assessment": true,
+    "assessment_type": "expert_skill",
+    "assessment_description": "Proposal review",
+    "completion_criteria": "Submit a mock grant proposal",
+    "evidence_required": [
+      "assignment_submission",
+      "expert_review"
+    ],
+    "bloom_levels": [
+      "apply",
+      "create"
+    ],
+    "prerequisites": [],
+    "is_terminal": true,
+    "hours_to_complete": 20,
+    "source_format": "proposal_form"
+  },
+  {
+    "badge_name": "First-Year Seminar Completion",
+    "description": "Foundational seminar for new students.",
+    "issuing_department": "University College",
+    "audience": [
+      "student"
+    ],
+    "context": "academic",
+    "has_assessment": true,
+    "assessment_type": "auto_graded",
+    "assessment_description": "Weekly reflections",
+    "completion_criteria": "Attend all sessions and submit reflections",
+    "evidence_required": [
+      "attendance_record",
+      "assignment_submission"
+    ],
+    "bloom_levels": [
+      "understand"
+    ],
+    "prerequisites": [],
+    "is_terminal": false,
+    "hours_to_complete": 15,
+    "source_format": "proposal_form"
+  },
+  {
+    "badge_name": "Research Ethics Certification",
+    "description": "Training in responsible conduct of research.",
+    "issuing_department": "Research Integrity",
+    "audience": [
+      "student",
+      "faculty",
+      "staff"
+    ],
+    "context": "academic",
+    "has_assessment": true,
+    "assessment_type": "auto_graded",
+    "assessment_description": "Online modules and quiz",
+    "completion_criteria": "Complete modules with 90% quiz score",
+    "evidence_required": [
+      "quiz_result"
+    ],
+    "bloom_levels": [
+      "remember",
+      "understand"
+    ],
+    "prerequisites": [],
+    "is_terminal": false,
+    "hours_to_complete": 5,
+    "source_format": "proposal_form"
+  },
+  {
+    "badge_name": "Public Speaking Skill",
+    "description": "Demonstrate effective presentation skills.",
+    "issuing_department": "Communication",
+    "audience": [
+      "student"
+    ],
+    "context": "academic",
+    "has_assessment": true,
+    "assessment_type": "expert_skill",
+    "assessment_description": "Video recording evaluated by instructor",
+    "completion_criteria": "Deliver a 10-minute presentation",
+    "evidence_required": [
+      "demonstration",
+      "expert_review"
+    ],
+    "bloom_levels": [
+      "apply"
+    ],
+    "prerequisites": [],
+    "is_terminal": false,
+    "hours_to_complete": 8,
+    "source_format": "proposal_form"
+  },
+  {
+    "badge_name": "Team Leadership Competency",
+    "description": "Demonstrate ability to lead a team project.",
+    "issuing_department": "Business School",
+    "audience": [
+      "student"
+    ],
+    "context": "academic",
+    "has_assessment": true,
+    "assessment_type": "expert_multi",
+    "assessment_description": "360 feedback and project outcomes",
+    "completion_criteria": "Lead a team project and submit peer evaluations",
+    "evidence_required": [
+      "project_artifact",
+      "_360_feedback",
+      "supervisor_evaluation"
+    ],
+    "bloom_levels": [
+      "evaluate",
+      "create"
+    ],
+    "prerequisites": [],
+    "is_terminal": true,
+    "hours_to_complete": 30,
+    "source_format": "proposal_form"
+  },
+  {
+    "badge_name": "Adobe Creative Suite Basics",
+    "description": "Introductory skill in Adobe tools.",
+    "issuing_department": "Digital Design",
+    "audience": [
+      "student",
+      "external"
+    ],
+    "context": "professional_ed",
+    "has_assessment": true,
+    "assessment_type": "auto_graded",
+    "assessment_description": "Hands-on exercises",
+    "completion_criteria": "Complete tutorials and pass quiz",
+    "evidence_required": [
+      "quiz_result",
+      "assignment_submission"
+    ],
+    "bloom_levels": [
+      "remember",
+      "understand"
+    ],
+    "prerequisites": [],
+    "is_terminal": false,
+    "hours_to_complete": 10,
+    "source_format": "proposal_form"
+  },
+  {
+    "badge_name": "Capstone Design Project",
+    "description": "Terminal achievement in engineering design.",
+    "issuing_department": "Engineering",
+    "audience": [
+      "student"
+    ],
+    "context": "academic",
+    "has_assessment": true,
+    "assessment_type": "expert_multi",
+    "assessment_description": "Final project judged by faculty panel",
+    "completion_criteria": "Submit design report and present to panel",
+    "evidence_required": [
+      "project_artifact",
+      "expert_rated_rubric",
+      "presentation"
+    ],
+    "bloom_levels": [
+      "evaluate",
+      "create"
+    ],
+    "prerequisites": [
+      "Design Fundamentals"
+    ],
+    "is_terminal": true,
+    "hours_to_complete": 80,
+    "source_format": "proposal_form"
+  },
+  {
+    "badge_name": "2026 Infrastructure Forum",
+    "expected_category": "Continuing & Professional Education",
+    "source_format": "master_dataset",
+    "source_row": 4,
+    "expected_type": "Souvenir",
+    "expected_level": "Souvenir",
+    "issuing_department": "LDI",
+    "description": "NJIT Digital Badge - 2026 Infrastructure Forum",
+    "audience": [
+      "external",
+      "professional"
+    ],
+    "context": "professional_ed",
+    "assessment_type": null,
+    "has_assessment": false,
+    "assessment_description": "Attendance",
+    "completion_criteria": "Complete all requirements",
+    "evidence_required": [
+      "attendance_record"
+    ],
+    "bloom_levels": [
+      "remember",
+      "understand"
+    ],
+    "is_terminal": false,
+    "prerequisites": [],
+    "hours_to_complete": 10
+  },
+  {
+    "badge_name": "AI in the Workplace",
+    "expected_category": "Continuing & Professional Education",
+    "source_format": "master_dataset",
+    "source_row": 5,
+    "expected_type": "Achievement",
+    "expected_level": "Foundational",
+    "issuing_department": "LDI",
+    "description": "NJIT Digital Badge - AI in the Workplace",
+    "audience": [
+      "external",
+      "professional"
+    ],
+    "context": "professional_ed",
+    "assessment_type": "auto_graded",
+    "has_assessment": true,
+    "assessment_description": "Applied activities",
+    "completion_criteria": "Complete all requirements",
+    "evidence_required": [
+      "attendance_record"
+    ],
+    "bloom_levels": [
+      "apply",
+      "analyze"
+    ],
+    "is_terminal": false,
+    "prerequisites": [],
+    "hours_to_complete": 10
+  },
+  {
+    "badge_name": "AI for Administrative Efficiency",
+    "expected_category": "Faculty & Staff Development",
+    "source_format": "master_dataset",
+    "source_row": 6,
+    "expected_type": "Achievement",
+    "expected_level": "Milestone",
+    "issuing_department": "LDI",
+    "description": "NJIT Digital Badge - AI for Administrative Efficiency",
+    "audience": [
+      "faculty"
+    ],
+    "context": "employee_development",
+    "assessment_type": "auto_graded",
+    "has_assessment": true,
+    "assessment_description": "Module completion",
+    "completion_criteria": "Complete all requirements",
+    "evidence_required": [
+      "attendance_record"
+    ],
+    "bloom_levels": [
+      "apply"
+    ],
+    "is_terminal": false,
+    "prerequisites": [],
+    "hours_to_complete": 10
+  },
+  {
+    "badge_name": "Introduction to AI in Education",
+    "expected_category": "Faculty & Staff Development",
+    "source_format": "master_dataset",
+    "source_row": 7,
+    "expected_type": "Achievement",
+    "expected_level": "Foundational",
+    "issuing_department": "LDI",
+    "description": "NJIT Digital Badge - Introduction to AI in Education",
+    "audience": [
+      "faculty"
+    ],
+    "context": "employee_development",
+    "assessment_type": "auto_graded",
+    "has_assessment": true,
+    "assessment_description": "Module completion",
+    "completion_criteria": "Complete all requirements",
+    "evidence_required": [
+      "attendance_record"
+    ],
+    "bloom_levels": [
+      "understand"
+    ],
+    "is_terminal": false,
+    "prerequisites": [],
+    "hours_to_complete": 10
+  },
+  {
+    "badge_name": "AI-Enhanced Instructional Practices",
+    "expected_category": "Faculty & Staff Development",
+    "source_format": "master_dataset",
+    "source_row": 8,
+    "expected_type": "Achievement",
+    "expected_level": "Milestone",
+    "issuing_department": "LDI",
+    "description": "NJIT Digital Badge - AI-Enhanced Instructional Practices",
+    "audience": [
+      "faculty"
+    ],
+    "context": "employee_development",
+    "assessment_type": "auto_graded",
+    "has_assessment": true,
+    "assessment_description": "Module completion",
+    "completion_criteria": "Complete all requirements",
+    "evidence_required": [
+      "attendance_record"
+    ],
+    "bloom_levels": [
+      "apply"
+    ],
+    "is_terminal": false,
+    "prerequisites": [],
+    "hours_to_complete": 10
+  },
+  {
+    "badge_name": "Adaptability & Lifelong Learning with AI",
+    "expected_category": "Faculty & Staff Development",
+    "source_format": "master_dataset",
+    "source_row": 9,
+    "expected_type": "Achievement",
+    "expected_level": "Milestone",
+    "issuing_department": "LDI",
+    "description": "NJIT Digital Badge - Adaptability & Lifelong Learning with AI",
+    "audience": [
+      "faculty"
+    ],
+    "context": "employee_development",
+    "assessment_type": "auto_graded",
+    "has_assessment": true,
+    "assessment_description": "Final assessment 80%",
+    "completion_criteria": "Complete all requirements",
+    "evidence_required": [
+      "attendance_record"
+    ],
+    "bloom_levels": [
+      "understand",
+      "apply"
+    ],
+    "is_terminal": false,
+    "prerequisites": [],
+    "hours_to_complete": 10
+  },
+  {
+    "badge_name": "AI Literacy and Fundamentals",
+    "expected_category": "Faculty & Staff Development",
+    "source_format": "master_dataset",
+    "source_row": 10,
+    "expected_type": "Achievement",
+    "expected_level": "Milestone",
+    "issuing_department": "LDI",
+    "description": "NJIT Digital Badge - AI Literacy and Fundamentals",
+    "audience": [
+      "faculty"
+    ],
+    "context": "employee_development",
+    "assessment_type": "auto_graded",
+    "has_assessment": true,
+    "assessment_description": "Final assessment 80%",
+    "completion_criteria": "Complete all requirements",
+    "evidence_required": [
+      "attendance_record"
+    ],
+    "bloom_levels": [
+      "remember",
+      "understand"
+    ],
+    "is_terminal": false,
+    "prerequisites": [],
+    "hours_to_complete": 10
+  },
+  {
+    "badge_name": "AI in Context: History & Interdisciplinary",
+    "expected_category": "Faculty & Staff Development",
+    "source_format": "master_dataset",
+    "source_row": 11,
+    "expected_type": "Achievement",
+    "expected_level": "Foundational",
+    "issuing_department": "LDI",
+    "description": "NJIT Digital Badge - AI in Context: History & Interdisciplinary",
+    "audience": [
+      "faculty"
+    ],
+    "context": "employee_development",
+    "assessment_type": "auto_graded",
+    "has_assessment": true,
+    "assessment_description": "Knowledge checks 80%",
+    "completion_criteria": "Complete all requirements",
+    "evidence_required": [
+      "attendance_record"
+    ],
+    "bloom_levels": [
+      "remember",
+      "analyze"
+    ],
+    "is_terminal": false,
+    "prerequisites": [],
+    "hours_to_complete": 10
+  },
+  {
+    "badge_name": "PM Healthcare \u2014 Course 1: Introduction",
+    "expected_category": "Continuing & Professional Education",
+    "source_format": "master_dataset",
+    "source_row": 12,
+    "expected_type": "Achievement",
+    "expected_level": "Foundational",
+    "issuing_department": "LDI",
+    "description": "NJIT Digital Badge - PM Healthcare \u2014 Course 1: Introduction",
+    "audience": [
+      "external",
+      "professional"
+    ],
+    "context": "professional_ed",
+    "assessment_type": "auto_graded",
+    "has_assessment": true,
+    "assessment_description": "Module completion",
+    "completion_criteria": "Complete all requirements",
+    "evidence_required": [
+      "attendance_record"
+    ],
+    "bloom_levels": [
+      "apply",
+      "analyze"
+    ],
+    "is_terminal": false,
+    "prerequisites": [],
+    "hours_to_complete": 10
+  },
+  {
+    "badge_name": "PM Healthcare \u2014 Course 2: Intermediate",
+    "expected_category": "Continuing & Professional Education",
+    "source_format": "master_dataset",
+    "source_row": 13,
+    "expected_type": "Achievement",
+    "expected_level": "Milestone",
+    "issuing_department": "LDI",
+    "description": "NJIT Digital Badge - PM Healthcare \u2014 Course 2: Intermediate",
+    "audience": [
+      "external",
+      "professional"
+    ],
+    "context": "professional_ed",
+    "assessment_type": "auto_graded",
+    "has_assessment": true,
+    "assessment_description": "Module quizzes",
+    "completion_criteria": "Complete all requirements",
+    "evidence_required": [
+      "quiz_result"
+    ],
+    "bloom_levels": [
+      "apply",
+      "analyze"
+    ],
+    "is_terminal": false,
+    "prerequisites": [],
+    "hours_to_complete": 10
+  },
+  {
+    "badge_name": "PM Healthcare \u2014 Course 3: Advanced",
+    "expected_category": "Continuing & Professional Education",
+    "source_format": "master_dataset",
+    "source_row": 14,
+    "expected_type": "Achievement",
+    "expected_level": "Milestone",
+    "issuing_department": "LDI",
+    "description": "NJIT Digital Badge - PM Healthcare \u2014 Course 3: Advanced",
+    "audience": [
+      "external",
+      "professional"
+    ],
+    "context": "professional_ed",
+    "assessment_type": "auto_graded",
+    "has_assessment": true,
+    "assessment_description": "Module completion",
+    "completion_criteria": "Complete all requirements",
+    "evidence_required": [
+      "attendance_record"
+    ],
+    "bloom_levels": [
+      "analyze",
+      "evaluate"
+    ],
+    "is_terminal": false,
+    "prerequisites": [],
+    "hours_to_complete": 10
+  },
+  {
+    "badge_name": "PM Healthcare \u2014 Course 4: Agile",
+    "expected_category": "Continuing & Professional Education",
+    "source_format": "master_dataset",
+    "source_row": 15,
+    "expected_type": "Achievement",
+    "expected_level": "Milestone",
+    "issuing_department": "LDI",
+    "description": "NJIT Digital Badge - PM Healthcare \u2014 Course 4: Agile",
+    "audience": [
+      "external",
+      "professional"
+    ],
+    "context": "professional_ed",
+    "assessment_type": "auto_graded",
+    "has_assessment": true,
+    "assessment_description": "Module completion",
+    "completion_criteria": "Complete all requirements",
+    "evidence_required": [
+      "attendance_record"
+    ],
+    "bloom_levels": [
+      "apply",
+      "analyze"
+    ],
+    "is_terminal": false,
+    "prerequisites": [],
+    "hours_to_complete": 10
+  },
+  {
+    "badge_name": "Make 101: Introduction to Makerspace",
+    "expected_category": "Academic",
+    "source_format": "master_dataset",
+    "source_row": 16,
+    "expected_type": "Skill",
+    "expected_level": "Awareness",
+    "issuing_department": "Makerspace",
+    "description": "NJIT Digital Badge - Make 101: Introduction to Makerspace",
+    "audience": [
+      "faculty"
+    ],
+    "context": "academic",
+    "assessment_type": "auto_graded",
+    "has_assessment": true,
+    "assessment_description": "Final assessment 90%",
+    "completion_criteria": "Complete all requirements",
+    "evidence_required": [
+      "attendance_record"
+    ],
+    "bloom_levels": [
+      "remember",
+      "understand"
+    ],
+    "is_terminal": false,
+    "prerequisites": [],
+    "hours_to_complete": 10
+  },
+  {
+    "badge_name": "Make 102: Introduction to CO2 Laser Cutting",
+    "expected_category": "Academic",
+    "source_format": "master_dataset",
+    "source_row": 17,
+    "expected_type": "Skill",
+    "expected_level": "Application",
+    "issuing_department": "Makerspace",
+    "description": "NJIT Digital Badge - Make 102: Introduction to CO2 Laser Cutting",
+    "audience": [
+      "faculty"
+    ],
+    "context": "academic",
+    "assessment_type": "auto_graded",
+    "has_assessment": true,
+    "assessment_description": "Final assessment 90%",
+    "completion_criteria": "Complete all requirements",
+    "evidence_required": [
+      "attendance_record"
+    ],
+    "bloom_levels": [
+      "understand",
+      "apply"
+    ],
+    "is_terminal": false,
+    "prerequisites": [],
+    "hours_to_complete": 10
+  },
+  {
+    "badge_name": "Make 103: Introduction to 3D Printing",
+    "expected_category": "Academic",
+    "source_format": "master_dataset",
+    "source_row": 18,
+    "expected_type": "Skill",
+    "expected_level": "Application",
+    "issuing_department": "Makerspace",
+    "description": "NJIT Digital Badge - Make 103: Introduction to 3D Printing",
+    "audience": [
+      "faculty"
+    ],
+    "context": "academic",
+    "assessment_type": "auto_graded",
+    "has_assessment": true,
+    "assessment_description": "Final assessment 90%",
+    "completion_criteria": "Complete all requirements",
+    "evidence_required": [
+      "attendance_record"
+    ],
+    "bloom_levels": [
+      "understand",
+      "apply"
+    ],
+    "is_terminal": false,
+    "prerequisites": [],
+    "hours_to_complete": 10
+  },
+  {
+    "badge_name": "Make 242: Introduction to Woodshop",
+    "expected_category": "Academic",
+    "source_format": "master_dataset",
+    "source_row": 19,
+    "expected_type": "Skill",
+    "expected_level": "Application",
+    "issuing_department": "Makerspace",
+    "description": "NJIT Digital Badge - Make 242: Introduction to Woodshop",
+    "audience": [
+      "faculty"
+    ],
+    "context": "academic",
+    "assessment_type": "auto_graded",
+    "has_assessment": true,
+    "assessment_description": "Online 90% + practical",
+    "completion_criteria": "Complete all requirements",
+    "evidence_required": [
+      "attendance_record"
+    ],
+    "bloom_levels": [
+      "apply"
+    ],
+    "is_terminal": false,
+    "prerequisites": [],
+    "hours_to_complete": 10
+  },
+  {
+    "badge_name": "MakerSpeak: Iterate to Innovate",
+    "expected_category": "Academic",
+    "source_format": "master_dataset",
+    "source_row": 20,
+    "expected_type": "Souvenir",
+    "expected_level": "Souvenir",
+    "issuing_department": "Makerspace",
+    "description": "NJIT Digital Badge - MakerSpeak: Iterate to Innovate",
+    "audience": [
+      "student"
+    ],
+    "context": "academic",
+    "assessment_type": null,
+    "has_assessment": false,
+    "assessment_description": "Attendance",
+    "completion_criteria": "Complete all requirements",
+    "evidence_required": [
+      "attendance_record"
+    ],
+    "bloom_levels": [
+      "remember",
+      "understand"
+    ],
+    "is_terminal": false,
+    "prerequisites": [],
+    "hours_to_complete": 10
+  },
+  {
+    "badge_name": "Change Management Capstone",
+    "expected_category": "Co-Curricular and Extra-Curricular",
+    "source_format": "master_dataset",
+    "source_row": 21,
+    "expected_type": "Achievement",
+    "expected_level": "Terminal",
+    "issuing_department": "OSIL",
+    "description": "NJIT Digital Badge - Change Management Capstone",
+    "audience": [
+      "student"
+    ],
+    "context": "co_curricular",
+    "assessment_type": "auto_graded",
+    "has_assessment": true,
+    "assessment_description": "Team project presentation",
+    "completion_criteria": "Complete all requirements",
+    "evidence_required": [
+      "project_artifact"
+    ],
+    "bloom_levels": [
+      "apply"
+    ],
+    "is_terminal": true,
+    "prerequisites": [],
+    "hours_to_complete": 10
+  },
+  {
+    "badge_name": "Change Management \u2014 Foundational",
+    "expected_category": "Co-Curricular and Extra-Curricular",
+    "source_format": "master_dataset",
+    "source_row": 22,
+    "expected_type": "Achievement",
+    "expected_level": "Foundational",
+    "issuing_department": "OSIL",
+    "description": "NJIT Digital Badge - Change Management \u2014 Foundational",
+    "audience": [
+      "student"
+    ],
+    "context": "co_curricular",
+    "assessment_type": "auto_graded",
+    "has_assessment": true,
+    "assessment_description": "Pre/post assessment",
+    "completion_criteria": "Complete all requirements",
+    "evidence_required": [
+      "attendance_record"
+    ],
+    "bloom_levels": [
+      "understand",
+      "apply"
+    ],
+    "is_terminal": false,
+    "prerequisites": [],
+    "hours_to_complete": 10
+  },
+  {
+    "badge_name": "Strategic Thinking Capstone",
+    "expected_category": "Co-Curricular and Extra-Curricular",
+    "source_format": "master_dataset",
+    "source_row": 23,
+    "expected_type": "Achievement",
+    "expected_level": "Terminal",
+    "issuing_department": "OSIL",
+    "description": "NJIT Digital Badge - Strategic Thinking Capstone",
+    "audience": [
+      "student"
+    ],
+    "context": "co_curricular",
+    "assessment_type": "auto_graded",
+    "has_assessment": true,
+    "assessment_description": "Team project presentation",
+    "completion_criteria": "Complete all requirements",
+    "evidence_required": [
+      "project_artifact"
+    ],
+    "bloom_levels": [
+      "apply"
+    ],
+    "is_terminal": true,
+    "prerequisites": [],
+    "hours_to_complete": 10
+  },
+  {
+    "badge_name": "Change Management \u2014 Intermediate",
+    "expected_category": "Co-Curricular and Extra-Curricular",
+    "source_format": "master_dataset",
+    "source_row": 24,
+    "expected_type": "Achievement",
+    "expected_level": "Milestone",
+    "issuing_department": "OSIL",
+    "description": "NJIT Digital Badge - Change Management \u2014 Intermediate",
+    "audience": [
+      "student"
+    ],
+    "context": "co_curricular",
+    "assessment_type": "auto_graded",
+    "has_assessment": true,
+    "assessment_description": "Pre/post assessment",
+    "completion_criteria": "Complete all requirements",
+    "evidence_required": [
+      "attendance_record"
+    ],
+    "bloom_levels": [
+      "apply",
+      "analyze"
+    ],
+    "is_terminal": false,
+    "prerequisites": [],
+    "hours_to_complete": 10
+  },
+  {
+    "badge_name": "Entrepreneurial Experience Badge",
+    "expected_category": "Co-Curricular and Extra-Curricular",
+    "source_format": "master_dataset",
+    "source_row": 25,
+    "expected_type": "Competency",
+    "expected_level": "Demonstrated",
+    "issuing_department": "OSIL",
+    "description": "NJIT Digital Badge - Entrepreneurial Experience Badge",
+    "audience": [
+      "student"
+    ],
+    "context": "co_curricular",
+    "assessment_type": "auto_graded",
+    "has_assessment": true,
+    "assessment_description": "Real-world experience (OR)",
+    "completion_criteria": "Complete all requirements",
+    "evidence_required": [
+      "attendance_record"
+    ],
+    "bloom_levels": [
+      "apply",
+      "create"
+    ],
+    "is_terminal": false,
+    "prerequisites": [],
+    "hours_to_complete": 10
+  },
+  {
+    "badge_name": "Workplace Readiness Capstone",
+    "expected_category": "Co-Curricular and Extra-Curricular",
+    "source_format": "master_dataset",
+    "source_row": 26,
+    "expected_type": "Achievement",
+    "expected_level": "Terminal",
+    "issuing_department": "OSIL",
+    "description": "NJIT Digital Badge - Workplace Readiness Capstone",
+    "audience": [
+      "student"
+    ],
+    "context": "co_curricular",
+    "assessment_type": "auto_graded",
+    "has_assessment": true,
+    "assessment_description": "Team project presentation",
+    "completion_criteria": "Complete all requirements",
+    "evidence_required": [
+      "project_artifact"
+    ],
+    "bloom_levels": [
+      "apply"
+    ],
+    "is_terminal": true,
+    "prerequisites": [],
+    "hours_to_complete": 10
+  },
+  {
+    "badge_name": "Entrepreneurship Essentials Badge",
+    "expected_category": "Co-Curricular and Extra-Curricular",
+    "source_format": "master_dataset",
+    "source_row": 27,
+    "expected_type": "Achievement",
+    "expected_level": "Foundational",
+    "issuing_department": "OSIL",
+    "description": "NJIT Digital Badge - Entrepreneurship Essentials Badge",
+    "audience": [
+      "student"
+    ],
+    "context": "co_curricular",
+    "assessment_type": "auto_graded",
+    "has_assessment": true,
+    "assessment_description": "Quiz + attendance",
+    "completion_criteria": "Complete all requirements",
+    "evidence_required": [
+      "quiz_result"
+    ],
+    "bloom_levels": [
+      "remember",
+      "understand"
+    ],
+    "is_terminal": false,
+    "prerequisites": [],
+    "hours_to_complete": 10
+  },
+  {
+    "badge_name": "NJIT/NYSCC Formulation Workshop",
+    "expected_category": "Academic",
+    "source_format": "master_dataset",
+    "source_row": 28,
+    "expected_type": "Skill",
+    "expected_level": "Awareness",
+    "issuing_department": "NCE",
+    "description": "NJIT Digital Badge - NJIT/NYSCC Formulation Workshop",
+    "audience": [
+      "student"
+    ],
+    "context": "academic",
+    "assessment_type": "auto_graded",
+    "has_assessment": true,
+    "assessment_description": "Active participation + lab",
+    "completion_criteria": "Complete all requirements",
+    "evidence_required": [
+      "attendance_record"
+    ],
+    "bloom_levels": [
+      "understand",
+      "apply"
+    ],
+    "is_terminal": false,
+    "prerequisites": [],
+    "hours_to_complete": 10
+  },
+  {
+    "badge_name": "CPT Course",
+    "expected_category": "Unknown \u2014 Open Q001",
+    "source_format": "master_dataset",
+    "source_row": 29,
+    "expected_type": "Achievement",
+    "expected_level": "Foundational",
+    "issuing_department": "OGI",
+    "description": "NJIT Digital Badge - CPT Course",
+    "audience": [
+      "student"
+    ],
+    "context": "academic",
+    "assessment_type": "auto_graded",
+    "has_assessment": true,
+    "assessment_description": "Modules + quizzes",
+    "completion_criteria": "Complete all requirements",
+    "evidence_required": [
+      "attendance_record"
+    ],
+    "bloom_levels": [
+      "understand"
+    ],
+    "is_terminal": false,
+    "prerequisites": [],
+    "hours_to_complete": 10
+  },
+  {
+    "badge_name": "AI Literacy Microcredential",
+    "expected_category": "Faculty & Staff Development",
+    "source_format": "master_dataset",
+    "source_row": 30,
+    "expected_type": "Achievement",
+    "expected_level": "Terminal",
+    "issuing_department": "LDI",
+    "description": "NJIT Digital Badge - AI Literacy Microcredential",
+    "audience": [
+      "faculty"
+    ],
+    "context": "employee_development",
+    "assessment_type": "auto_graded",
+    "has_assessment": true,
+    "assessment_description": "All 3 milestone badges",
+    "completion_criteria": "Complete all requirements",
+    "evidence_required": [
+      "attendance_record"
+    ],
+    "bloom_levels": [
+      "apply",
+      "evaluate"
+    ],
+    "is_terminal": true,
+    "prerequisites": [],
+    "hours_to_complete": 10
+  },
+  {
+    "badge_name": "PM Healthcare Microcredential",
+    "expected_category": "Continuing & Professional Education",
+    "source_format": "master_dataset",
+    "source_row": 31,
+    "expected_type": "Achievement",
+    "expected_level": "Terminal",
+    "issuing_department": "LDI",
+    "description": "NJIT Digital Badge - PM Healthcare Microcredential",
+    "audience": [
+      "external",
+      "professional"
+    ],
+    "context": "professional_ed",
+    "assessment_type": "auto_graded",
+    "has_assessment": true,
+    "assessment_description": "All 4 course badges",
+    "completion_criteria": "Complete all requirements",
+    "evidence_required": [
+      "attendance_record"
+    ],
+    "bloom_levels": [
+      "apply",
+      "evaluate"
+    ],
+    "is_terminal": true,
+    "prerequisites": [],
+    "hours_to_complete": 10
+  },
+  {
+    "badge_name": "AI for Educators Microcredential",
+    "expected_category": "Faculty & Staff Development",
+    "source_format": "master_dataset",
+    "source_row": 32,
+    "expected_type": "Achievement",
+    "expected_level": "Terminal",
+    "issuing_department": "LDI",
+    "description": "NJIT Digital Badge - AI for Educators Microcredential",
+    "audience": [
+      "faculty"
+    ],
+    "context": "employee_development",
+    "assessment_type": "auto_graded",
+    "has_assessment": true,
+    "assessment_description": "All 3 course badges",
+    "completion_criteria": "Complete all requirements",
+    "evidence_required": [
+      "attendance_record"
+    ],
+    "bloom_levels": [
+      "apply"
+    ],
+    "is_terminal": true,
+    "prerequisites": [],
+    "hours_to_complete": 10
+  }
+]

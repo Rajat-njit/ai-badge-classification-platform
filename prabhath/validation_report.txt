@@ -1,0 +1,39 @@
+======================================================================
+NJIT BADGE CLASSIFICATION VALIDATION REPORT
+======================================================================
+Total Badges Validated: 29
+
+ACCURACY SUMMARY
+----------------------------------------------------------------------
+CATEGORY     | Correct: 28 | Incorrect:  1 | Accuracy:  96.5%
+TYPE         | Correct: 23 | Incorrect:  6 | Accuracy:  79.3%
+LEVEL        | Correct: 15 | Incorrect: 14 | Accuracy:  51.7%
+
+MISMATCH DETAILS
+----------------------------------------------------------------------
+
+CATEGORY Mismatches:
+  • CPT Course                               | Expected: Unknown — Open Q001  | Predicted: Academic
+
+TYPE Mismatches:
+  • Make 101: Introduction to Makerspace     | Expected: Skill                | Predicted: Achievement
+  • Make 102: Introduction to CO2 Laser Cutt | Expected: Skill                | Predicted: Achievement
+  • Make 103: Introduction to 3D Printing    | Expected: Skill                | Predicted: Achievement
+  • Make 242: Introduction to Woodshop       | Expected: Skill                | Predicted: Achievement
+  • Entrepreneurial Experience Badge         | Expected: Competency           | Predicted: Achievement
+  • NJIT/NYSCC Formulation Workshop          | Expected: Skill                | Predicted: Achievement
+
+LEVEL Mismatches:
+  • AI for Administrative Efficiency         | Expected: Milestone            | Predicted: Foundational
+  • AI-Enhanced Instructional Practices      | Expected: Milestone            | Predicted: Foundational
+  • Adaptability & Lifelong Learning with AI | Expected: Milestone            | Predicted: Foundational
+  • AI Literacy and Fundamentals             | Expected: Milestone            | Predicted: Foundational
+  • PM Healthcare — Course 2: Intermediate   | Expected: Milestone            | Predicted: Foundational
+  • PM Healthcare — Course 3: Advanced       | Expected: Milestone            | Predicted: Foundational
+  • PM Healthcare — Course 4: Agile          | Expected: Milestone            | Predicted: Foundational
+  • Make 101: Introduction to Makerspace     | Expected: Awareness            | Predicted: Foundational
+  • Make 102: Introduction to CO2 Laser Cutt | Expected: Application          | Predicted: Foundational
+  • Make 103: Introduction to 3D Printing    | Expected: Application          | Predicted: Foundational
+  ... and 4 more
+
+======================================================================

@@ -1,0 +1,568 @@
+{
+  "statistics": {
+    "total": 29,
+    "category": {
+      "correct": 28,
+      "incorrect": 1,
+      "mismatches": [
+        {
+          "badge": "CPT Course",
+          "expected": "Unknown \u2014 Open Q001",
+          "predicted": "Academic"
+        }
+      ],
+      "accuracy": 96.55
+    },
+    "type": {
+      "correct": 23,
+      "incorrect": 6,
+      "mismatches": [
+        {
+          "badge": "Make 101: Introduction to Makerspace",
+          "expected": "Skill",
+          "predicted": "Achievement"
+        },
+        {
+          "badge": "Make 102: Introduction to CO2 Laser Cutting",
+          "expected": "Skill",
+          "predicted": "Achievement"
+        },
+        {
+          "badge": "Make 103: Introduction to 3D Printing",
+          "expected": "Skill",
+          "predicted": "Achievement"
+        },
+        {
+          "badge": "Make 242: Introduction to Woodshop",
+          "expected": "Skill",
+          "predicted": "Achievement"
+        },
+        {
+          "badge": "Entrepreneurial Experience Badge",
+          "expected": "Competency",
+          "predicted": "Achievement"
+        },
+        {
+          "badge": "NJIT/NYSCC Formulation Workshop",
+          "expected": "Skill",
+          "predicted": "Achievement"
+        }
+      ],
+      "accuracy": 79.31
+    },
+    "level": {
+      "correct": 15,
+      "incorrect": 14,
+      "mismatches": [
+        {
+          "badge": "AI for Administrative Efficiency",
+          "expected": "Milestone",
+          "predicted": "Foundational"
+        },
+        {
+          "badge": "AI-Enhanced Instructional Practices",
+          "expected": "Milestone",
+          "predicted": "Foundational"
+        },
+        {
+          "badge": "Adaptability & Lifelong Learning with AI",
+          "expected": "Milestone",
+          "predicted": "Foundational"
+        },
+        {
+          "badge": "AI Literacy and Fundamentals",
+          "expected": "Milestone",
+          "predicted": "Foundational"
+        },
+        {
+          "badge": "PM Healthcare \u2014 Course 2: Intermediate",
+          "expected": "Milestone",
+          "predicted": "Foundational"
+        },
+        {
+          "badge": "PM Healthcare \u2014 Course 3: Advanced",
+          "expected": "Milestone",
+          "predicted": "Foundational"
+        },
+        {
+          "badge": "PM Healthcare \u2014 Course 4: Agile",
+          "expected": "Milestone",
+          "predicted": "Foundational"
+        },
+        {
+          "badge": "Make 101: Introduction to Makerspace",
+          "expected": "Awareness",
+          "predicted": "Foundational"
+        },
+        {
+          "badge": "Make 102: Introduction to CO2 Laser Cutting",
+          "expected": "Application",
+          "predicted": "Foundational"
+        },
+        {
+          "badge": "Make 103: Introduction to 3D Printing",
+          "expected": "Application",
+          "predicted": "Foundational"
+        },
+        {
+          "badge": "Make 242: Introduction to Woodshop",
+          "expected": "Application",
+          "predicted": "Foundational"
+        },
+        {
+          "badge": "Change Management \u2014 Intermediate",
+          "expected": "Milestone",
+          "predicted": "Foundational"
+        },
+        {
+          "badge": "Entrepreneurial Experience Badge",
+          "expected": "Demonstrated",
+          "predicted": "Foundational"
+        },
+        {
+          "badge": "NJIT/NYSCC Formulation Workshop",
+          "expected": "Awareness",
+          "predicted": "Foundational"
+        }
+      ],
+      "accuracy": 51.72
+    }
+  },
+  "results": [
+    {
+      "badge_name": "2026 Infrastructure Forum",
+      "expected_category": "Continuing & Professional Education",
+      "expected_type": "Souvenir",
+      "expected_level": "Souvenir",
+      "predicted_category": "Continuing & Professional Education",
+      "predicted_type": "Souvenir",
+      "predicted_level": "Souvenir",
+      "category_explanation": "Category 'Continuing & Professional Education' determined by:\n- Audience: external, professional\n- Context: professional_ed\nBased on NJIT Taxonomy Step 1 rules.",
+      "type_explanation": "Type 'Souvenir' because no assessment is required (attendance/participation only).",
+      "level_explanation": "Level 'Souvenir' based on evidence and taxonomy rules.",
+      "category_match": true,
+      "type_match": true,
+      "level_match": true
+    },
+    {
+      "badge_name": "AI in the Workplace",
+      "expected_category": "Continuing & Professional Education",
+      "expected_type": "Achievement",
+      "expected_level": "Foundational",
+      "predicted_category": "Continuing & Professional Education",
+      "predicted_type": "Achievement",
+      "predicted_level": "Foundational",
+      "category_explanation": "Category 'Continuing & Professional Education' determined by:\n- Audience: external, professional\n- Context: professional_ed\nBased on NJIT Taxonomy Step 1 rules.",
+      "type_explanation": "Type 'Achievement' determined by assessment type: auto_graded.\nBased on NJIT Taxonomy Step 2 rules.",
+      "level_explanation": "Foundational level: first in pathway, no prerequisites.",
+      "category_match": true,
+      "type_match": true,
+      "level_match": true
+    },
+    {
+      "badge_name": "AI for Administrative Efficiency",
+      "expected_category": "Faculty & Staff Development",
+      "expected_type": "Achievement",
+      "expected_level": "Milestone",
+      "predicted_category": "Faculty & Staff Development",
+      "predicted_type": "Achievement",
+      "predicted_level": "Foundational",
+      "category_explanation": "Category 'Faculty & Staff Development' determined by:\n- Audience: faculty\n- Context: employee_development\nBased on NJIT Taxonomy Step 1 rules.",
+      "type_explanation": "Type 'Achievement' determined by assessment type: auto_graded.\nBased on NJIT Taxonomy Step 2 rules.",
+      "level_explanation": "Foundational level: first in pathway, no prerequisites.",
+      "category_match": true,
+      "type_match": true,
+      "level_match": false
+    },
+    {
+      "badge_name": "Introduction to AI in Education",
+      "expected_category": "Faculty & Staff Development",
+      "expected_type": "Achievement",
+      "expected_level": "Foundational",
+      "predicted_category": "Faculty & Staff Development",
+      "predicted_type": "Achievement",
+      "predicted_level": "Foundational",
+      "category_explanation": "Category 'Faculty & Staff Development' determined by:\n- Audience: faculty\n- Context: employee_development\nBased on NJIT Taxonomy Step 1 rules.",
+      "type_explanation": "Type 'Achievement' determined by assessment type: auto_graded.\nBased on NJIT Taxonomy Step 2 rules.",
+      "level_explanation": "Foundational level: first in pathway, no prerequisites.",
+      "category_match": true,
+      "type_match": true,
+      "level_match": true
+    },
+    {
+      "badge_name": "AI-Enhanced Instructional Practices",
+      "expected_category": "Faculty & Staff Development",
+      "expected_type": "Achievement",
+      "expected_level": "Milestone",
+      "predicted_category": "Faculty & Staff Development",
+      "predicted_type": "Achievement",
+      "predicted_level": "Foundational",
+      "category_explanation": "Category 'Faculty & Staff Development' determined by:\n- Audience: faculty\n- Context: employee_development\nBased on NJIT Taxonomy Step 1 rules.",
+      "type_explanation": "Type 'Achievement' determined by assessment type: auto_graded.\nBased on NJIT Taxonomy Step 2 rules.",
+      "level_explanation": "Foundational level: first in pathway, no prerequisites.",
+      "category_match": true,
+      "type_match": true,
+      "level_match": false
+    },
+    {
+      "badge_name": "Adaptability & Lifelong Learning with AI",
+      "expected_category": "Faculty & Staff Development",
+      "expected_type": "Achievement",
+      "expected_level": "Milestone",
+      "predicted_category": "Faculty & Staff Development",
+      "predicted_type": "Achievement",
+      "predicted_level": "Foundational",
+      "category_explanation": "Category 'Faculty & Staff Development' determined by:\n- Audience: faculty\n- Context: employee_development\nBased on NJIT Taxonomy Step 1 rules.",
+      "type_explanation": "Type 'Achievement' determined by assessment type: auto_graded.\nBased on NJIT Taxonomy Step 2 rules.",
+      "level_explanation": "Foundational level: first in pathway, no prerequisites.",
+      "category_match": true,
+      "type_match": true,
+      "level_match": false
+    },
+    {
+      "badge_name": "AI Literacy and Fundamentals",
+      "expected_category": "Faculty & Staff Development",
+      "expected_type": "Achievement",
+      "expected_level": "Milestone",
+      "predicted_category": "Faculty & Staff Development",
+      "predicted_type": "Achievement",
+      "predicted_level": "Foundational",
+      "category_explanation": "Category 'Faculty & Staff Development' determined by:\n- Audience: faculty\n- Context: employee_development\nBased on NJIT Taxonomy Step 1 rules.",
+      "type_explanation": "Type 'Achievement' determined by assessment type: auto_graded.\nBased on NJIT Taxonomy Step 2 rules.",
+      "level_explanation": "Foundational level: first in pathway, no prerequisites.",
+      "category_match": true,
+      "type_match": true,
+      "level_match": false
+    },
+    {
+      "badge_name": "AI in Context: History & Interdisciplinary",
+      "expected_category": "Faculty & Staff Development",
+      "expected_type": "Achievement",
+      "expected_level": "Foundational",
+      "predicted_category": "Faculty & Staff Development",
+      "predicted_type": "Achievement",
+      "predicted_level": "Foundational",
+      "category_explanation": "Category 'Faculty & Staff Development' determined by:\n- Audience: faculty\n- Context: employee_development\nBased on NJIT Taxonomy Step 1 rules.",
+      "type_explanation": "Type 'Achievement' determined by assessment type: auto_graded.\nBased on NJIT Taxonomy Step 2 rules.",
+      "level_explanation": "Foundational level: first in pathway, no prerequisites.",
+      "category_match": true,
+      "type_match": true,
+      "level_match": true
+    },
+    {
+      "badge_name": "PM Healthcare \u2014 Course 1: Introduction",
+      "expected_category": "Continuing & Professional Education",
+      "expected_type": "Achievement",
+      "expected_level": "Foundational",
+      "predicted_category": "Continuing & Professional Education",
+      "predicted_type": "Achievement",
+      "predicted_level": "Foundational",
+      "category_explanation": "Category 'Continuing & Professional Education' determined by:\n- Audience: external, professional\n- Context: professional_ed\nBased on NJIT Taxonomy Step 1 rules.",
+      "type_explanation": "Type 'Achievement' determined by assessment type: auto_graded.\nBased on NJIT Taxonomy Step 2 rules.",
+      "level_explanation": "Foundational level: first in pathway, no prerequisites.",
+      "category_match": true,
+      "type_match": true,
+      "level_match": true
+    },
+    {
+      "badge_name": "PM Healthcare \u2014 Course 2: Intermediate",
+      "expected_category": "Continuing & Professional Education",
+      "expected_type": "Achievement",
+      "expected_level": "Milestone",
+      "predicted_category": "Continuing & Professional Education",
+      "predicted_type": "Achievement",
+      "predicted_level": "Foundational",
+      "category_explanation": "Category 'Continuing & Professional Education' determined by:\n- Audience: external, professional\n- Context: professional_ed\nBased on NJIT Taxonomy Step 1 rules.",
+      "type_explanation": "Type 'Achievement' determined by assessment type: auto_graded.\nBased on NJIT Taxonomy Step 2 rules.",
+      "level_explanation": "Foundational level: first in pathway, no prerequisites.",
+      "category_match": true,
+      "type_match": true,
+      "level_match": false
+    },
+    {
+      "badge_name": "PM Healthcare \u2014 Course 3: Advanced",
+      "expected_category": "Continuing & Professional Education",
+      "expected_type": "Achievement",
+      "expected_level": "Milestone",
+      "predicted_category": "Continuing & Professional Education",
+      "predicted_type": "Achievement",
+      "predicted_level": "Foundational",
+      "category_explanation": "Category 'Continuing & Professional Education' determined by:\n- Audience: external, professional\n- Context: professional_ed\nBased on NJIT Taxonomy Step 1 rules.",
+      "type_explanation": "Type 'Achievement' determined by assessment type: auto_graded.\nBased on NJIT Taxonomy Step 2 rules.",
+      "level_explanation": "Foundational level: first in pathway, no prerequisites.",
+      "category_match": true,
+      "type_match": true,
+      "level_match": false
+    },
+    {
+      "badge_name": "PM Healthcare \u2014 Course 4: Agile",
+      "expected_category": "Continuing & Professional Education",
+      "expected_type": "Achievement",
+      "expected_level": "Milestone",
+      "predicted_category": "Continuing & Professional Education",
+      "predicted_type": "Achievement",
+      "predicted_level": "Foundational",
+      "category_explanation": "Category 'Continuing & Professional Education' determined by:\n- Audience: external, professional\n- Context: professional_ed\nBased on NJIT Taxonomy Step 1 rules.",
+      "type_explanation": "Type 'Achievement' determined by assessment type: auto_graded.\nBased on NJIT Taxonomy Step 2 rules.",
+      "level_explanation": "Foundational level: first in pathway, no prerequisites.",
+      "category_match": true,
+      "type_match": true,
+      "level_match": false
+    },
+    {
+      "badge_name": "Make 101: Introduction to Makerspace",
+      "expected_category": "Academic",
+      "expected_type": "Skill",
+      "expected_level": "Awareness",
+      "predicted_category": "Academic",
+      "predicted_type": "Achievement",
+      "predicted_level": "Foundational",
+      "category_explanation": "Category 'Academic' determined by:\n- Audience: student\n- Context: academic\nBased on NJIT Taxonomy Step 1 rules.",
+      "type_explanation": "Type 'Achievement' determined by assessment type: auto_graded.\nBased on NJIT Taxonomy Step 2 rules.",
+      "level_explanation": "Foundational level: first in pathway, no prerequisites.",
+      "category_match": true,
+      "type_match": false,
+      "level_match": false
+    },
+    {
+      "badge_name": "Make 102: Introduction to CO2 Laser Cutting",
+      "expected_category": "Academic",
+      "expected_type": "Skill",
+      "expected_level": "Application",
+      "predicted_category": "Academic",
+      "predicted_type": "Achievement",
+      "predicted_level": "Foundational",
+      "category_explanation": "Category 'Academic' determined by:\n- Audience: student\n- Context: academic\nBased on NJIT Taxonomy Step 1 rules.",
+      "type_explanation": "Type 'Achievement' determined by assessment type: auto_graded.\nBased on NJIT Taxonomy Step 2 rules.",
+      "level_explanation": "Foundational level: first in pathway, no prerequisites.",
+      "category_match": true,
+      "type_match": false,
+      "level_match": false
+    },
+    {
+      "badge_name": "Make 103: Introduction to 3D Printing",
+      "expected_category": "Academic",
+      "expected_type": "Skill",
+      "expected_level": "Application",
+      "predicted_category": "Academic",
+      "predicted_type": "Achievement",
+      "predicted_level": "Foundational",
+      "category_explanation": "Category 'Academic' determined by:\n- Audience: student\n- Context: academic\nBased on NJIT Taxonomy Step 1 rules.",
+      "type_explanation": "Type 'Achievement' determined by assessment type: auto_graded.\nBased on NJIT Taxonomy Step 2 rules.",
+      "level_explanation": "Foundational level: first in pathway, no prerequisites.",
+      "category_match": true,
+      "type_match": false,
+      "level_match": false
+    },
+    {
+      "badge_name": "Make 242: Introduction to Woodshop",
+      "expected_category": "Academic",
+      "expected_type": "Skill",
+      "expected_level": "Application",
+      "predicted_category": "Academic",
+      "predicted_type": "Achievement",
+      "predicted_level": "Foundational",
+      "category_explanation": "Category 'Academic' determined by:\n- Audience: student\n- Context: academic\nBased on NJIT Taxonomy Step 1 rules.",
+      "type_explanation": "Type 'Achievement' determined by assessment type: auto_graded.\nBased on NJIT Taxonomy Step 2 rules.",
+      "level_explanation": "Foundational level: first in pathway, no prerequisites.",
+      "category_match": true,
+      "type_match": false,
+      "level_match": false
+    },
+    {
+      "badge_name": "MakerSpeak: Iterate to Innovate",
+      "expected_category": "Academic",
+      "expected_type": "Souvenir",
+      "expected_level": "Souvenir",
+      "predicted_category": "Academic",
+      "predicted_type": "Souvenir",
+      "predicted_level": "Souvenir",
+      "category_explanation": "Category 'Academic' determined by:\n- Audience: student\n- Context: academic\nBased on NJIT Taxonomy Step 1 rules.",
+      "type_explanation": "Type 'Souvenir' because no assessment is required (attendance/participation only).",
+      "level_explanation": "Level 'Souvenir' based on evidence and taxonomy rules.",
+      "category_match": true,
+      "type_match": true,
+      "level_match": true
+    },
+    {
+      "badge_name": "Change Management Capstone",
+      "expected_category": "Co-Curricular and Extra-Curricular",
+      "expected_type": "Achievement",
+      "expected_level": "Terminal",
+      "predicted_category": "Co-Curricular and Extra-Curricular",
+      "predicted_type": "Achievement",
+      "predicted_level": "Terminal",
+      "category_explanation": "Category 'Co-Curricular and Extra-Curricular' determined by:\n- Audience: student\n- Context: co_curricular\nBased on NJIT Taxonomy Step 1 rules.",
+      "type_explanation": "Type 'Achievement' determined by assessment type: auto_graded.\nBased on NJIT Taxonomy Step 2 rules.",
+      "level_explanation": "Terminal level: final achievement in pathway.",
+      "category_match": true,
+      "type_match": true,
+      "level_match": true
+    },
+    {
+      "badge_name": "Change Management \u2014 Foundational",
+      "expected_category": "Co-Curricular and Extra-Curricular",
+      "expected_type": "Achievement",
+      "expected_level": "Foundational",
+      "predicted_category": "Co-Curricular and Extra-Curricular",
+      "predicted_type": "Achievement",
+      "predicted_level": "Foundational",
+      "category_explanation": "Category 'Co-Curricular and Extra-Curricular' determined by:\n- Audience: student\n- Context: co_curricular\nBased on NJIT Taxonomy Step 1 rules.",
+      "type_explanation": "Type 'Achievement' determined by assessment type: auto_graded.\nBased on NJIT Taxonomy Step 2 rules.",
+      "level_explanation": "Foundational level: first in pathway, no prerequisites.",
+      "category_match": true,
+      "type_match": true,
+      "level_match": true
+    },
+    {
+      "badge_name": "Strategic Thinking Capstone",
+      "expected_category": "Co-Curricular and Extra-Curricular",
+      "expected_type": "Achievement",
+      "expected_level": "Terminal",
+      "predicted_category": "Co-Curricular and Extra-Curricular",
+      "predicted_type": "Achievement",
+      "predicted_level": "Terminal",
+      "category_explanation": "Category 'Co-Curricular and Extra-Curricular' determined by:\n- Audience: student\n- Context: co_curricular\nBased on NJIT Taxonomy Step 1 rules.",
+      "type_explanation": "Type 'Achievement' determined by assessment type: auto_graded.\nBased on NJIT Taxonomy Step 2 rules.",
+      "level_explanation": "Terminal level: final achievement in pathway.",
+      "category_match": true,
+      "type_match": true,
+      "level_match": true
+    },
+    {
+      "badge_name": "Change Management \u2014 Intermediate",
+      "expected_category": "Co-Curricular and Extra-Curricular",
+      "expected_type": "Achievement",
+      "expected_level": "Milestone",
+      "predicted_category": "Co-Curricular and Extra-Curricular",
+      "predicted_type": "Achievement",
+      "predicted_level": "Foundational",
+      "category_explanation": "Category 'Co-Curricular and Extra-Curricular' determined by:\n- Audience: student\n- Context: co_curricular\nBased on NJIT Taxonomy Step 1 rules.",
+      "type_explanation": "Type 'Achievement' determined by assessment type: auto_graded.\nBased on NJIT Taxonomy Step 2 rules.",
+      "level_explanation": "Foundational level: first in pathway, no prerequisites.",
+      "category_match": true,
+      "type_match": true,
+      "level_match": false
+    },
+    {
+      "badge_name": "Entrepreneurial Experience Badge",
+      "expected_category": "Co-Curricular and Extra-Curricular",
+      "expected_type": "Competency",
+      "expected_level": "Demonstrated",
+      "predicted_category": "Co-Curricular and Extra-Curricular",
+      "predicted_type": "Achievement",
+      "predicted_level": "Foundational",
+      "category_explanation": "Category 'Co-Curricular and Extra-Curricular' determined by:\n- Audience: student\n- Context: co_curricular\nBased on NJIT Taxonomy Step 1 rules.",
+      "type_explanation": "Type 'Achievement' determined by assessment type: auto_graded.\nBased on NJIT Taxonomy Step 2 rules.",
+      "level_explanation": "Foundational level: first in pathway, no prerequisites.",
+      "category_match": true,
+      "type_match": false,
+      "level_match": false
+    },
+    {
+      "badge_name": "Workplace Readiness Capstone",
+      "expected_category": "Co-Curricular and Extra-Curricular",
+      "expected_type": "Achievement",
+      "expected_level": "Terminal",
+      "predicted_category": "Co-Curricular and Extra-Curricular",
+      "predicted_type": "Achievement",
+      "predicted_level": "Terminal",
+      "category_explanation": "Category 'Co-Curricular and Extra-Curricular' determined by:\n- Audience: student\n- Context: co_curricular\nBased on NJIT Taxonomy Step 1 rules.",
+      "type_explanation": "Type 'Achievement' determined by assessment type: auto_graded.\nBased on NJIT Taxonomy Step 2 rules.",
+      "level_explanation": "Terminal level: final achievement in pathway.",
+      "category_match": true,
+      "type_match": true,
+      "level_match": true
+    },
+    {
+      "badge_name": "Entrepreneurship Essentials Badge",
+      "expected_category": "Co-Curricular and Extra-Curricular",
+      "expected_type": "Achievement",
+      "expected_level": "Foundational",
+      "predicted_category": "Co-Curricular and Extra-Curricular",
+      "predicted_type": "Achievement",
+      "predicted_level": "Foundational",
+      "category_explanation": "Category 'Co-Curricular and Extra-Curricular' determined by:\n- Audience: student\n- Context: co_curricular\nBased on NJIT Taxonomy Step 1 rules.",
+      "type_explanation": "Type 'Achievement' determined by assessment type: auto_graded.\nBased on NJIT Taxonomy Step 2 rules.",
+      "level_explanation": "Foundational level: first in pathway, no prerequisites.",
+      "category_match": true,
+      "type_match": true,
+      "level_match": true
+    },
+    {
+      "badge_name": "NJIT/NYSCC Formulation Workshop",
+      "expected_category": "Academic",
+      "expected_type": "Skill",
+      "expected_level": "Awareness",
+      "predicted_category": "Academic",
+      "predicted_type": "Achievement",
+      "predicted_level": "Foundational",
+      "category_explanation": "Category 'Academic' determined by:\n- Audience: student\n- Context: academic\nBased on NJIT Taxonomy Step 1 rules.",
+      "type_explanation": "Type 'Achievement' determined by assessment type: auto_graded.\nBased on NJIT Taxonomy Step 2 rules.",
+      "level_explanation": "Foundational level: first in pathway, no prerequisites.",
+      "category_match": true,
+      "type_match": false,
+      "level_match": false
+    },
+    {
+      "badge_name": "CPT Course",
+      "expected_category": "Unknown \u2014 Open Q001",
+      "expected_type": "Achievement",
+      "expected_level": "Foundational",
+      "predicted_category": "Academic",
+      "predicted_type": "Achievement",
+      "predicted_level": "Foundational",
+      "category_explanation": "Category 'Academic' determined by:\n- Audience: student\n- Context: academic\nBased on NJIT Taxonomy Step 1 rules.",
+      "type_explanation": "Type 'Achievement' determined by assessment type: auto_graded.\nBased on NJIT Taxonomy Step 2 rules.",
+      "level_explanation": "Foundational level: first in pathway, no prerequisites.",
+      "category_match": false,
+      "type_match": true,
+      "level_match": true
+    },
+    {
+      "badge_name": "AI Literacy Microcredential",
+      "expected_category": "Faculty & Staff Development",
+      "expected_type": "Achievement",
+      "expected_level": "Terminal",
+      "predicted_category": "Faculty & Staff Development",
+      "predicted_type": "Achievement",
+      "predicted_level": "Terminal",
+      "category_explanation": "Category 'Faculty & Staff Development' determined by:\n- Audience: faculty\n- Context: employee_development\nBased on NJIT Taxonomy Step 1 rules.",
+      "type_explanation": "Type 'Achievement' determined by assessment type: auto_graded.\nBased on NJIT Taxonomy Step 2 rules.",
+      "level_explanation": "Terminal level: final achievement in pathway.",
+      "category_match": true,
+      "type_match": true,
+      "level_match": true
+    },
+    {
+      "badge_name": "PM Healthcare Microcredential",
+      "expected_category": "Continuing & Professional Education",
+      "expected_type": "Achievement",
+      "expected_level": "Terminal",
+      "predicted_category": "Continuing & Professional Education",
+      "predicted_type": "Achievement",
+      "predicted_level": "Terminal",
+      "category_explanation": "Category 'Continuing & Professional Education' determined by:\n- Audience: external, professional\n- Context: professional_ed\nBased on NJIT Taxonomy Step 1 rules.",
+      "type_explanation": "Type 'Achievement' determined by assessment type: auto_graded.\nBased on NJIT Taxonomy Step 2 rules.",
+      "level_explanation": "Terminal level: final achievement in pathway.",
+      "category_match": true,
+      "type_match": true,
+      "level_match": true
+    },
+    {
+      "badge_name": "AI for Educators Microcredential",
+      "expected_category": "Faculty & Staff Development",
+      "expected_type": "Achievement",
+      "expected_level": "Terminal",
+      "predicted_category": "Faculty & Staff Development",
+      "predicted_type": "Achievement",
+      "predicted_level": "Terminal",
+      "category_explanation": "Category 'Faculty & Staff Development' determined by:\n- Audience: faculty\n- Context: employee_development\nBased on NJIT Taxonomy Step 1 rules.",
+      "type_explanation": "Type 'Achievement' determined by assessment type: auto_graded.\nBased on NJIT Taxonomy Step 2 rules.",
+      "level_explanation": "Terminal level: final achievement in pathway.",
+      "category_match": true,
+      "type_match": true,
+      "level_match": true
+    }
+  ]
+}
