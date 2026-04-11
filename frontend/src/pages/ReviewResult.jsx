@@ -1,21 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useParams, useLocation, useNavigate } from 'react-router-dom'
-import { getLog, submitReview } from '../services/api'
-
-// ─── Level options per type ────────────────────────────────────────────────────
-const LEVEL_OPTIONS = {
-  Souvenir:   ['Souvenir'],
-  Achievement:['Foundational', 'Milestone', 'Terminal'],
-  Skill:      ['Awareness', 'Application', 'Mastery'],
-  Competency: ['Demonstrated', 'Integrated', 'Exemplary'],
-}
-const CATEGORIES = [
-  'Continuing & Professional Education',
-  'Faculty & Staff Development',
-  'Co-Curricular and Extra-Curricular',
-  'Academic',
-]
-const TYPES = ['Souvenir', 'Achievement', 'Skill', 'Competency']
+import { getLog } from '../services/api'
 
 // ─── Confidence badge ─────────────────────────────────────────────────────────
 function ConfBadge({ level }) {
@@ -155,175 +140,24 @@ function ExplanationPanel({ explanation }) {
   )
 }
 
-// ─── Review Actions Panel ─────────────────────────────────────────────────────
+// ─── Reviewer Note Panel ──────────────────────────────────────────────────────
 
-function ReviewPanel({ logId, result, onReviewDone }) {
-  const [reviewerName, setReviewerName] = useState('')
-  const [overrideOpen, setOverrideOpen] = useState(false)
-  const [overrideCat, setOverrideCat] = useState(result.classification.category || '')
-  const [overrideType, setOverrideType] = useState(result.classification.type || '')
-  const [overrideLevel, setOverrideLevel] = useState(result.classification.level || '')
-  const [overrideReason, setOverrideReason] = useState('')
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState('')
-  const [done, setDone] = useState(null)
-
-  // Keep level in sync when type changes
-  function handleTypeChange(t) {
-    setOverrideType(t)
-    const opts = LEVEL_OPTIONS[t] || []
-    if (!opts.includes(overrideLevel)) setOverrideLevel(opts[0] || '')
-  }
-
-  async function handleAccept() {
-    if (!reviewerName.trim()) { setError('Reviewer name is required.'); return }
-    setLoading(true); setError('')
-    try {
-      const log = await submitReview({
-        log_id: logId,
-        reviewer_status: 'accepted',
-        reviewer_id: reviewerName.trim(),
-      })
-      setDone(log)
-      onReviewDone && onReviewDone(log)
-    } catch (err) {
-      setError(err.message)
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  async function handleOverride() {
-    if (!reviewerName.trim()) { setError('Reviewer name is required.'); return }
-    if (!overrideReason.trim()) { setError('Override reason is required.'); return }
-    setLoading(true); setError('')
-    try {
-      const log = await submitReview({
-        log_id: logId,
-        reviewer_status: 'overridden',
-        reviewer_id: reviewerName.trim(),
-        override_reason: overrideReason.trim(),
-        override_category: overrideCat || null,
-        override_type: overrideType || null,
-        override_level: overrideLevel || null,
-      })
-      setDone(log)
-      onReviewDone && onReviewDone(log)
-    } catch (err) {
-      setError(err.message)
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  if (done) {
-    return (
-      <div className="border border-green-300 rounded-lg p-5 bg-green-50 space-y-2">
-        <p className="font-semibold text-green-800">
-          ✓ Review submitted — <StatusBadge status={done.reviewer_status} />
-        </p>
-        {done.final_locked_decision && (
-          <p className="text-sm text-green-700">
-            Final locked decision: <strong>{done.final_locked_decision}</strong>
-          </p>
-        )}
-        <p className="text-xs text-green-600">Reviewed by {done.reviewer_id} at {done.reviewed_at}</p>
-      </div>
-    )
-  }
-
+function ReviewerNotePanel({ logId }) {
+  const navigate = useNavigate()
   return (
-    <div className="border border-gray-200 rounded-lg p-5 space-y-4">
-      <h2 className="text-base font-semibold text-njit-navy">Review Actions</h2>
-
-      {error && (
-        <div className="bg-red-50 border border-red-300 text-red-800 rounded p-3 text-sm">{error}</div>
-      )}
-
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">Reviewer Name *</label>
-        <input
-          className="border border-gray-300 rounded px-3 py-2 text-sm w-full max-w-xs focus:outline-none focus:ring-2 focus:ring-njit-red"
-          placeholder="Your name"
-          value={reviewerName}
-          onChange={e => setReviewerName(e.target.value)}
-        />
-      </div>
-
-      {/* Accept */}
-      <div className="flex items-center gap-4">
+    <div className="border border-blue-200 rounded-lg p-5 bg-blue-50 space-y-2">
+      <h2 className="text-base font-semibold text-njit-navy">Ready for Review</h2>
+      <p className="text-sm text-blue-800">
+        This badge classification is pending reviewer approval.
+        Reviewers can accept or override classifications from the{' '}
         <button
-          onClick={handleAccept}
-          disabled={loading}
-          className="bg-green-600 text-white px-6 py-2 rounded font-medium hover:bg-green-700 disabled:opacity-50"
+          onClick={() => navigate('/reviewer/dashboard')}
+          className="font-medium underline hover:text-njit-navy"
         >
-          {loading && !overrideOpen ? 'Submitting…' : 'Accept Classification'}
-        </button>
-        <span className="text-sm text-gray-500">or</span>
-        <button
-          onClick={() => setOverrideOpen(o => !o)}
-          className="border border-gray-300 text-gray-700 px-4 py-2 rounded text-sm hover:bg-gray-50"
-        >
-          {overrideOpen ? 'Cancel Override' : 'Override Classification'}
-        </button>
-      </div>
-
-      {/* Override form */}
-      {overrideOpen && (
-        <div className="border border-yellow-200 rounded-lg p-4 bg-yellow-50 space-y-3">
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-            <div>
-              <label className="block text-xs font-medium text-gray-700 mb-1">Category</label>
-              <select
-                value={overrideCat}
-                onChange={e => setOverrideCat(e.target.value)}
-                className="w-full border border-gray-300 rounded px-2 py-1.5 text-sm bg-white"
-              >
-                {CATEGORIES.map(c => <option key={c}>{c}</option>)}
-              </select>
-            </div>
-            <div>
-              <label className="block text-xs font-medium text-gray-700 mb-1">Type</label>
-              <select
-                value={overrideType}
-                onChange={e => handleTypeChange(e.target.value)}
-                className="w-full border border-gray-300 rounded px-2 py-1.5 text-sm bg-white"
-              >
-                {TYPES.map(t => <option key={t}>{t}</option>)}
-              </select>
-            </div>
-            <div>
-              <label className="block text-xs font-medium text-gray-700 mb-1">Level</label>
-              <select
-                value={overrideLevel}
-                onChange={e => setOverrideLevel(e.target.value)}
-                className="w-full border border-gray-300 rounded px-2 py-1.5 text-sm bg-white"
-              >
-                {(LEVEL_OPTIONS[overrideType] || []).map(l => <option key={l}>{l}</option>)}
-              </select>
-            </div>
-          </div>
-
-          <div>
-            <label className="block text-xs font-medium text-gray-700 mb-1">Override Reason *</label>
-            <textarea
-              rows={3}
-              value={overrideReason}
-              onChange={e => setOverrideReason(e.target.value)}
-              className="w-full border border-gray-300 rounded px-3 py-2 text-sm"
-              placeholder="Explain why the classification needs to be changed…"
-            />
-          </div>
-
-          <button
-            onClick={handleOverride}
-            disabled={loading}
-            className="bg-njit-navy text-white px-5 py-2 rounded text-sm font-medium hover:bg-njit-navy-dark disabled:opacity-50"
-          >
-            {loading && overrideOpen ? 'Submitting…' : 'Submit Override'}
-          </button>
-        </div>
-      )}
+          Reviewer Dashboard
+        </button>.
+      </p>
+      <p className="text-xs text-blue-600">Log ID: {logId}</p>
     </div>
   )
 }
@@ -435,11 +269,7 @@ export default function ReviewResult() {
           )}
         </div>
       ) : (
-        <ReviewPanel
-          logId={logId}
-          result={result}
-          onReviewDone={updatedLog => setLog(updatedLog)}
-        />
+        <ReviewerNotePanel logId={logId} />
       )}
     </div>
   )

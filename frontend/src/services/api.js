@@ -40,11 +40,12 @@ export async function ingestBadge(inputType, payload) {
 /**
  * POST /classify
  * @param {object} badgeFactSheet  Full BFS object returned by /ingest
+ * @param {object} [meta]          Optional { submitter_email, reviewer_email }
  * @returns {Promise<object>}      ClassificationResult
  */
-export async function classifyBadge(badgeFactSheet) {
+export async function classifyBadge(badgeFactSheet, meta = {}) {
   try {
-    const { data } = await http.post('/classify', badgeFactSheet)
+    const { data } = await http.post('/classify', { ...badgeFactSheet, ...meta })
     return data
   } catch (err) {
     throw apiError(err)
@@ -53,7 +54,7 @@ export async function classifyBadge(badgeFactSheet) {
 
 /**
  * POST /review
- * @param {object} reviewPayload  {log_id, reviewer_status, reviewer_id,
+ * @param {object} reviewPayload  {log_id?, review_token?, reviewer_status, reviewer_id,
  *                                  override_reason, override_category,
  *                                  override_type, override_level}
  * @returns {Promise<object>}     Updated GovernanceLog
@@ -96,6 +97,54 @@ export async function getLog(logId) {
   }
 }
 
+// ---------------------------------------------------------------------------
+// Reviewer API
+// ---------------------------------------------------------------------------
+
+/**
+ * POST /reviewer/auth
+ * @param {string} password  Reviewer shared password
+ * @returns {Promise<{access_token: string}>}
+ */
+export async function reviewerAuth(password) {
+  try {
+    const { data } = await http.post('/reviewer/auth', { password })
+    return data
+  } catch (err) {
+    throw apiError(err)
+  }
+}
+
+/**
+ * GET /reviewer/queue  (requires reviewer auth)
+ * @returns {Promise<{stats, pending, recently_reviewed}>}
+ */
+export async function getReviewerQueue() {
+  const token = _getReviewerToken()
+  try {
+    const { data } = await http.get('/reviewer/queue', {
+      headers: { Authorization: `Bearer ${token}` },
+    })
+    return data
+  } catch (err) {
+    throw apiError(err)
+  }
+}
+
+/**
+ * GET /reviewer/review/{token}
+ * @param {string} reviewToken  Opaque review token from the email link
+ * @returns {Promise<object>}   Log data ready for reviewer UI
+ */
+export async function getLogByToken(reviewToken) {
+  try {
+    const { data } = await http.get(`/reviewer/review/${reviewToken}`)
+    return data
+  } catch (err) {
+    throw apiError(err)
+  }
+}
+
 /**
  * GET /health
  * @returns {Promise<{status:string, version:string}>}
@@ -107,4 +156,23 @@ export async function getHealth() {
   } catch (err) {
     throw apiError(err)
   }
+}
+
+// ---------------------------------------------------------------------------
+// Internal helper — reads reviewer access token from ReviewerContext is not
+// possible here (no React hooks in a plain module). Components that call
+// getReviewerQueue must inject the token via the ReviewerContext instead.
+// We use a simple module-level variable kept in sync by ReviewerContext.
+// ---------------------------------------------------------------------------
+
+let _reviewerAccessToken = null
+
+/** Called by ReviewerContext when token changes. */
+export function _setReviewerToken(token) {
+  _reviewerAccessToken = token
+}
+
+function _getReviewerToken() {
+  if (!_reviewerAccessToken) throw new Error('Not authenticated as reviewer.')
+  return _reviewerAccessToken
 }

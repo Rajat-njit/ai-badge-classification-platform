@@ -17,9 +17,10 @@ load_dotenv()
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    """Create all database tables on startup."""
-    from database import create_tables
+    """Create all database tables and run column migrations on startup."""
+    from database import create_tables, migrate_tables
     create_tables()
+    migrate_tables()
     yield
 
 
@@ -47,11 +48,13 @@ from app.routes.ingestion import router as ingestion_router
 from app.routes.classification import router as classification_router
 from app.routes.review import router as review_router
 from app.routes.logs import router as logs_router
+from app.routes.reviewer import router as reviewer_router
 
 app.include_router(ingestion_router)
 app.include_router(classification_router)
 app.include_router(review_router)
 app.include_router(logs_router)
+app.include_router(reviewer_router)
 
 
 @app.get("/health")

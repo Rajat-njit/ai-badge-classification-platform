@@ -79,6 +79,21 @@ class GovernanceLog(Base):
     final_locked_decision = Column(String, nullable=True)
 
     # ------------------------------------------------------------------
+    # Two-user workflow — submitter / reviewer email routing
+    # ------------------------------------------------------------------
+    submitter_email = Column(String, nullable=True)
+    reviewer_email = Column(String, nullable=True)
+
+    # Opaque UUID token e-mailed to the reviewer; gates the review page
+    review_token = Column(String, nullable=True)
+    # ISO timestamp — token expires 30 days after classification
+    review_token_expires_at = Column(String, nullable=True)
+
+    # Console notification timestamps (real email would set these)
+    notification_sent_at = Column(String, nullable=True)
+    decision_notification_sent_at = Column(String, nullable=True)
+
+    # ------------------------------------------------------------------
     # Timestamps
     # ------------------------------------------------------------------
     created_at = Column(

@@ -29,6 +29,12 @@ def create_log(
     bfs: BadgeFactSheet,
     result: ClassificationResult,
     db: Session,
+    *,
+    submitter_email: str | None = None,
+    reviewer_email: str | None = None,
+    review_token: str | None = None,
+    review_token_expires_at: str | None = None,
+    notification_sent_at: str | None = None,
 ) -> GovernanceLog:
     """
     Insert a new governance log record for a completed classification.
@@ -38,10 +44,12 @@ def create_log(
     - triggered_rules: JSON array of rule IDs
     - final_category/type/level: seeded from recommended values;
       updated if a reviewer later overrides
-    - reviewer_status: "pending"
+    - reviewer_status: "pending_review" when reviewer_email provided, else "pending"
     """
     bfs_dict = bfs.model_dump()
     extracted = {k: bfs_dict[k] for k in _NLP_SIGNAL_KEYS if k in bfs_dict}
+
+    reviewer_status = "pending_review" if reviewer_email else "pending"
 
     log = GovernanceLog(
         badge_id=bfs.badge_id,
@@ -57,7 +65,13 @@ def create_log(
         confidence=result.classification.confidence,
         triggered_rules=json.dumps(result.rules_triggered),
         explanation_text=result.explanation or "",
-        reviewer_status="pending",
+        reviewer_status=reviewer_status,
+        # Email routing fields
+        submitter_email=submitter_email,
+        reviewer_email=reviewer_email,
+        review_token=review_token,
+        review_token_expires_at=review_token_expires_at,
+        notification_sent_at=notification_sent_at,
         # Seed final decision with recommendation — updated on review
         final_category=result.classification.category,
         final_type=result.classification.type,
@@ -119,8 +133,29 @@ def update_log_review(
     level_str = log.final_level or "Unknown"
     log.final_locked_decision = f"{category_str} | {type_str} | {level_str}"
 
+    # Record decision notification timestamp
+    log.decision_notification_sent_at = datetime.now(timezone.utc).isoformat()
+
     db.commit()
     db.refresh(log)
+
+    # Console notifications (replace with real email in production)
+    print(
+        f"\n[DECISION NOTIFY] Badge '{log.badge_title}' reviewed by "
+        f"'{reviewer_id}': {reviewer_status}"
+    )
+    if log.submitter_email:
+        print(
+            f"  [EMAIL → submitter] {log.submitter_email} — "
+            f"your badge '{log.badge_title}' was {reviewer_status}. "
+            f"Final: {log.final_locked_decision}"
+        )
+    if log.reviewer_email:
+        print(
+            f"  [EMAIL → reviewer]  {log.reviewer_email} — "
+            f"review recorded for '{log.badge_title}' ({reviewer_status})."
+        )
+
     return log
 
 

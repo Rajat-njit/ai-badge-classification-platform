@@ -34,6 +34,36 @@ def create_tables() -> None:
     Base.metadata.create_all(bind=engine)
 
 
+def migrate_tables() -> None:
+    """
+    Add new columns to existing tables without dropping data.
+
+    Each ALTER TABLE is wrapped in try/except so it silently skips
+    columns that already exist (SQLite raises OperationalError for
+    duplicate column additions).
+    """
+    _new_columns = [
+        ("submitter_email",              "TEXT"),
+        ("reviewer_email",               "TEXT"),
+        ("review_token",                 "TEXT"),
+        ("review_token_expires_at",      "TEXT"),
+        ("notification_sent_at",         "TEXT"),
+        ("decision_notification_sent_at","TEXT"),
+    ]
+    with engine.connect() as conn:
+        for col_name, col_type in _new_columns:
+            try:
+                conn.execute(
+                    __import__("sqlalchemy").text(
+                        f"ALTER TABLE governance_logs ADD COLUMN {col_name} {col_type}"
+                    )
+                )
+                conn.commit()
+            except Exception:
+                # Column already exists — safe to ignore
+                pass
+
+
 def get_db() -> Generator[Session, None, None]:
     """
     FastAPI dependency — yields a database session and guarantees cleanup.

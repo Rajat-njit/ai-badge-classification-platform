@@ -1,11 +1,16 @@
 """
 POST /classify — runs the classification engine on a BadgeFactSheet.
 
-Input:  BadgeFactSheet (from POST /ingest or manually constructed)
+Input:  ClassifyRequest (BadgeFactSheet + optional submitter_email / reviewer_email)
 Output: ClassificationResult (with governance.log_id populated)
 
 The route owns governance log creation so the engine stays DB-free.
 """
+
+import os
+from datetime import datetime, timedelta, timezone
+from typing import Optional
+from uuid import uuid4
 
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
@@ -23,9 +28,23 @@ router = APIRouter()
 _signal_extractor = SignalExtractor()
 
 
+class ClassifyRequest(BadgeFactSheet):
+    """
+    Extends BadgeFactSheet with optional two-user workflow fields.
+
+    These fields are not part of the classification logic — they are
+    used only by the governance logger for notification routing.
+
+    Backward compatible: existing clients that POST a plain BadgeFactSheet
+    will simply leave these fields as None.
+    """
+    submitter_email: Optional[str] = None
+    reviewer_email: Optional[str] = None
+
+
 @router.post("/classify", response_model=ClassificationResult)
 def classify_badge(
-    bfs: BadgeFactSheet,
+    req: ClassifyRequest,
     db: Session = Depends(get_db),
 ) -> ClassificationResult:
     """
@@ -34,12 +53,16 @@ def classify_badge(
     Steps:
       1. Run NLP signal extraction (idempotent — skips already-filled fields)
       2. Run classification engine (Stage 1 → 2 → 3)
-      3. Create governance log record
-      4. Return ClassificationResult with log_id
+      3. Generate review token (if reviewer_email provided)
+      4. Print console notifications
+      5. Create governance log record
+      6. Return ClassificationResult with log_id
     """
+    # Cast to plain BadgeFactSheet so engine stays ignorant of email fields
+    bfs: BadgeFactSheet = req
+
     try:
         # Step 1a — Parse canvas code if present but not yet parsed
-        # (normalizer does this; this is a safety step for direct BFS submissions)
         if bfs.canvas_course_code and bfs.canvas_sequence_number is None:
             parsed = parse_canvas_code(bfs.canvas_course_code)
             if parsed:
@@ -56,10 +79,51 @@ def classify_badge(
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Classification error: {e}")
 
-    # Step 3 — Governance log (delegated to governance_logger)
-    log = create_log(bfs, result, db)
+    # Step 3 — Review token (generated when reviewer_email provided)
+    review_token: Optional[str] = None
+    review_token_expires_at: Optional[str] = None
+    notification_sent_at: Optional[str] = None
 
-    # Step 4 — Fill governance.log_id now that we have it
+    if req.reviewer_email:
+        review_token = str(uuid4())
+        expires = datetime.now(timezone.utc) + timedelta(days=30)
+        review_token_expires_at = expires.isoformat()
+
+    # Step 4 — Console notifications (replace with real email in production)
+    now_iso = datetime.now(timezone.utc).isoformat()
+    title = bfs.badge_title or "Untitled Badge"
+
+    if req.submitter_email or req.reviewer_email:
+        notification_sent_at = now_iso
+        print(f"\n[CLASSIFICATION NOTIFY] Badge '{title}' classified.")
+
+    if req.submitter_email:
+        print(
+            f"  [EMAIL → submitter] {req.submitter_email} — "
+            f"your badge '{title}' has been classified and is pending review."
+        )
+
+    if req.reviewer_email and review_token:
+        print(
+            f"  [EMAIL → reviewer]  {req.reviewer_email} — "
+            f"badge '{title}' is ready for your review. "
+            f"Review link: /reviewer/review/{review_token}"
+        )
+
+    # Step 5 — Governance log
+    log = create_log(
+        bfs,
+        result,
+        db,
+        submitter_email=req.submitter_email or None,
+        reviewer_email=req.reviewer_email or None,
+        review_token=review_token,
+        review_token_expires_at=review_token_expires_at,
+        notification_sent_at=notification_sent_at,
+    )
+
+    # Step 6 — Fill governance metadata now that we have the log
     result.governance.log_id = log.id
+    result.governance.reviewer_status = log.reviewer_status
 
     return result

@@ -362,7 +362,10 @@ function GuidedForm({ onIngested }) {
     try {
       const fields = translateFormAnswers(answers)
       const bfs = await ingestBadge('form', fields)
-      onIngested(bfs, 'form')
+      onIngested(bfs, 'form', {
+        submitter_email: answers.submitter_email.trim(),
+        reviewer_email: answers.reviewer_email.trim(),
+      })
     } catch (err) {
       setApiError(err.message)
     } finally {
@@ -802,13 +805,15 @@ export default function SubmitBadge() {
   const [bfs, setBfs] = useState(null)
   const [inputMode, setInputMode] = useState('form')
   const [followupValues, setFollowupValues] = useState({})
+  const [submissionMeta, setSubmissionMeta] = useState({})
   const [classifying, setClassifying] = useState(false)
   const [classifyError, setClassifyError] = useState('')
 
-  function handleIngested(bfsData, mode) {
+  function handleIngested(bfsData, mode, meta = {}) {
     setBfs(bfsData)
     setInputMode(mode)
     setFollowupValues({})
+    setSubmissionMeta(meta)
     setClassifyError('')
     window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' })
   }
@@ -827,8 +832,20 @@ export default function SubmitBadge() {
     setClassifyError('')
     try {
       const enrichedBfs = { ...bfs, ...followupValues }
-      const result = await classifyBadge(enrichedBfs)
-      navigate(`/review/${result.governance.log_id}`, { state: { result, bfs: enrichedBfs } })
+      const result = await classifyBadge(enrichedBfs, submissionMeta)
+      const logId = result.governance.log_id
+      if (submissionMeta.submitter_email || submissionMeta.reviewer_email) {
+        navigate('/submit/confirmation', {
+          state: {
+            badgeTitle: result.badge_title || enrichedBfs.badge_title,
+            submitterEmail: submissionMeta.submitter_email,
+            reviewerEmail: submissionMeta.reviewer_email,
+            logId,
+          },
+        })
+      } else {
+        navigate(`/review/${logId}`, { state: { result, bfs: enrichedBfs } })
+      }
     } catch (err) {
       setClassifyError(err.message)
     } finally {
