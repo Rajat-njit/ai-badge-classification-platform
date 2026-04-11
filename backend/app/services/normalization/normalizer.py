@@ -103,7 +103,14 @@ def normalize(input_type: str, payload: Any) -> BadgeFactSheet:
         bfs.has_prerequisite_badges = True
 
     # ------------------------------------------------------------------
-    # Step 6 — Validate required fields; add to missing_signals
+    # Step 6 — Input validation edge cases (EC01–EC03)
+    # ------------------------------------------------------------------
+    _sanitize_whitespace_fields(bfs)   # EC01
+    _check_duplicate_content(bfs)      # EC02
+    _check_minimum_content(bfs)        # EC03
+
+    # ------------------------------------------------------------------
+    # Step 7 — Validate required fields; add to missing_signals
     # ------------------------------------------------------------------
     _check_required_fields(bfs)
 
@@ -153,3 +160,70 @@ def _check_required_fields(bfs: BadgeFactSheet) -> None:
 def _add_missing(bfs: BadgeFactSheet, field: str) -> None:
     if field not in bfs.missing_signals:
         bfs.missing_signals.append(field)
+
+
+def _sanitize_whitespace_fields(bfs: BadgeFactSheet) -> None:
+    """
+    EC01 — Whitespace-only field detection.
+
+    For form and obv3_json sources, fields that arrive as empty or
+    whitespace-only strings represent explicit blank submissions — treat them
+    as absent: set to None and flag as missing.
+
+    The form mapper's _str() helper strips input values before they reach
+    this function, so "   " arrives here as "". Both are caught by the
+    val.strip() == "" check below.
+
+    For free_text sources, badge_title is never extracted from the text and
+    stays at its BFS default of "". Firing EC01 for free_text defaults would
+    be incorrect — the field was never submitted, just absent — so we skip
+    EC01 for free_text entirely.
+    """
+    if bfs.structured_source_type == "free_text":
+        return
+
+    _WATCHED = ("badge_title", "badge_description", "earning_criteria_text")
+    for field in _WATCHED:
+        val = getattr(bfs, field, None)
+        if val is not None and val.strip() == "":
+            setattr(bfs, field, None)
+            _add_missing(bfs, field)
+            bfs.needs_followup_questions = True
+
+
+def _check_duplicate_content(bfs: BadgeFactSheet) -> None:
+    """
+    EC02 — Criteria identical to description.
+
+    When earning_criteria_text and badge_description contain exactly the same
+    text, the criteria field provides no additional signal. Flag for follow-up.
+    """
+    if not (bfs.earning_criteria_text and bfs.badge_description):
+        return
+    if bfs.earning_criteria_text.strip() != bfs.badge_description.strip():
+        return
+    if "criteria_identical_to_description" not in (bfs.confidence_notes or ""):
+        bfs.confidence_notes = (
+            (bfs.confidence_notes or "")
+            + " | WARN: criteria_identical_to_description"
+        ).lstrip(" |").strip()
+    _add_missing(bfs, "earning_criteria_meaningful_content")
+    bfs.needs_followup_questions = True
+
+
+def _check_minimum_content(bfs: BadgeFactSheet) -> None:
+    """
+    EC03 — Minimum content warning.
+
+    Short fields are flagged in confidence_notes only — they do NOT block
+    classification or add to missing_signals.
+    """
+    if bfs.badge_description and len(bfs.badge_description.strip()) < 50:
+        bfs.confidence_notes = (
+            (bfs.confidence_notes or "") + " | WARN: description_too_short"
+        ).lstrip(" |").strip()
+
+    if bfs.earning_criteria_text and len(bfs.earning_criteria_text.strip()) < 30:
+        bfs.confidence_notes = (
+            (bfs.confidence_notes or "") + " | WARN: criteria_too_short"
+        ).lstrip(" |").strip()
