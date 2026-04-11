@@ -7,8 +7,11 @@ Output: Updated GovernanceLog record
 Validation rules:
   - Either log_id or review_token must be provided
   - reviewer_status must be "accepted" or "overridden"
-  - If "overridden": override_reason is required
+  - If "overridden": override_reason must be at least 20 characters (EC29)
+  - If "overridden": override_type + override_level must be a valid taxonomy
+    combination when both are provided (EC30)
   - If "overridden": at least one of override_category/type/level must be set
+  - If all override values match the recommendation, silently accept (EC26)
 """
 
 from typing import Optional
@@ -24,6 +27,14 @@ from database import get_db
 router = APIRouter()
 
 _VALID_STATUSES = {"accepted", "overridden"}
+
+# EC30 — valid type → level combinations from the official NJIT taxonomy
+VALID_COMBINATIONS: dict[str, list[str]] = {
+    "Souvenir":    ["Souvenir"],
+    "Achievement": ["Foundational", "Milestone", "Terminal"],
+    "Skill":       ["Awareness", "Application", "Mastery"],
+    "Competency":  ["Demonstrated", "Integrated", "Exemplary"],
+}
 
 
 class ReviewRequest(BaseModel):
@@ -68,6 +79,13 @@ def review_classification(
 
     Returns the updated GovernanceLog serialized as a dict.
     """
+    # Extract mutable working copies — EC26 may change these before DB write
+    reviewer_status = req.reviewer_status
+    override_reason = req.override_reason
+    override_category = req.override_category
+    override_type = req.override_type
+    override_level = req.override_level
+
     # --- Validate identifier ---
     if not req.log_id and not req.review_token:
         raise HTTPException(
@@ -76,25 +94,22 @@ def review_classification(
         )
 
     # --- Validate status ---
-    if req.reviewer_status not in _VALID_STATUSES:
+    if reviewer_status not in _VALID_STATUSES:
         raise HTTPException(
             status_code=400,
             detail=(
-                f"Invalid reviewer_status '{req.reviewer_status}'. "
+                f"Invalid reviewer_status '{reviewer_status}'. "
                 f"Must be one of: {sorted(_VALID_STATUSES)}"
             ),
         )
 
-    if req.reviewer_status == "overridden":
-        if not req.override_reason or not req.override_reason.strip():
-            raise HTTPException(
-                status_code=400,
-                detail="override_reason is required when reviewer_status is 'overridden'.",
-            )
+    if reviewer_status == "overridden":
+        # Guard — at least one override field required (checked first so a
+        # payload with no fields fails before the reason-length check)
         if (
-            req.override_category is None
-            and req.override_type is None
-            and req.override_level is None
+            override_category is None
+            and override_type is None
+            and override_level is None
         ):
             raise HTTPException(
                 status_code=400,
@@ -104,19 +119,58 @@ def review_classification(
                 ),
             )
 
+        # EC29 — minimum override reason length
+        # Message deliberately contains "override_reason" for client parsing.
+        if not override_reason or len(override_reason.strip()) < 20:
+            raise HTTPException(
+                status_code=400,
+                detail=(
+                    "override_reason must be at least 20 characters. "
+                    "Please provide a specific reason for the classification change."
+                ),
+            )
+
+        # EC30 — invalid taxonomy combination
+        if override_type and override_level:
+            valid_levels = VALID_COMBINATIONS.get(override_type, [])
+            if override_level not in valid_levels:
+                raise HTTPException(
+                    status_code=400,
+                    detail=(
+                        f"Invalid taxonomy combination. "
+                        f"{override_type} type cannot have {override_level} level. "
+                        f"Valid levels for {override_type}: {', '.join(valid_levels)}"
+                    ),
+                )
+
     # --- Resolve log from id or token ---
     log = _resolve_log(req, db)
     log_id = log.id
 
+    # --- EC26 — identical override detection ---
+    # If every provided override value already matches the recommendation,
+    # the reviewer has effectively confirmed the system's decision.
+    # Silently change to "accepted" so the log reflects a clean acceptance.
+    if reviewer_status == "overridden":
+        recommended_matches = all([
+            not override_category or override_category == log.recommended_category,
+            not override_type     or override_type     == log.recommended_type,
+            not override_level    or override_level    == log.recommended_level,
+        ])
+        if recommended_matches:
+            reviewer_status = "accepted"
+            if not override_reason:
+                override_reason = "Reviewer confirmed system recommendation"
+
     # --- Apply review ---
     log = update_log_review(
         log_id=log_id,
-        reviewer_status=req.reviewer_status,
+        reviewer_status=reviewer_status,
         reviewer_id=req.reviewer_id,
-        override_reason=req.override_reason,
-        override_category=req.override_category,
-        override_type=req.override_type,
-        override_level=req.override_level,
+        override_reason=override_reason,
+        override_category=override_category,
+        override_type=override_type,
+        override_level=override_level,
         db=db,
     )
 

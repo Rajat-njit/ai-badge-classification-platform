@@ -1,14 +1,17 @@
 """
 test_edge_cases.py
 
-Input-validation edge cases — Category 2 (Upgrade 3).
+Edge case tests — Upgrade 3 Categories 2 and 3.
 
-Tests EC01–EC03 exercised against the normalizer via POST /ingest.
-All tests use form input to have full control over field values.
+Category 2: Input validation (EC01–EC03) — exercised via POST /ingest.
+Category 3: Review workflow validation (EC26, EC29, EC30) — exercised via POST /review.
 
 EC01  Whitespace-only field detection
 EC02  Criteria identical to description
 EC03  Minimum content warning (warning-only, does not block)
+EC26  Identical override silently becomes acceptance
+EC29  Minimum override reason length (≥ 20 characters)
+EC30  Invalid taxonomy type+level combination rejected
 """
 
 import os
@@ -134,3 +137,147 @@ class TestEC03_MinimumContentWarnings:
         })
         assert "criteria_too_short" in (bfs["confidence_notes"] or "")
         assert "earning_criteria_text" not in bfs["missing_signals"]
+
+
+# ---------------------------------------------------------------------------
+# Helpers shared by EC26 / EC29 / EC30 tests
+# ---------------------------------------------------------------------------
+
+# A minimal OSIL attendance badge — classifies as Co-Curricular / Souvenir / Souvenir.
+_SOUVENIR_FORM = {
+    "badge_title": "Leadership Workshop",
+    "badge_description": (
+        "A badge recognizing NJIT students who completed the annual "
+        "OSIL leadership workshop."
+    ),
+    "issuer": "OSIL",
+    "earning_criteria_text": "Attend the full-day workshop and submit the reflection activity.",
+}
+
+
+def _classify_badge(client) -> dict:
+    """
+    Classify a simple badge and return the full ClassificationResult dict.
+    Ingest + classify in one call.
+    """
+    ingest_resp = client.post(
+        "/ingest", json={"input_type": "form", "payload": _SOUVENIR_FORM}
+    )
+    assert ingest_resp.status_code == 200, ingest_resp.text
+    bfs = ingest_resp.json()
+
+    classify_resp = client.post("/classify", json=bfs)
+    assert classify_resp.status_code == 200, classify_resp.text
+    return classify_resp.json()
+
+
+def _review(client, log_id: str, **kwargs) -> object:
+    """POST /review and return the raw Response object."""
+    return client.post("/review", json={"log_id": log_id, **kwargs})
+
+
+# ---------------------------------------------------------------------------
+# EC29 — Minimum override reason length
+# ---------------------------------------------------------------------------
+
+class TestEC29_MinimumOverrideReason:
+
+    def test_ec29_override_reason_too_short(self, client):
+        """override_reason shorter than 20 chars must return 400."""
+        result = _classify_badge(client)
+        log_id = result["governance"]["log_id"]
+
+        resp = _review(
+            client,
+            log_id,
+            reviewer_status="overridden",
+            reviewer_id="tester",
+            override_reason="Wrong",          # 5 chars — too short
+            override_category="Academic",
+        )
+        assert resp.status_code == 400
+        assert "20 characters" in resp.json()["detail"]
+
+    def test_ec29_override_reason_exactly_20_chars(self, client):
+        """override_reason of exactly 20 chars must be accepted (boundary value)."""
+        result = _classify_badge(client)
+        log_id = result["governance"]["log_id"]
+
+        resp = _review(
+            client,
+            log_id,
+            reviewer_status="overridden",
+            reviewer_id="tester",
+            override_reason="A" * 20,         # exactly 20 chars — must pass
+            override_category="Academic",     # different from recommended Co-Curricular
+        )
+        assert resp.status_code == 200
+
+
+# ---------------------------------------------------------------------------
+# EC30 — Invalid taxonomy combination validation
+# ---------------------------------------------------------------------------
+
+class TestEC30_InvalidTaxonomyCombination:
+
+    def test_ec30_invalid_taxonomy_combination(self, client):
+        """Skill type + Foundational level is an invalid combination — must return 400."""
+        result = _classify_badge(client)
+        log_id = result["governance"]["log_id"]
+
+        resp = _review(
+            client,
+            log_id,
+            reviewer_status="overridden",
+            reviewer_id="tester",
+            override_reason="Testing invalid combination here",   # ≥ 20 chars
+            override_type="Skill",
+            override_level="Foundational",   # invalid for Skill
+        )
+        assert resp.status_code == 400
+        assert "Invalid taxonomy combination" in resp.json()["detail"]
+
+    def test_ec30_valid_taxonomy_combination(self, client):
+        """Skill type + Application level is valid — must return 200."""
+        result = _classify_badge(client)
+        log_id = result["governance"]["log_id"]
+
+        resp = _review(
+            client,
+            log_id,
+            reviewer_status="overridden",
+            reviewer_id="tester",
+            override_reason="Confirmed skill badge application level",  # ≥ 20 chars
+            override_type="Skill",
+            override_level="Application",    # valid for Skill
+        )
+        assert resp.status_code == 200
+
+
+# ---------------------------------------------------------------------------
+# EC26 — Identical override detection
+# ---------------------------------------------------------------------------
+
+class TestEC26_IdenticalOverride:
+
+    def test_ec26_identical_override_treated_as_acceptance(self, client):
+        """
+        Submitting override values that match the system recommendation
+        must silently resolve to reviewer_status == 'accepted'.
+        """
+        result = _classify_badge(client)
+        log_id = result["governance"]["log_id"]
+        rec = result["classification"]
+
+        resp = _review(
+            client,
+            log_id,
+            reviewer_status="overridden",
+            reviewer_id="tester",
+            override_reason="Confirmed correct classification",   # ≥ 20 chars
+            override_category=rec["category"],   # matches recommended
+            override_type=rec["type"],           # matches recommended
+            override_level=rec["level"],         # matches recommended
+        )
+        assert resp.status_code == 200
+        assert resp.json()["reviewer_status"] == "accepted"
