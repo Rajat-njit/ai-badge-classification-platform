@@ -16,7 +16,7 @@ Returns:
 from app.models.badge_fact_sheet import BadgeFactSheet
 
 # assessment_type values that indicate a structured module/course completion
-_MODULE_ASSESSMENT_TYPES = {"module_completion", "final_assessment", "knowledge_checks"}
+_MODULE_ASSESSMENT_TYPES = {"module_completion", "final_assessment", "knowledge_checks", "pre_post_assessment"}
 
 
 def classify_stage2(bfs: BadgeFactSheet) -> dict:
@@ -89,7 +89,10 @@ def classify_stage2(bfs: BadgeFactSheet) -> dict:
     # S2R06 — Expert evaluation present → Skill
     # Simplified per Phase 5 spec: expert_evaluation_required OR expert_scored
     # ------------------------------------------------------------------
-    if bfs.expert_evaluation_required or bfs.assessment_evaluator == "expert_scored":
+    if (
+        (bfs.expert_evaluation_required or bfs.assessment_evaluator == "expert_scored")
+        and bfs.assessment_type != "pre_post_assessment"
+    ):
         return {
             "type": "Skill",
             "confidence": "High",

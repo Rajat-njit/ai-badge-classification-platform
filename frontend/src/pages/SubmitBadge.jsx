@@ -1,26 +1,19 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { ingestBadge, classifyBadge } from '../services/api'
+import {
+  translateFormAnswers,
+  translateAreaAnswer,
+  translateVerificationAnswer,
+  translateAudienceAnswer,
+  AREA_OPTIONS,
+  LDI_AUDIENCE_OPTIONS,
+  AUDIENCE_OPTIONS,
+  VERIFICATION_OPTIONS,
+  PASS_SCORE_OPTIONS,
+} from '../utils/formTranslator'
 
-// ─── Constants ───────────────────────────────────────────────────────────────
-
-const ISSUERS = ['LDI', 'OSIL', 'Makerspace', 'NCE', 'OGI']
-const ASSESSMENT_TYPES = [
-  'attendance', 'module_completion', 'final_assessment',
-  'knowledge_checks', 'pre_post_assessment', 'project_presentation',
-  'practical', 'quiz', 'portfolio',
-]
-const EVALUATORS = [
-  'expert_scored', 'auto_assessed', 'peer_evaluated',
-  'self_reported', 'observed',
-]
-const ACHIEVEMENT_TYPES = [
-  'Achievement', 'Competency', 'Certificate Of Completion', 'Micro Credential',
-]
-
-const FOLLOWUP_FIELDS = ['issuer', 'assessment_evaluator', 'audience_type']
-
-// ─── Small shared UI components ──────────────────────────────────────────────
+// ── Small shared UI primitives ────────────────────────────────────────────────
 
 function Label({ children }) {
   return <label className="block text-sm font-medium text-gray-700 mb-1">{children}</label>
@@ -47,23 +40,12 @@ function Textarea({ error, rows = 4, ...props }) {
   )
 }
 
-function Select({ children, error, ...props }) {
-  return (
-    <select
-      className={`w-full border rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-njit-red bg-white
-        ${error ? 'border-red-500' : 'border-gray-300'}`}
-      {...props}
-    >
-      {children}
-    </select>
-  )
-}
-
-function FieldGroup({ label, children }) {
+function FieldGroup({ label, children, helper }) {
   return (
     <div>
-      <Label>{label}</Label>
+      {label && <Label>{label}</Label>}
       {children}
+      {helper && <p className="text-xs text-gray-500 mt-1">{helper}</p>}
     </div>
   )
 }
@@ -85,12 +67,123 @@ function ErrorBanner({ message }) {
   )
 }
 
-// ─── BFS Confirmation Panel ───────────────────────────────────────────────────
+function FieldError({ message }) {
+  if (!message) return null
+  return <p className="text-red-600 text-xs mt-1">{message}</p>
+}
 
-function BfsConfirmPanel({ bfs, onConfirm, onFollowupChange, followupValues, loading }) {
+/**
+ * Radio card group — renders a list of options as styled selectable cards.
+ */
+function RadioGroup({ options, value, onChange, name, error }) {
+  return (
+    <div className={`space-y-2 ${error ? 'ring-1 ring-red-400 rounded-lg p-1' : ''}`}>
+      {options.map(opt => (
+        <label
+          key={opt}
+          className={`flex items-start gap-3 p-3 rounded-lg border cursor-pointer transition-colors select-none
+            ${value === opt
+              ? 'border-njit-red bg-red-50'
+              : 'border-gray-200 bg-white hover:border-gray-300 hover:bg-gray-50'}`}
+        >
+          <input
+            type="radio"
+            name={name}
+            value={opt}
+            checked={value === opt}
+            onChange={() => onChange(opt)}
+            className="mt-0.5 accent-njit-red flex-shrink-0"
+          />
+          <span className="text-sm leading-snug text-gray-800">{opt}</span>
+        </label>
+      ))}
+    </div>
+  )
+}
+
+// ── BFS Confirmation Panel ────────────────────────────────────────────────────
+
+/**
+ * Follow-up question for a single missing field.
+ * Translates the selected answer immediately and reports BFS fields to parent.
+ */
+function FollowupQuestion({ field, onAnswer }) {
+  const [selected, setSelected] = useState('')
+
+  const QUESTIONS = {
+    issuer: {
+      label: 'Which area of NJIT issued this badge?',
+      options: AREA_OPTIONS,
+      translate: translateAreaAnswer,
+    },
+    assessment_evaluator: {
+      label: 'How is the earner evaluated for this badge?',
+      options: VERIFICATION_OPTIONS,
+      translate: translateVerificationAnswer,
+    },
+    audience_type: {
+      label: 'Who earns this badge?',
+      options: AUDIENCE_OPTIONS,
+      translate: translateAudienceAnswer,
+    },
+  }
+
+  const q = QUESTIONS[field]
+  if (!q) return null
+
+  function handleSelect(opt) {
+    setSelected(opt)
+    onAnswer(q.translate(opt))
+  }
+
+  return (
+    <div>
+      <p className="text-sm font-semibold text-gray-800 mb-2">{q.label}</p>
+      <RadioGroup
+        options={q.options}
+        value={selected}
+        onChange={handleSelect}
+        name={`followup_${field}`}
+      />
+    </div>
+  )
+}
+
+/**
+ * Plain-language follow-up section shown inside BfsConfirmPanel.
+ * inputMode='json': show for missing issuer and/or assessment_evaluator (max 2)
+ * inputMode='free_text': show for fields in missing_signals (max 3)
+ * inputMode='form': nothing shown
+ */
+function PlainLanguageFollowups({ bfs, inputMode, onAnswer }) {
   const missing = bfs.missing_signals || []
-  const needsFollowup = bfs.needs_followup_questions
+  const questions = []
 
+  if (inputMode === 'json') {
+    if (!bfs.issuer) questions.push('issuer')
+    if (!bfs.assessment_evaluator) questions.push('assessment_evaluator')
+  } else if (inputMode === 'free_text') {
+    const priority = ['issuer', 'assessment_evaluator', 'audience_type']
+    for (const f of priority) {
+      if (missing.includes(f) && questions.length < 3) questions.push(f)
+    }
+  }
+
+  if (questions.length === 0) return null
+
+  return (
+    <div className="border border-yellow-200 rounded-lg p-4 space-y-5 bg-yellow-50">
+      <p className="text-sm font-medium text-yellow-900">
+        Please answer {questions.length === 1 ? 'this question' : `these ${questions.length} questions`} to improve the classification:
+      </p>
+      {questions.map(q => (
+        <FollowupQuestion key={q} field={q} onAnswer={onAnswer} />
+      ))}
+    </div>
+  )
+}
+
+function BfsConfirmPanel({ bfs, inputMode, onConfirm, onFollowupChange, loading }) {
   const keyFields = [
     ['badge_title', 'Badge Title'],
     ['issuer', 'Issuer'],
@@ -105,6 +198,8 @@ function BfsConfirmPanel({ bfs, onConfirm, onFollowupChange, followupValues, loa
     ['bloom_level', 'Bloom Level'],
     ['self_declared_level', 'Declared Level'],
   ]
+  const missing = bfs.missing_signals || []
+  const needsFollowup = bfs.needs_followup_questions
 
   return (
     <div className="border border-gray-200 rounded-lg p-6 space-y-4">
@@ -112,8 +207,8 @@ function BfsConfirmPanel({ bfs, onConfirm, onFollowupChange, followupValues, loa
 
       {needsFollowup && (
         <div className="bg-yellow-50 border border-yellow-300 text-yellow-800 rounded p-3 text-sm">
-          <strong>Follow-up required:</strong> Some critical signals could not be extracted.
-          Please fill in the fields below before classifying.
+          <strong>Follow-up required:</strong> Some signals could not be extracted automatically.
+          Please answer the questions below before classifying.
         </div>
       )}
 
@@ -132,56 +227,17 @@ function BfsConfirmPanel({ bfs, onConfirm, onFollowupChange, followupValues, loa
               <span className={hasVal ? 'text-gray-900' : 'text-gray-400 italic'}>
                 {hasVal ? String(val) : 'not detected'}
               </span>
-              {isMissing && <span className="ml-2 text-yellow-700 font-semibold">⚠ missing</span>}
+              {isMissing && <span className="ml-2 text-yellow-700 font-semibold text-xs">⚠ missing</span>}
             </div>
           )
         })}
       </div>
 
-      {/* Follow-up form for missing signals */}
-      {needsFollowup && (
-        <div className="border border-yellow-200 rounded p-4 space-y-3 bg-yellow-50">
-          <p className="text-sm font-medium text-yellow-900">
-            Fill in missing signals (only the fields below are required):
-          </p>
-          {missing.includes('issuer') && (
-            <FieldGroup label="Issuer *">
-              <Select
-                value={followupValues.issuer || ''}
-                onChange={e => onFollowupChange('issuer', e.target.value)}
-              >
-                <option value="">— select issuer —</option>
-                {ISSUERS.map(i => <option key={i}>{i}</option>)}
-              </Select>
-            </FieldGroup>
-          )}
-          {missing.includes('assessment_evaluator') && (
-            <FieldGroup label="Assessment Evaluator *">
-              <Select
-                value={followupValues.assessment_evaluator || ''}
-                onChange={e => onFollowupChange('assessment_evaluator', e.target.value)}
-              >
-                <option value="">— select evaluator —</option>
-                {EVALUATORS.map(e => <option key={e}>{e}</option>)}
-              </Select>
-            </FieldGroup>
-          )}
-          {missing.includes('audience_type') && (
-            <FieldGroup label="Audience Type *">
-              <Select
-                value={followupValues.audience_type || ''}
-                onChange={e => onFollowupChange('audience_type', e.target.value)}
-              >
-                <option value="">— select audience —</option>
-                <option value="njit_employee">NJIT Employee (Faculty/Staff)</option>
-                <option value="njit_student">NJIT Student</option>
-                <option value="external_professional">External Professional</option>
-                <option value="faculty">Faculty</option>
-              </Select>
-            </FieldGroup>
-          )}
-        </div>
-      )}
+      <PlainLanguageFollowups
+        bfs={bfs}
+        inputMode={inputMode}
+        onAnswer={onFollowupChange}
+      />
 
       <button
         onClick={onConfirm}
@@ -194,46 +250,119 @@ function BfsConfirmPanel({ bfs, onConfirm, onFollowupChange, followupValues, loa
   )
 }
 
-// ─── Tab 1: Proposal Form ─────────────────────────────────────────────────────
+// ── Tab 1: Guided Form (replaces Proposal Form) ───────────────────────────────
 
-function ProposalForm({ onIngested }) {
-  const [form, setForm] = useState({
-    badge_title: '', badge_description: '', issuer: '',
-    intended_audience: '', institutional_context: '',
-    earning_criteria_text: '', assessment_required: 'unknown',
-    assessment_type: '', assessment_evaluator: '',
-    assessment_pass_threshold: '', evidence_required: 'unknown',
-    canvas_course_code: '', pathway_name: '', achievement_type: '',
+const STEP_TITLES = [
+  'Badge Identity',
+  'Who Is This For',
+  'Earning Criteria',
+  'How Is It Verified',
+  'Pathway',
+  'Notifications',
+]
+
+const PATHWAY_OPTIONS = [
+  'No — this badge stands alone',
+  'Yes — it is one course in a series',
+  'Yes — it is the final badge completing the whole series',
+  'Not sure',
+]
+
+const PATHWAY_POSITION_OPTIONS = ['1st', '2nd', '3rd', '4th', 'Later']
+
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+
+function GuidedForm({ onIngested }) {
+  const [step, setStep] = useState(1)
+  const [answers, setAnswers] = useState({
+    badge_title: '',
+    badge_description: '',
+    area: '',
+    area_other: '',
+    ldi_audience: '',
+    earning_criteria: '',
+    verification: '',
+    pass_score: '',
+    pass_score_other: '',
+    pathway: '',
+    pathway_position: '',
+    canvas_code: '',
+    submitter_email: '',
+    reviewer_email: '',
   })
   const [errors, setErrors] = useState({})
   const [loading, setLoading] = useState(false)
   const [apiError, setApiError] = useState('')
 
   function set(field, val) {
-    setForm(f => ({ ...f, [field]: val }))
+    setAnswers(a => ({ ...a, [field]: val }))
     if (errors[field]) setErrors(e => ({ ...e, [field]: '' }))
   }
 
-  function validate() {
+  function validateStep(s) {
     const e = {}
-    if (!form.badge_title.trim()) e.badge_title = 'Required'
-    if (!form.badge_description.trim()) e.badge_description = 'Required'
-    if (!form.earning_criteria_text.trim()) e.earning_criteria_text = 'Required'
+    if (s === 1) {
+      if (answers.badge_title.trim().length < 5)
+        e.badge_title = 'At least 5 characters required'
+      if (answers.badge_description.trim().length < 50)
+        e.badge_description = 'At least 50 characters required'
+    }
+    if (s === 2) {
+      if (!answers.area) e.area = 'Please select an option'
+      if (
+        answers.area === 'Learning and Development / Continuing Education' &&
+        !answers.ldi_audience
+      )
+        e.ldi_audience = 'Please select who will earn this badge'
+    }
+    if (s === 3) {
+      if (answers.earning_criteria.trim().length < 30)
+        e.earning_criteria = 'At least 30 characters required'
+    }
+    if (s === 4) {
+      if (!answers.verification)
+        e.verification = 'Please select how the earner is verified'
+    }
+    if (s === 5) {
+      if (!answers.pathway) e.pathway = 'Please select an option'
+      if (
+        answers.pathway === 'Yes — it is one course in a series' &&
+        !answers.pathway_position
+      )
+        e.pathway_position = 'Please select the position in the series'
+    }
+    if (s === 6) {
+      if (!answers.submitter_email.trim()) e.submitter_email = 'Required'
+      else if (!EMAIL_RE.test(answers.submitter_email))
+        e.submitter_email = 'Valid email required'
+      if (!answers.reviewer_email.trim()) e.reviewer_email = 'Required'
+      else if (!EMAIL_RE.test(answers.reviewer_email))
+        e.reviewer_email = 'Valid email required'
+    }
     return e
   }
 
-  async function handleSubmit(ev) {
-    ev.preventDefault()
-    const e = validate()
+  function goNext() {
+    const e = validateStep(step)
     if (Object.keys(e).length) { setErrors(e); return }
-    setLoading(true); setApiError('')
+    setErrors({})
+    setStep(s => s + 1)
+  }
+
+  function goBack() {
+    setErrors({})
+    setStep(s => s - 1)
+  }
+
+  async function handleSubmit() {
+    const e = validateStep(6)
+    if (Object.keys(e).length) { setErrors(e); return }
+    setLoading(true)
+    setApiError('')
     try {
-      // Strip empty strings so backend doesn't get empty fields
-      const payload = Object.fromEntries(
-        Object.entries(form).filter(([, v]) => v !== '')
-      )
-      const bfs = await ingestBadge('form', payload)
-      onIngested(bfs)
+      const fields = translateFormAnswers(answers)
+      const bfs = await ingestBadge('form', fields)
+      onIngested(bfs, 'form')
     } catch (err) {
       setApiError(err.message)
     } finally {
@@ -241,115 +370,301 @@ function ProposalForm({ onIngested }) {
     }
   }
 
+  const isLDI = answers.area === 'Learning and Development / Continuing Education'
+  const totalSteps = 6
+
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
+    <div className="space-y-6">
+      {/* Progress bar */}
+      <div>
+        <div className="flex items-center justify-between mb-1.5">
+          <span className="text-sm font-semibold text-njit-navy">
+            Step {step} of {totalSteps}
+          </span>
+          <span className="text-sm text-gray-500">{STEP_TITLES[step - 1]}</span>
+        </div>
+        <div className="h-1.5 bg-gray-200 rounded-full overflow-hidden">
+          <div
+            className="h-full bg-njit-red transition-all duration-300 rounded-full"
+            style={{ width: `${(step / totalSteps) * 100}%` }}
+          />
+        </div>
+      </div>
+
       <ErrorBanner message={apiError} />
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <FieldGroup label="Badge Title *">
-          <Input value={form.badge_title} error={errors.badge_title}
-            onChange={e => set('badge_title', e.target.value)} placeholder="e.g. AI Fundamentals" />
-          {errors.badge_title && <p className="text-red-600 text-xs mt-1">{errors.badge_title}</p>}
-        </FieldGroup>
+      {/* ── Step 1: Badge Identity ── */}
+      {step === 1 && (
+        <div className="space-y-4">
+          <p className="text-base font-semibold text-njit-navy">What is this badge called?</p>
 
-        <FieldGroup label="Issuer">
-          <Select value={form.issuer} onChange={e => set('issuer', e.target.value)}>
-            <option value="">— select —</option>
-            {ISSUERS.map(i => <option key={i}>{i}</option>)}
-          </Select>
-        </FieldGroup>
+          <FieldGroup label="Badge Title *">
+            <Input
+              value={answers.badge_title}
+              error={errors.badge_title}
+              onChange={e => set('badge_title', e.target.value)}
+              placeholder="e.g. AI Fundamentals"
+            />
+            <div className="flex items-center justify-between mt-1">
+              <FieldError message={errors.badge_title} />
+              <span className={`text-xs ml-auto ${answers.badge_title.trim().length < 5 ? 'text-gray-400' : 'text-green-600'}`}>
+                {answers.badge_title.trim().length} / 5 min
+              </span>
+            </div>
+          </FieldGroup>
+
+          <FieldGroup label="Badge Description *">
+            <Textarea
+              value={answers.badge_description}
+              error={errors.badge_description}
+              onChange={e => set('badge_description', e.target.value)}
+              rows={5}
+              placeholder="Describe what this badge represents and who it is for…"
+            />
+            <div className="flex items-center justify-between mt-1">
+              <FieldError message={errors.badge_description} />
+              <span className={`text-xs ml-auto ${answers.badge_description.trim().length < 50 ? 'text-gray-400' : 'text-green-600'}`}>
+                {answers.badge_description.trim().length} / 50 min
+              </span>
+            </div>
+          </FieldGroup>
+        </div>
+      )}
+
+      {/* ── Step 2: Who Is This For ── */}
+      {step === 2 && (
+        <div className="space-y-5">
+          <p className="text-base font-semibold text-njit-navy">
+            Which area of NJIT is this badge from?
+          </p>
+
+          <RadioGroup
+            options={AREA_OPTIONS}
+            value={answers.area}
+            onChange={val => { set('area', val); set('ldi_audience', '') }}
+            name="area"
+            error={errors.area}
+          />
+          <FieldError message={errors.area} />
+
+          {answers.area === 'Other' && (
+            <div className="pl-2">
+              <FieldGroup label="Please describe the issuing area:">
+                <Input
+                  value={answers.area_other}
+                  onChange={e => set('area_other', e.target.value)}
+                  placeholder="e.g. Center for Pre-College Programs"
+                />
+              </FieldGroup>
+            </div>
+          )}
+
+          {isLDI && (
+            <div className="mt-4 pl-2 border-l-2 border-njit-red space-y-3">
+              <p className="text-sm font-semibold text-njit-navy">
+                Who will earn this badge?
+              </p>
+              <RadioGroup
+                options={LDI_AUDIENCE_OPTIONS}
+                value={answers.ldi_audience}
+                onChange={val => set('ldi_audience', val)}
+                name="ldi_audience"
+                error={errors.ldi_audience}
+              />
+              <FieldError message={errors.ldi_audience} />
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* ── Step 3: Earning Criteria ── */}
+      {step === 3 && (
+        <div className="space-y-4">
+          <p className="text-base font-semibold text-njit-navy">
+            What must someone do to earn this badge?
+          </p>
+          <FieldGroup
+            helper='Describe the specific actions, activities, or requirements the earner must complete.'
+          >
+            <Textarea
+              value={answers.earning_criteria}
+              error={errors.earning_criteria}
+              onChange={e => set('earning_criteria', e.target.value)}
+              rows={7}
+              placeholder="e.g. Attend the full workshop session and pass the final assessment with 80% or higher…"
+            />
+            <div className="flex items-center justify-between mt-1">
+              <FieldError message={errors.earning_criteria} />
+              <span className={`text-xs ml-auto ${answers.earning_criteria.trim().length < 30 ? 'text-gray-400' : 'text-green-600'}`}>
+                {answers.earning_criteria.trim().length} / 30 min
+              </span>
+            </div>
+          </FieldGroup>
+        </div>
+      )}
+
+      {/* ── Step 4: How Is It Verified ── */}
+      {step === 4 && (
+        <div className="space-y-5">
+          <div>
+            <p className="text-base font-semibold text-njit-navy mb-3">
+              How is the earner's work checked?
+            </p>
+            <RadioGroup
+              options={VERIFICATION_OPTIONS}
+              value={answers.verification}
+              onChange={val => set('verification', val)}
+              name="verification"
+              error={errors.verification}
+            />
+            <FieldError message={errors.verification} />
+          </div>
+
+          <div>
+            <p className="text-sm font-semibold text-gray-700 mb-3">
+              Is there a minimum pass score required?
+            </p>
+            <RadioGroup
+              options={PASS_SCORE_OPTIONS}
+              value={answers.pass_score}
+              onChange={val => { set('pass_score', val); set('pass_score_other', '') }}
+              name="pass_score"
+            />
+            {answers.pass_score === 'Other' && (
+              <div className="mt-2 pl-2">
+                <Input
+                  value={answers.pass_score_other}
+                  onChange={e => set('pass_score_other', e.target.value)}
+                  placeholder="e.g. 75%"
+                />
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* ── Step 5: Pathway ── */}
+      {step === 5 && (
+        <div className="space-y-5">
+          <div>
+            <p className="text-base font-semibold text-njit-navy mb-3">
+              Is this badge part of a learning series?
+            </p>
+            <RadioGroup
+              options={PATHWAY_OPTIONS}
+              value={answers.pathway}
+              onChange={val => { set('pathway', val); set('pathway_position', '') }}
+              name="pathway"
+              error={errors.pathway}
+            />
+            <FieldError message={errors.pathway} />
+
+            {answers.pathway === 'Yes — it is one course in a series' && (
+              <div className="mt-3 pl-2 border-l-2 border-njit-red">
+                <p className="text-sm font-semibold text-njit-navy mb-2">Which position?</p>
+                <div className="flex flex-wrap gap-2">
+                  {PATHWAY_POSITION_OPTIONS.map(pos => (
+                    <button
+                      key={pos}
+                      type="button"
+                      onClick={() => set('pathway_position', pos)}
+                      className={`px-4 py-1.5 rounded-full text-sm border transition-colors
+                        ${answers.pathway_position === pos
+                          ? 'bg-njit-red text-white border-njit-red'
+                          : 'border-gray-300 text-gray-700 hover:border-njit-red hover:text-njit-red'}`}
+                    >
+                      {pos}
+                    </button>
+                  ))}
+                </div>
+                <FieldError message={errors.pathway_position} />
+              </div>
+            )}
+          </div>
+
+          <FieldGroup
+            label="Canvas course code (optional):"
+            helper="Leave blank if you don't have this."
+          >
+            <Input
+              value={answers.canvas_code}
+              onChange={e => set('canvas_code', e.target.value)}
+              placeholder="MCAI.002.03"
+            />
+          </FieldGroup>
+        </div>
+      )}
+
+      {/* ── Step 6: Notifications ── */}
+      {step === 6 && (
+        <div className="space-y-4">
+          <p className="text-base font-semibold text-njit-navy">
+            Who should be notified about this classification?
+          </p>
+
+          <FieldGroup label="Your email address *">
+            <Input
+              type="email"
+              value={answers.submitter_email}
+              error={errors.submitter_email}
+              onChange={e => set('submitter_email', e.target.value)}
+              placeholder="you@njit.edu"
+            />
+            <FieldError message={errors.submitter_email} />
+          </FieldGroup>
+
+          <FieldGroup
+            label="Reviewer email address *"
+            helper="The person who will review and approve this classification."
+          >
+            <Input
+              type="email"
+              value={answers.reviewer_email}
+              error={errors.reviewer_email}
+              onChange={e => set('reviewer_email', e.target.value)}
+              placeholder="reviewer@njit.edu"
+            />
+            <FieldError message={errors.reviewer_email} />
+          </FieldGroup>
+        </div>
+      )}
+
+      {/* Navigation buttons */}
+      <div className="flex items-center gap-3 pt-2">
+        {step > 1 && (
+          <button
+            type="button"
+            onClick={goBack}
+            className="px-5 py-2 rounded border border-gray-300 text-sm text-gray-700 hover:bg-gray-50"
+          >
+            ← Back
+          </button>
+        )}
+        {step < totalSteps && (
+          <button
+            type="button"
+            onClick={goNext}
+            className="bg-njit-red text-white px-6 py-2 rounded font-medium hover:bg-njit-red-dark text-sm"
+          >
+            Next →
+          </button>
+        )}
+        {step === totalSteps && (
+          <button
+            type="button"
+            onClick={handleSubmit}
+            disabled={loading}
+            className="bg-njit-red text-white px-6 py-2 rounded font-medium hover:bg-njit-red-dark disabled:opacity-50 text-sm"
+          >
+            {loading ? 'Submitting…' : 'Submit Badge →'}
+          </button>
+        )}
       </div>
-
-      <FieldGroup label="Badge Description *">
-        <Textarea value={form.badge_description} error={errors.badge_description}
-          onChange={e => set('badge_description', e.target.value)}
-          placeholder="Full badge description…" />
-        {errors.badge_description && <p className="text-red-600 text-xs mt-1">{errors.badge_description}</p>}
-      </FieldGroup>
-
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <FieldGroup label="Intended Audience">
-          <Input value={form.intended_audience}
-            onChange={e => set('intended_audience', e.target.value)}
-            placeholder="e.g. Faculty and instructors" />
-        </FieldGroup>
-        <FieldGroup label="Institutional Context">
-          <Input value={form.institutional_context}
-            onChange={e => set('institutional_context', e.target.value)} />
-        </FieldGroup>
-      </div>
-
-      <FieldGroup label="Earning Criteria *">
-        <Textarea value={form.earning_criteria_text} error={errors.earning_criteria_text}
-          onChange={e => set('earning_criteria_text', e.target.value)} rows={5}
-          placeholder="Full criteria text verbatim…" />
-        {errors.earning_criteria_text && <p className="text-red-600 text-xs mt-1">{errors.earning_criteria_text}</p>}
-      </FieldGroup>
-
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <FieldGroup label="Assessment Required">
-          <Select value={form.assessment_required} onChange={e => set('assessment_required', e.target.value)}>
-            <option value="yes">Yes</option>
-            <option value="no">No</option>
-            <option value="unknown">Unknown</option>
-          </Select>
-        </FieldGroup>
-        <FieldGroup label="Assessment Type">
-          <Select value={form.assessment_type} onChange={e => set('assessment_type', e.target.value)}>
-            <option value="">— select —</option>
-            {ASSESSMENT_TYPES.map(t => <option key={t}>{t}</option>)}
-          </Select>
-        </FieldGroup>
-        <FieldGroup label="Assessment Evaluator">
-          <Select value={form.assessment_evaluator} onChange={e => set('assessment_evaluator', e.target.value)}>
-            <option value="">— select —</option>
-            {EVALUATORS.map(e => <option key={e}>{e}</option>)}
-          </Select>
-        </FieldGroup>
-      </div>
-
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <FieldGroup label="Pass Threshold">
-          <Input value={form.assessment_pass_threshold}
-            onChange={e => set('assessment_pass_threshold', e.target.value)}
-            placeholder="e.g. 80%" />
-        </FieldGroup>
-        <FieldGroup label="Evidence Required">
-          <Select value={form.evidence_required} onChange={e => set('evidence_required', e.target.value)}>
-            <option value="yes">Yes</option>
-            <option value="no">No</option>
-            <option value="unknown">Unknown</option>
-          </Select>
-        </FieldGroup>
-        <FieldGroup label="Achievement Type">
-          <Select value={form.achievement_type} onChange={e => set('achievement_type', e.target.value)}>
-            <option value="">— select —</option>
-            {ACHIEVEMENT_TYPES.map(t => <option key={t}>{t}</option>)}
-          </Select>
-        </FieldGroup>
-      </div>
-
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <FieldGroup label="Canvas Course Code">
-          <Input value={form.canvas_course_code}
-            onChange={e => set('canvas_course_code', e.target.value)}
-            placeholder="e.g. MCAI.002.03" />
-        </FieldGroup>
-        <FieldGroup label="Pathway Name">
-          <Input value={form.pathway_name}
-            onChange={e => set('pathway_name', e.target.value)} />
-        </FieldGroup>
-      </div>
-
-      <button type="submit" disabled={loading}
-        className="bg-njit-red text-white px-6 py-2 rounded font-medium hover:bg-njit-red-dark disabled:opacity-50">
-        {loading ? 'Submitting…' : 'Extract Badge Fact Sheet →'}
-      </button>
-    </form>
+    </div>
   )
 }
 
-// ─── Tab 2: JSON Paste ────────────────────────────────────────────────────────
+// ── Tab 2: JSON Paste ─────────────────────────────────────────────────────────
 
 function JsonPasteTab({ onIngested }) {
   const [raw, setRaw] = useState('')
@@ -359,7 +674,8 @@ function JsonPasteTab({ onIngested }) {
   const [apiError, setApiError] = useState('')
 
   function handleParse() {
-    setParseError(''); setParsed(null)
+    setParseError('')
+    setParsed(null)
     try {
       const obj = JSON.parse(raw)
       setParsed(obj)
@@ -369,11 +685,22 @@ function JsonPasteTab({ onIngested }) {
   }
 
   async function handleSubmit() {
-    if (!parsed) { setParseError('Parse JSON first.'); return }
-    setLoading(true); setApiError('')
+    if (!raw.trim()) { setParseError('Paste JSON before submitting.'); return }
+    setLoading(true)
+    setApiError('')
     try {
-      const bfs = await ingestBadge('obv3_json', parsed)
-      onIngested(bfs)
+      // Always parse fresh from raw — never rely on stale `parsed` state.
+      // This is the correct pattern: const parsed = JSON.parse(text); ingestBadge("obv3_json", parsed)
+      let jsonObj
+      try {
+        jsonObj = JSON.parse(raw)
+      } catch {
+        setParseError('Invalid JSON — please check your input.')
+        setLoading(false)
+        return
+      }
+      const bfs = await ingestBadge('obv3_json', jsonObj)
+      onIngested(bfs, 'json')
     } catch (err) {
       setApiError(err.message)
     } finally {
@@ -404,12 +731,17 @@ function JsonPasteTab({ onIngested }) {
       )}
 
       <div className="flex gap-3">
-        <button onClick={handleParse}
-          className="border border-gray-300 px-4 py-2 rounded text-sm hover:bg-gray-50">
+        <button
+          onClick={handleParse}
+          className="border border-gray-300 px-4 py-2 rounded text-sm hover:bg-gray-50"
+        >
           Parse JSON
         </button>
-        <button onClick={handleSubmit} disabled={!parsed || loading}
-          className="bg-njit-red text-white px-6 py-2 rounded font-medium hover:bg-njit-red-dark disabled:opacity-50">
+        <button
+          onClick={handleSubmit}
+          disabled={!raw.trim() || loading}
+          className="bg-njit-red text-white px-6 py-2 rounded font-medium hover:bg-njit-red-dark disabled:opacity-50"
+        >
           {loading ? 'Submitting…' : 'Submit & Extract →'}
         </button>
       </div>
@@ -417,7 +749,7 @@ function JsonPasteTab({ onIngested }) {
   )
 }
 
-// ─── Tab 3: Free Text ─────────────────────────────────────────────────────────
+// ── Tab 3: Free Text ──────────────────────────────────────────────────────────
 
 function FreeTextTab({ onIngested }) {
   const [text, setText] = useState('')
@@ -426,10 +758,11 @@ function FreeTextTab({ onIngested }) {
 
   async function handleSubmit() {
     if (!text.trim()) return
-    setLoading(true); setApiError('')
+    setLoading(true)
+    setApiError('')
     try {
       const bfs = await ingestBadge('free_text', { text })
-      onIngested(bfs)
+      onIngested(bfs, 'free_text')
     } catch (err) {
       setApiError(err.message)
     } finally {
@@ -448,15 +781,18 @@ function FreeTextTab({ onIngested }) {
           placeholder="This badge is awarded to faculty who complete the AI for Education course series. Learners must pass the final assessment with 80% or higher…"
         />
       </FieldGroup>
-      <button onClick={handleSubmit} disabled={!text.trim() || loading}
-        className="bg-njit-red text-white px-6 py-2 rounded font-medium hover:bg-njit-red-dark disabled:opacity-50">
+      <button
+        onClick={handleSubmit}
+        disabled={!text.trim() || loading}
+        className="bg-njit-red text-white px-6 py-2 rounded font-medium hover:bg-njit-red-dark disabled:opacity-50"
+      >
         {loading ? 'Submitting…' : 'Submit & Extract →'}
       </button>
     </div>
   )
 }
 
-// ─── Main Page ────────────────────────────────────────────────────────────────
+// ── Main Page ─────────────────────────────────────────────────────────────────
 
 const TABS = ['Proposal Form', 'JSON Paste', 'Free Text']
 
@@ -464,25 +800,32 @@ export default function SubmitBadge() {
   const navigate = useNavigate()
   const [activeTab, setActiveTab] = useState(0)
   const [bfs, setBfs] = useState(null)
+  const [inputMode, setInputMode] = useState('form')
   const [followupValues, setFollowupValues] = useState({})
   const [classifying, setClassifying] = useState(false)
   const [classifyError, setClassifyError] = useState('')
 
-  function handleIngested(bfsData) {
+  function handleIngested(bfsData, mode) {
     setBfs(bfsData)
+    setInputMode(mode)
     setFollowupValues({})
     setClassifyError('')
     window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' })
   }
 
-  function handleFollowupChange(field, val) {
-    setFollowupValues(v => ({ ...v, [field]: val }))
+  // Accepts either a multi-field object or (field, val) for backward compat
+  function handleFollowupChange(fieldsOrField, val) {
+    if (typeof fieldsOrField === 'object' && fieldsOrField !== null) {
+      setFollowupValues(v => ({ ...v, ...fieldsOrField }))
+    } else {
+      setFollowupValues(v => ({ ...v, [fieldsOrField]: val }))
+    }
   }
 
   async function handleConfirmClassify() {
-    setClassifying(true); setClassifyError('')
+    setClassifying(true)
+    setClassifyError('')
     try {
-      // Merge follow-up answers into BFS before classifying
       const enrichedBfs = { ...bfs, ...followupValues }
       const result = await classifyBadge(enrichedBfs)
       navigate(`/review/${result.governance.log_id}`, { state: { result, bfs: enrichedBfs } })
@@ -522,7 +865,7 @@ export default function SubmitBadge() {
 
       {/* Tab content */}
       <div>
-        {activeTab === 0 && <ProposalForm onIngested={handleIngested} />}
+        {activeTab === 0 && <GuidedForm onIngested={handleIngested} />}
         {activeTab === 1 && <JsonPasteTab onIngested={handleIngested} />}
         {activeTab === 2 && <FreeTextTab onIngested={handleIngested} />}
       </div>
@@ -534,9 +877,9 @@ export default function SubmitBadge() {
           <ErrorBanner message={classifyError} />
           <BfsConfirmPanel
             bfs={bfs}
+            inputMode={inputMode}
             onConfirm={handleConfirmClassify}
             onFollowupChange={handleFollowupChange}
-            followupValues={followupValues}
             loading={classifying}
           />
         </>

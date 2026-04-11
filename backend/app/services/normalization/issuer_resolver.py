@@ -28,6 +28,8 @@ _CRITERIA_URL_RULES: list[Tuple[str, str, str]] = [
     ("njitmakerspace.com", "Makerspace", "IR02"),
     # IR03 — Newark College of Engineering
     ("engineering.njit.edu", "NCE", "IR03"),
+    # IR01c — LDI development / professional programs
+    ("njit.edu/development", "LDI", "IR01"),
     # IR04 — Office of Global Initiatives
     ("njit.edu/global", "OGI", "IR04"),
 ]

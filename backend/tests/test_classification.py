@@ -224,7 +224,7 @@ class TestStage2Type:
         )
         r = classify(bfs, extractor)
         assert r.classification.type == "Achievement"
-        assert "S2R10" in r.rules_triggered
+        assert "S2R09" in r.rules_triggered
 
 
 # ===========================================================================

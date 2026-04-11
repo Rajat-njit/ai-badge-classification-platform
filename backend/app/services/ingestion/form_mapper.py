@@ -101,6 +101,14 @@ def map_form_to_bfs(form_data: Dict[str, Any]) -> BadgeFactSheet:
     # pathway_position — needed for S3A13 (standalone attendance badge)
     bfs.pathway_position = _str(form_data, "pathway_position") or None
 
+    # canvas_sequence_number — direct position override without a full course code
+    csn = form_data.get("canvas_sequence_number")
+    if csn is not None:
+        try:
+            bfs.canvas_sequence_number = int(csn)
+        except (TypeError, ValueError):
+            pass
+
     # ------------------------------------------------------------------
     # Section 7 — Skill and Competency Signals
     # ------------------------------------------------------------------
@@ -121,6 +129,11 @@ def map_free_text_to_bfs(raw_text: str) -> BadgeFactSheet:
     All signals will come from NLP extraction. The full text is
     stored in both earning_criteria_text and raw_input_text so
     the NLP layer has maximum surface area to work with.
+
+    A lightweight keyword pass resolves issuer when the submitter
+    mentions a known NJIT office by name or abbreviation — avoids
+    a mandatory follow-up question for straightforward free-text
+    submissions.
     """
     bfs = BadgeFactSheet()
     bfs.structured_source_type = "free_text"
@@ -131,6 +144,29 @@ def map_free_text_to_bfs(raw_text: str) -> BadgeFactSheet:
     # For free text, treat the whole blob as both description and criteria
     bfs.badge_description = raw_text.strip()
     bfs.earning_criteria_text = raw_text.strip()
+
+    # Layer 0 — issuer keyword detection.
+    # Checked before URL-based resolver so explicit mentions take precedence.
+    # Order matters: longer / more specific strings first to avoid false matches.
+    _lower = raw_text.lower()
+    _ISSUER_KEYWORDS: list[tuple[str, list[str]]] = [
+        ("OSIL",      ["student involvement and leadership",
+                       "student involvement office",
+                       "student involvement",
+                       "osil"]),
+        ("LDI",       ["learning and development institute",
+                       "learning and development office",
+                       "continuing education office",
+                       " ldi "]),
+        ("Makerspace", ["makerspace"]),
+        ("NCE",       ["newark college of engineering"]),
+        ("OGI",       ["office of global initiatives",
+                       " ogi "]),
+    ]
+    for issuer_name, keywords in _ISSUER_KEYWORDS:
+        if any(kw in _lower for kw in keywords):
+            bfs.issuer = issuer_name
+            break
 
     return bfs
 
