@@ -1,19 +1,25 @@
 """
+NJIT AI-Assisted Digital Badge Classification Tool
+Author: Rajat Ravindra Pednekar (rp2348@njit.edu)
+Institution: New Jersey Institute of Technology
+Capstone Project — Spring 2026
+
 NLP Layer 4 — LLM extractor stub.
 
 Enabled only when USE_LLM=true environment variable is set.
 Returns the BFS unchanged until implemented.
 
-.md rules:
-- R2: LLM never makes classification decisions
-- R3: LLM extracts signals only
-- All signals extracted here must be marked source="llm_extraction"
+Architecture rules:
+- The LLM never makes classification decisions (rule engine only)
+- The LLM extracts signals only — all returned signals must be
+  marked source="llm_extraction"
 
-Future implementation notes (.md Section 10):
+Future implementation notes:
   1. Only request fields listed in bfs.missing_signals
   2. Return structured JSON only — no prose
   3. Mark every returned signal with source="llm_extraction"
-  4. Model: -sonnet-4-6 (current production model)
+  4. Configure the LLM provider and model via LLM_API_KEY and
+     LLM_MODEL environment variables (provider-agnostic)
 """
 
 from app.models.badge_fact_sheet import BadgeFactSheet

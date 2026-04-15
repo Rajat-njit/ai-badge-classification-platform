@@ -1,4 +1,9 @@
 """
+NJIT AI-Assisted Digital Badge Classification Tool
+Author: Rajat Ravindra Pednekar (rp2348@njit.edu)
+Institution: New Jersey Institute of Technology
+Capstone Project — Spring 2026
+
 Normalizer — orchestrates all ingestion into a complete BadgeFactSheet.
 
 Pipeline per input type:
@@ -32,6 +37,26 @@ VALID_INPUT_TYPES = {"obv3_json", "form", "free_text"}
 def normalize(input_type: str, payload: Any) -> BadgeFactSheet:
     """
     Main entry point — accepts raw input and returns a fully normalised BFS.
+
+    Pipeline (7 steps, applied in order):
+      Step 1 — Parse: route obv3_json → parse_obv3(), form → map_form_to_bfs(),
+               free_text → map_free_text_to_bfs()
+      Step 2 — Resolve issuer: IR01–IR07 URL-pattern rules populate bfs.issuer
+               when not already set by form input
+      Step 3 — Canvas code: extract canvas_pathway_code, canvas_sequence_number,
+               is_capstone from bfs.canvas_course_code or criteria_id_url
+      Step 4 — is_capstone: derive from achievementType == "Micro Credential"
+               if not already set by Step 3
+      Step 5 — Prerequisite flag: set has_prerequisite_badges = True
+               when bfs.prerequisite_badges is non-empty
+      Step 6 — Input validation edge cases (EC01–EC03 + EC24):
+               whitespace-only fields, duplicate criteria, minimum content,
+               implied series from title keywords
+      Step 7 — Required field check: populate missing_signals and
+               set needs_followup_questions = True for any absent critical field
+
+    The rule engine NEVER receives raw input — it only reads the BFS this
+    function returns (.md Rule R7).
 
     Args:
         input_type: One of "obv3_json" | "form" | "free_text"

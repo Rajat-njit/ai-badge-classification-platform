@@ -1,4 +1,9 @@
 """
+NJIT AI-Assisted Digital Badge Classification Tool
+Author: Rajat Ravindra Pednekar (rp2348@njit.edu)
+Institution: New Jersey Institute of Technology
+Capstone Project — Spring 2026
+
 Stage 1 — Badge Category classification.
 
 Determined by: Audience and Institutional Context.
@@ -29,7 +34,30 @@ _EXTERNAL_PROF_SIGNALS = {"professional", "workforce", "workplace", "industry"}
 
 def classify_stage1(bfs: BadgeFactSheet) -> dict:
     """
-    Classify the badge category using S1R01–S1R08.
+    Classify the badge category using S1R01–S1R08 (.md Section 8).
+
+    Driving signals (in priority order):
+      1. issuer — the primary discriminator; resolves to one of five known
+         NJIT offices (LDI, OSIL, Makerspace, NCE, OGI) before Stage 1 runs
+      2. audience_type / audience_signal — for LDI badges only, determines
+         whether the audience is faculty/staff (→ Faculty & Staff Development)
+         or external professionals (→ Continuing & Professional Education);
+         checked via _is_faculty_staff() and _is_external_professional()
+      3. pdh_credits — presence of PDH credits is a strong signal for
+         external/professional audience even without explicit audience_type
+      4. achievement_type == "Micro Credential" — used by S1R03 as a fallback
+         when LDI audience cannot be resolved from S1R01 or S1R02
+
+    Decision path:
+      LDI + faculty/staff signal → S1R01 → Faculty & Staff Development (High)
+      LDI + external/PDH signal  → S1R02 → Continuing & Professional Ed (High)
+      LDI + Micro Credential     → S1R03 → Faculty or Continuing Ed (High)
+      LDI (no audience resolved) → S1R02 default (Medium)
+      OSIL                       → S1R04 → Co-Curricular (High)
+      Makerspace                 → S1R05 → Academic (High)
+      NCE                        → S1R06 → Academic (High)
+      OGI                        → S1R07 → None/Low (open question Q001)
+      Unknown/missing issuer     → S1R08 → None/Low + missing_signals
 
     Mutates nothing on the BFS — pure function.
     """

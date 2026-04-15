@@ -1,9 +1,12 @@
 /**
- * formTranslator.js
+ * NJIT AI-Assisted Digital Badge Classification Tool
+ * Author: Rajat Ravindra Pednekar (rp2348@njit.edu)
+ * Institution: New Jersey Institute of Technology
+ * Capstone Project — Spring 2026
  *
+ * formTranslator.js
  * Translates plain-language guided form answers → BadgeFactSheet fields
  * for POST /ingest with input_type="form".
- *
  * Also exports option arrays and helper translators used by the follow-up
  * panels in the JSON and free-text tabs (Parts 3 & 4).
  */

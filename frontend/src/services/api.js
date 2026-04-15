@@ -1,6 +1,10 @@
 /**
- * api.js — all HTTP calls to the backend, centralised here.
+ * NJIT AI-Assisted Digital Badge Classification Tool
+ * Author: Rajat Ravindra Pednekar (rp2348@njit.edu)
+ * Institution: New Jersey Institute of Technology
+ * Capstone Project — Spring 2026
  *
+ * api.js — all HTTP calls to the backend, centralised here.
  * All components import from this file only.
  * No direct fetch or axios calls anywhere else.
  */

@@ -1,4 +1,9 @@
 """
+NJIT AI-Assisted Digital Badge Classification Tool
+Author: Rajat Ravindra Pednekar (rp2348@njit.edu)
+Institution: New Jersey Institute of Technology
+Capstone Project — Spring 2026
+
 Explainability Layer — generate_explanation(bfs, result) -> str
 
 Every classification produces a plain-English explanation covering 8 mandatory
@@ -34,8 +39,31 @@ def generate_explanation(bfs: BadgeFactSheet, result: ClassificationResult) -> s
     """
     Build and return the complete plain-English explanation for a classification.
 
+    The explanation covers 8 mandatory elements (.md Section 11):
+      1. CATEGORY   — issuer name, how it was detected, Stage 1 rule IDs fired;
+                      OGI open-question Q001 note appended when issuer == "OGI"
+      2. TYPE       — rule-specific reason from _S2_REASONS, assessment type and
+                      evaluator detected, Stage 2 rule IDs fired
+      3. LEVEL      — branch used, canvas position or NLP phrase or Bloom verbs,
+                      prerequisite/competency evidence notes, Stage 3 rule IDs fired
+      4. SIGNALS    — every non-None BFS signal listed with value and source label;
+                      skips boolean False and empty list fields to reduce noise
+      5. CONFIDENCE — overall level and every reason that applies (missing signals,
+                      OR criteria, regex signal source, title/description conflict)
+      6. MISSING SIGNALS (conditional) — listed only when bfs.missing_signals
+                      is non-empty; instructs reviewer to provide them
+      7. CONFLICT   (conditional) — rendered only when "conflict" appears in
+                      bfs.confidence_notes
+      8. HUMAN REVIEW — always present; states recommendation or no-action;
+                      Low/Medium confidence, OR criteria, unresolved type/level,
+                      and OGI issuer all trigger a "Recommended" verdict
+
+    Format: plain-text paragraphs separated by one blank line.
+    No markdown headers, no bullet points, no JSON — must be readable by a
+    non-technical reviewer. Low confidence → more detail, not less.
+
     Called by the engine after all three stages run and the ClassificationResult
-    has been assembled (so result.rules_triggered is populated).
+    has been assembled (so result.rules_triggered is fully populated).
     """
     paragraphs: list[str] = []
 

@@ -1,6 +1,10 @@
 /**
- * ReviewerContext — in-memory authentication state for the reviewer dashboard.
+ * NJIT AI-Assisted Digital Badge Classification Tool
+ * Author: Rajat Ravindra Pednekar (rp2348@njit.edu)
+ * Institution: New Jersey Institute of Technology
+ * Capstone Project — Spring 2026
  *
+ * ReviewerContext — in-memory authentication state for the reviewer dashboard.
  * The access token is kept in React state only (not localStorage) so it
  * is automatically cleared when the tab closes. This is intentional for
  * a prototype — no persistent session management needed.

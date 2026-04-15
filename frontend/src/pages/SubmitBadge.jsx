@@ -1,3 +1,12 @@
+/**
+ * NJIT AI-Assisted Digital Badge Classification Tool
+ * Author: Rajat Ravindra Pednekar (rp2348@njit.edu)
+ * Institution: New Jersey Institute of Technology
+ * Capstone Project — Spring 2026
+ *
+ * Three-tab badge submission page: structured form, JSON paste, and free text.
+ */
+
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { ingestBadge, classifyBadge } from '../services/api'

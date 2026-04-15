@@ -1,4 +1,9 @@
 """
+NJIT AI-Assisted Digital Badge Classification Tool
+Author: Rajat Ravindra Pednekar (rp2348@njit.edu)
+Institution: New Jersey Institute of Technology
+Capstone Project — Spring 2026
+
 NLP Signal Extractor — orchestrates all four layers.
 
 Pipeline (.md Section 10):
@@ -44,10 +49,27 @@ class SignalExtractor:
 
     def extract_all(self, bfs: BadgeFactSheet) -> BadgeFactSheet:
         """
-        Run all NLP layers against the badge text and return an updated BFS.
+        Run all four NLP layers against the badge text and return an updated BFS.
 
-        Text surface = badge_description + earning_criteria_text
-        (same surface used by all layers).
+        Text surface: badge_description + earning_criteria_text concatenated —
+        the same surface is passed to every layer so results are consistent.
+
+        Layer execution order (each layer fills only what is still None):
+          Layer 1 — PhraseExtractor: exact case-insensitive keyword phrases;
+                    highest confidence; produces self_declared_level,
+                    assessment_type, audience_type, badge_purpose
+          Layer 2 — PatternExtractor: regex patterns for paraphrased language;
+                    fills gaps left by Layer 1; marks level_signal_source as
+                    "regex_pattern" when it fires
+          Layer 3 — BloomExtractor: spaCy dependency-parse verb lemma mapping;
+                    populates bloom_level, bloom_verbs_detected, bloom_confidence
+          Layer 4 — LLMExtractor: stub; only runs when USE_LLM=true AND
+                    _has_critical_missing() is True; marks signals as
+                    "llm_extraction"
+
+        After all layers, _check_missing_signals() appends any still-absent
+        critical fields to bfs.missing_signals and sets
+        needs_followup_questions = True.
         """
         text = f"{bfs.badge_description} {bfs.earning_criteria_text}".strip()
 
@@ -82,6 +104,18 @@ class SignalExtractor:
         """
         Populate bfs.missing_signals with any critical fields still absent
         after all NLP layers have run.
+
+        One-way gate: entries are only ever added, never removed — signals
+        flagged by the normalizer (e.g. "issuer") survive unchanged, and
+        this method adds any additional NLP-layer gaps. The gate cannot be
+        reset to clean once needs_followup_questions is True.
+
+        Critical fields checked:
+          - issuer            — Stage 1 cannot classify without it (S1R08)
+          - assessment_evaluator — determines Skill vs Achievement (S2R06/S2R07);
+                                   only flagged when assessment_required == "yes"
+          - audience_type     — required when issuer is LDI to choose between
+                                Faculty & Staff (S1R01) vs Continuing Ed (S1R02)
 
         Only adds new entries — does not duplicate signals already recorded
         by the normalizer.

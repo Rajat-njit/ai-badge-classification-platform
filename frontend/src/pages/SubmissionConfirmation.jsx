@@ -1,11 +1,15 @@
 /**
- * SubmissionConfirmation — shown after a badge is classified.
+ * NJIT AI-Assisted Digital Badge Classification Tool
+ * Author: Rajat Ravindra Pednekar (rp2348@njit.edu)
+ * Institution: New Jersey Institute of Technology
+ * Capstone Project — Spring 2026
  *
+ * SubmissionConfirmation — shown after a badge is classified.
  * Displays:
- *  - Green checkmark + badge title
- *  - Submitter email confirmation
- *  - Reviewer email who will receive the review link
- *  - Two action buttons: Submit Another | View Logs
+ * - Green checkmark + badge title
+ * - Submitter email confirmation
+ * - Reviewer email who will receive the review link
+ * - Two action buttons: Submit Another | View Logs
  */
 
 import { useLocation, useNavigate } from 'react-router-dom'

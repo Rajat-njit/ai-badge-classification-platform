@@ -1,4 +1,9 @@
 """
+NJIT AI-Assisted Digital Badge Classification Tool
+Author: Rajat Ravindra Pednekar (rp2348@njit.edu)
+Institution: New Jersey Institute of Technology
+Capstone Project — Spring 2026
+
 Stage 3 — Badge Level classification.
 
 Determined by: Evidence, Bloom Level, and Pathway Position.
@@ -38,7 +43,37 @@ def _phrase_contains(bfs: BadgeFactSheet, *keywords: str) -> bool:
 
 def classify_stage3(bfs: BadgeFactSheet, type_result: str) -> dict:
     """
-    Classify badge level. Branches on type_result from Stage 2.
+    Classify badge level by branching on the Stage 2 type result.
+
+    CRITICAL: Level vocabularies are type-specific and must not be mixed
+    (.md Section 20). Each branch is fully independent.
+
+    Branch A — Souvenir (type_result == "Souvenir"):
+      Single level "Souvenir". Always High confidence. No sub-rules needed.
+      Rule: S3S01
+
+    Branch B — Achievement (type_result == "Achievement"):
+      Levels: Foundational | Milestone | Terminal
+      Priority: structured canvas signals first (S3A01–S3A09), then NLP phrases
+      (S3A10–S3A12), then attendance-standalone default (S3A13), else None (S3A14).
+      Canvas sequence_number is the strongest signal: 0→Terminal, 1→Foundational,
+      2+→Milestone. is_capstone and achievement_type=="Micro Credential" → Terminal.
+
+    Branch C — Skill (type_result == "Skill"):
+      Levels: Awareness | Application | Mastery
+      Driven by Bloom's taxonomy level from BloomExtractor (Layer 3).
+      High Bloom (evaluating/creating) → Mastery (S3SK01)
+      Mid  Bloom (applying/analyzing)  → Application (S3SK02)
+      Low  Bloom (remembering/understanding) → Awareness (S3SK03)
+      Expert scored but no Bloom signal → None/Medium + missing_signals (S3SK04)
+
+    Branch D — Competency (type_result == "Competency"):
+      Levels: Demonstrated | Integrated | Exemplary
+      Driven by evidence breadth and leadership signals.
+      leadership_evidence or exemplary phrases → Exemplary (S3C01)
+      multi_context_evidence or integrated phrases → Integrated (S3C02)
+      real_world_context (single, no leadership) → Demonstrated (S3C03)
+      OR criteria + real-world → Demonstrated/Medium (S3C04)
 
     Args:
         bfs:         Fully normalised + NLP-extracted BadgeFactSheet.

@@ -1,4 +1,9 @@
 """
+NJIT AI-Assisted Digital Badge Classification Tool
+Author: Rajat Ravindra Pednekar (rp2348@njit.edu)
+Institution: New Jersey Institute of Technology
+Capstone Project — Spring 2026
+
 Classification engine — orchestrates Stage 1 → Stage 2 → Stage 3.
 
 Entry point: run_classification(bfs) → ClassificationResult
@@ -61,7 +66,32 @@ _TITLE_TO_LEVEL = {
 
 def run_classification(bfs: BadgeFactSheet) -> ClassificationResult:
     """
-    Run all three classification stages and return a ClassificationResult.
+    Orchestrate all three classification stages and return a ClassificationResult.
+
+    Stage execution order:
+      Stage 1 — classify_stage1(bfs): determines badge Category from issuer +
+                audience signals (S1R01–S1R08); returns {category, confidence,
+                rules_triggered}
+      Stage 2 — classify_stage2(bfs): determines badge Type from earning
+                criteria and assessment signals (S2R01–S2R11); first match wins;
+                returns {type, confidence, rules_triggered, flag?}
+      Stage 3 — classify_stage3(bfs, type): determines badge Level by branching
+                on Stage 2 type; four independent branches: souvenir (S3S01),
+                achievement (S3A01–S3A14), skill (S3SK01–S3SK05),
+                competency (S3C01–S3C05)
+
+    Post-stage processing:
+      - Collects all triggered rule IDs from all three stages
+      - Writes results back to bfs (Section 10 fields)
+      - Overrides level_signal_source to "structured_field" when a structural
+        Stage 3 rule (canvas/capstone) fired, preventing NLP regex signals
+        from contaminating confidence
+      - Calculates overall confidence via _calculate_confidence()
+      - Builds ClassificationResult with signals and governance skeleton
+      - Calls generate_explanation() to produce the plain-English explanation
+
+    Governance log creation is handled by the calling route (classification.py),
+    not here — the engine is DB-free.
 
     Mutates bfs.category_result, type_result, level_result,
     level_branch_used, classification_confidence, triggered_rules,
@@ -170,6 +200,23 @@ def _calculate_confidence(
     s3_conf: str,
     bfs: BadgeFactSheet,
 ) -> str:
+    """
+    Compute the overall classification confidence from three stage scores
+    and four downgrade conditions.
+
+    Downgrade conditions (applied in priority order):
+      1. Missing signals — any unresolved required field → always "Low",
+         regardless of what the individual stage scores are.
+      2. OR criteria logic — criteria that offer alternative paths cannot be
+         verified programmatically → capped at "Medium".
+      3. Regex/LLM level signal — a non-phrase level signal source weakens
+         Stage 3 confidence from its declared value to "Medium".
+      4. Title/description level conflict — when a level keyword in the badge
+         title disagrees with the NLP-detected level in the description,
+         confidence is capped at "Medium" and a note is recorded.
+
+    If no downgrade condition fires, overall confidence = min(s1, s2, s3).
+    """
     # Downgrade 1: missing signals → always Low regardless of other factors
     if bfs.needs_followup_questions:
         return "Low"

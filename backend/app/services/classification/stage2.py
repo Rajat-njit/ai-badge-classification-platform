@@ -1,4 +1,9 @@
 """
+NJIT AI-Assisted Digital Badge Classification Tool
+Author: Rajat Ravindra Pednekar (rp2348@njit.edu)
+Institution: New Jersey Institute of Technology
+Capstone Project — Spring 2026
+
 Stage 2 — Badge Type classification.
 
 Determined by: Earning Criteria and Assessment.
@@ -21,7 +26,32 @@ _MODULE_ASSESSMENT_TYPES = {"module_completion", "final_assessment", "knowledge_
 
 def classify_stage2(bfs: BadgeFactSheet) -> dict:
     """
-    Classify badge type using S2R01–S2R11.
+    Classify badge type using S2R01–S2R11 (.md Section 8).
+
+    Rules run in listed order; first match wins.
+
+    The critical Skill vs Achievement distinction hinges on two fields:
+      - assessment_evaluator == "expert_scored"  →  human expert grades the work
+      - expert_evaluation_required == True        →  confirms human review is mandatory
+
+    When either is True (and assessment_type is not pre_post_assessment), S2R06
+    fires and returns Skill. When assessment is required but evaluator is unknown,
+    S2R07 fires and returns Achievement/Medium with a flag:
+    "Skill possible — confirm assessment_evaluator". This flag propagates to the
+    engine, which adds "assessment_evaluator" to bfs.missing_signals.
+
+    Type selection decision path:
+      achievement_type == "Micro Credential"       → S2R01 → Achievement (Terminal in S3)
+      achievement_type == "Competency"             → S2R02 → Competency
+      achievement_type == "Certificate of Comp."   → S2R03 → Achievement (entry)
+      badge_purpose == "compliance"                → S2R04 → Achievement
+      no assessment / attendance only              → S2R05 → Souvenir
+      expert_evaluation_required or expert_scored  → S2R06 → Skill
+      ksa_dimensions present OR real-world + OR    → S2R08 → Competency/Medium
+      canvas code OR module assessment type        → S2R09 → Achievement
+      OSIL + pre_post_assessment                   → S2R10 → Achievement
+      assessment required, evaluator unknown       → S2R07 → Achievement/Medium (flag)
+      nothing matched                              → S2R11 → None/Low
 
     Mutates nothing on the BFS — pure function.
     """

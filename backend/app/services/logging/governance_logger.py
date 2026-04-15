@@ -1,4 +1,9 @@
 """
+NJIT AI-Assisted Digital Badge Classification Tool
+Author: Rajat Ravindra Pednekar (rp2348@njit.edu)
+Institution: New Jersey Institute of Technology
+Capstone Project — Spring 2026
+
 Governance Logger — four functions for creating and updating governance logs.
 
 Owns all DB interactions for the governance_logs table.
@@ -39,12 +44,22 @@ def create_log(
     """
     Insert a new governance log record for a completed classification.
 
-    - normalized_facts: full BFS serialized as JSON string
-    - extracted_signals: Section 9 NLP fields only, as JSON string
-    - triggered_rules: JSON array of rule IDs
-    - final_category/type/level: seeded from recommended values;
-      updated if a reviewer later overrides
-    - reviewer_status: "pending_review" when reviewer_email provided, else "pending"
+    What gets stored and why (.md Rule R5 — every decision must be auditable):
+      - raw_input: original verbatim text preserved so the log is self-contained
+        and an auditor can re-classify from scratch if rules change
+      - normalized_facts: full BFS serialized as JSON string; stores the complete
+        post-NLP state including all extracted signals and confidence notes
+      - extracted_signals: Section 9 NLP fields only, as a JSON string; provides
+        a quick-access snapshot of what the NLP pipeline found without deserializing
+        the entire BFS
+      - triggered_rules: JSON array of rule IDs (e.g. ["S1R01", "S2R09", "S3A05"]);
+        enables rule-level audit queries across the log table
+      - recommended_category/type/level: the engine's output before human review;
+        stored separately from final_* so overrides are traceable
+      - final_category/type/level: seeded from recommended values on creation;
+        updated by update_log_review() when a reviewer accepts or overrides
+      - reviewer_status: "pending_review" when reviewer_email provided (email
+        notification pathway), else "pending"
     """
     bfs_dict = bfs.model_dump()
     extracted = {k: bfs_dict[k] for k in _NLP_SIGNAL_KEYS if k in bfs_dict}
@@ -97,10 +112,26 @@ def update_log_review(
     """
     Apply a reviewer decision to an existing governance log record.
 
-    accepted  → final_* = recommended_* values (no changes to classification)
-    overridden → final_* = provided override_* values where given,
-                 otherwise keep the recommended_* value for that stage
-    Sets final_locked_decision and reviewed_at in both cases.
+    Partial override logic — reviewers may correct any subset of the three
+    classification stages without affecting the others:
+      override_category provided → final_category = override_category
+      override_category is None  → final_category = recommended_category (unchanged)
+      (same logic applies independently for override_type and override_level)
+
+    This means a reviewer can correct only the level without touching category
+    or type, and the log accurately records which stages were human-corrected
+    vs accepted as recommended.
+
+    Status values:
+      accepted  → final_* set from recommended_*; override_* fields cleared
+                  to avoid stale data from any previous partial edit
+      overridden → override_* fields stored for audit; final_* computed via
+                   partial override logic above; override_reason required
+
+    After either status, final_locked_decision is built as a single string
+    "{category} | {type} | {level}" and reviewed_at is set to UTC now.
+    decision_notification_sent_at is recorded, and console notifications are
+    printed (replace with real email delivery in production).
     """
     log = get_log(log_id, db)
 

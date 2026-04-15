@@ -1,4 +1,9 @@
 """
+NJIT AI-Assisted Digital Badge Classification Tool
+Author: Rajat Ravindra Pednekar (rp2348@njit.edu)
+Institution: New Jersey Institute of Technology
+Capstone Project — Spring 2026
+
 POST /ingest — accepts raw badge input and returns a normalised BadgeFactSheet.
 
 Input contract (.md Section 12):

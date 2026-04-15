@@ -1,4 +1,9 @@
 """
+NJIT AI-Assisted Digital Badge Classification Tool
+Author: Rajat Ravindra Pednekar (rp2348@njit.edu)
+Institution: New Jersey Institute of Technology
+Capstone Project — Spring 2026
+
 NLP Layer 3 — spaCy Bloom's Taxonomy verb extraction.
 
 Loads en_core_web_sm once at module level (expensive operation).
