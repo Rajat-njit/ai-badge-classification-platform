@@ -14,7 +14,7 @@ Pipeline per input type:
 The rule engine NEVER touches raw input — it only reads the BFS
 produced by this module.
 
-.md Rule R7: "Classify from Badge Fact Sheet only."
+R7: "Classify from Badge Fact Sheet only." — rule engine never reads raw input.
 """
 
 import json
@@ -56,7 +56,7 @@ def normalize(input_type: str, payload: Any) -> BadgeFactSheet:
                set needs_followup_questions = True for any absent critical field
 
     The rule engine NEVER receives raw input — it only reads the BFS this
-    function returns (.md Rule R7).
+    function returns (BFS-only principle — rule engine never reads raw input).
 
     Args:
         input_type: One of "obv3_json" | "form" | "free_text"
@@ -169,7 +169,7 @@ def _ingest_obv3(payload: Any) -> BadgeFactSheet:
 def _check_required_fields(bfs: BadgeFactSheet) -> None:
     """
     Populate missing_signals for fields the rule engine critically needs.
-    Does NOT raise — degrades gracefully per .md Rule R10.
+    Does NOT raise — degrades gracefully when signals are missing (R10 — degrade gracefully).
     """
     if not bfs.badge_title:
         _add_missing(bfs, "badge_title")

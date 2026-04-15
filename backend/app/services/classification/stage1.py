@@ -7,7 +7,7 @@ Capstone Project — Spring 2026
 Stage 1 — Badge Category classification.
 
 Determined by: Audience and Institutional Context.
-Rules S1R01–S1R08 from .md Section 8.
+Rules S1R01–S1R08 from docs/taxonomy-rules.md.
 
 Returns:
     {
@@ -16,8 +16,8 @@ Returns:
         "rules_triggered": list[str],
     }
 
-.md Rule R1: Taxonomy rules are locked.
-.md Rule R2: Rule engine decides — not any LLM.
+R1: Taxonomy rules are locked — do not invent new policy logic.
+R2: Classification is deterministic — the rule engine decides, not any LLM.
 """
 
 from app.models.badge_fact_sheet import BadgeFactSheet
@@ -34,7 +34,7 @@ _EXTERNAL_PROF_SIGNALS = {"professional", "workforce", "workplace", "industry"}
 
 def classify_stage1(bfs: BadgeFactSheet) -> dict:
     """
-    Classify the badge category using S1R01–S1R08 (.md Section 8).
+    Classify the badge category using S1R01–S1R08 (docs/taxonomy-rules.md).
 
     Driving signals (in priority order):
       1. issuer — the primary discriminator; resolves to one of five known

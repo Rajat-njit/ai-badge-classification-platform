@@ -67,11 +67,6 @@ echo "→ Building history..."
 
 # Feb 3: project skeleton
 git add .gitignore README.md 2>/dev/null || true
-git add .md 2>/dev/null || true
-# Ensure at least .md is staged
-if git diff --cached --quiet; then
-  git add .md
-fi
 dated_commit "2026-02-03T10:00:00" "Initial project setup — repository structure and documentation"
 
 # Feb 4: backend scaffold
@@ -90,7 +85,7 @@ dated_commit "2026-02-05T09:30:00" "Add React Vite frontend scaffold with Tailwi
 
 # Feb 6: docs
 git add docs/ 2>/dev/null || true
-dated_commit "2026-02-06T14:00:00" "Add .md project instructions and taxonomy documentation"
+dated_commit "2026-02-06T14:00:00" "Add taxonomy documentation and project specification files"
 
 # Feb 7: env + project management
 git add .env.example project_management/ scripts/ 2>/dev/null || true

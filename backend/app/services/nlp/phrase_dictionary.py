@@ -7,8 +7,8 @@ Capstone Project — Spring 2026
 NLP Layer 1 — Exact phrase matching.
 
 All phrases are case-insensitive exact substring matches.
-Dictionaries are from .md Section 10 — do not modify without
-updating the taxonomy documentation.
+Dictionaries are from docs/nlp-phrase-dictionary.md — do not modify without
+updating docs/nlp-phrase-dictionary.md.
 
 PhraseExtractor applies all dictionaries to a BFS and returns
 the updated BFS with signal fields populated.
@@ -65,7 +65,7 @@ def is_negated(text: str, match_start: int, window: int = 10) -> bool:
 
 
 # ---------------------------------------------------------------------------
-# LEVEL_PHRASES — from .md Section 10
+# LEVEL_PHRASES
 # Tuple: (level_value, confidence)
 # ---------------------------------------------------------------------------
 LEVEL_PHRASES: dict[str, tuple[str, str]] = {
@@ -134,7 +134,7 @@ _LEVEL_PHRASES_SORTED: list[tuple[str, str, str]] = sorted(
 
 
 # ---------------------------------------------------------------------------
-# ASSESSMENT_PHRASES — from .md Section 10
+# ASSESSMENT_PHRASES
 # Tuple: (type_key, threshold_or_None, confidence)
 #
 # type_key values and how they're used:
@@ -184,7 +184,7 @@ _ASSESSMENT_TYPE_VALUES = {
 
 
 # ---------------------------------------------------------------------------
-# AUDIENCE_PHRASES — from .md Section 10
+# AUDIENCE_PHRASES
 # Tuple: (audience_type, audience_signal_detail, confidence)
 # ---------------------------------------------------------------------------
 AUDIENCE_PHRASES: dict[str, tuple[str, str | None, str]] = {
@@ -216,7 +216,7 @@ _AUDIENCE_PHRASES_SORTED: list[tuple[str, str, str | None, str]] = sorted(
 
 
 # ---------------------------------------------------------------------------
-# PURPOSE_PHRASES — from .md Section 10
+# PURPOSE_PHRASES
 # Maps phrase → badge_purpose value or "downstream_workflow" sentinel
 # ---------------------------------------------------------------------------
 PURPOSE_PHRASES: dict[str, str] = {

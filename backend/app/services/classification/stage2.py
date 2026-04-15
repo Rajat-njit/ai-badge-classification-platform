@@ -7,7 +7,7 @@ Capstone Project — Spring 2026
 Stage 2 — Badge Type classification.
 
 Determined by: Earning Criteria and Assessment.
-Rules S2R01–S2R11 from .md Section 8.
+Rules S2R01–S2R11 from docs/taxonomy-rules.md.
 CRITICAL: Run in listed order. First match wins.
 
 Returns:
@@ -26,7 +26,7 @@ _MODULE_ASSESSMENT_TYPES = {"module_completion", "final_assessment", "knowledge_
 
 def classify_stage2(bfs: BadgeFactSheet) -> dict:
     """
-    Classify badge type using S2R01–S2R11 (.md Section 8).
+    Classify badge type using S2R01–S2R11 (docs/taxonomy-rules.md).
 
     Rules run in listed order; first match wins.
 

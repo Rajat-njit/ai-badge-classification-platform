@@ -7,7 +7,7 @@ Capstone Project — Spring 2026
 BadgeFactSheet — the single normalized internal representation of every badge.
 
 The rule engine ONLY reads this object — never raw input.
-Filled in across 8 stages as described in .md Section 6.
+Filled in across 8 stages as described in docs/badge-fact-sheet-schema.md.
 """
 
 from typing import Any, Dict, List, Optional

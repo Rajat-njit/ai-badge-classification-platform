@@ -7,7 +7,7 @@ Capstone Project — Spring 2026
 Explainability Layer — generate_explanation(bfs, result) -> str
 
 Every classification produces a plain-English explanation covering 8 mandatory
-elements (.md Section 11):
+elements (docs/taxonomy-rules.md):
 
   1. CATEGORY — issuer, how detected, S1 rule IDs
   2. TYPE     — reason, assessment type/evaluator, S2 rule IDs
@@ -39,7 +39,7 @@ def generate_explanation(bfs: BadgeFactSheet, result: ClassificationResult) -> s
     """
     Build and return the complete plain-English explanation for a classification.
 
-    The explanation covers 8 mandatory elements (.md Section 11):
+    The explanation covers 8 mandatory elements (docs/taxonomy-rules.md):
       1. CATEGORY   — issuer name, how it was detected, Stage 1 rule IDs fired;
                       OGI open-question Q001 note appended when issuer == "OGI"
       2. TYPE       — rule-specific reason from _S2_REASONS, assessment type and

@@ -44,7 +44,7 @@ def create_log(
     """
     Insert a new governance log record for a completed classification.
 
-    What gets stored and why (.md Rule R5 — every decision must be auditable):
+    What gets stored and why (auditable governance principle — every decision must be auditable):
       - raw_input: original verbatim text preserved so the log is self-contained
         and an auditor can re-classify from scratch if rules change
       - normalized_facts: full BFS serialized as JSON string; stores the complete

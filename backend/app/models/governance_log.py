@@ -6,7 +6,7 @@ Capstone Project — Spring 2026
 
 GovernanceLog — SQLAlchemy model for the governance_logs SQLite table.
 
-Schema defined in .md Section 13.
+Schema defined in docs/governance-logging.md.
 Every classification event and every human review decision must be stored here.
 """
 

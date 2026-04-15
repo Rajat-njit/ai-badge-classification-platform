@@ -7,8 +7,8 @@ Capstone Project — Spring 2026
 NLP Layer 2 — Regex pattern matching.
 
 Handles paraphrased language that exact phrase matching misses.
-All patterns from .md Section 10 — do not modify without
-updating the taxonomy documentation.
+All patterns from docs/nlp-phrase-dictionary.md — do not modify without
+updating docs/nlp-phrase-dictionary.md.
 
 PatternExtractor only sets fields that Layer 1 (PhraseExtractor) left blank,
 so the two layers don't conflict. Signal source is set to "regex_pattern".
@@ -20,7 +20,7 @@ from app.models.badge_fact_sheet import BadgeFactSheet
 
 
 # ---------------------------------------------------------------------------
-# LEVEL_PATTERNS — from .md Section 10
+# LEVEL_PATTERNS
 # List of (compiled_regex, level_value, confidence)
 # ---------------------------------------------------------------------------
 LEVEL_PATTERNS: list[tuple[re.Pattern, str, str]] = [
@@ -127,7 +127,7 @@ LEVEL_PATTERNS: list[tuple[re.Pattern, str, str]] = [
 
 
 # ---------------------------------------------------------------------------
-# ASSESSMENT_PATTERNS — from .md Section 10
+# ASSESSMENT_PATTERNS
 # List of (compiled_regex, type_key, confidence)
 # For patterns with a capture group (threshold %), group 1 is the number.
 # ---------------------------------------------------------------------------
@@ -191,7 +191,7 @@ ASSESSMENT_PATTERNS: list[tuple[re.Pattern, str, str]] = [
 ]
 
 # ---------------------------------------------------------------------------
-# BLOOM_PATTERNS — from .md Section 10
+# BLOOM_PATTERNS
 # Used as a lightweight fallback if spaCy is unavailable.
 # PatternExtractor does NOT set bloom fields from these — that is
 # BloomExtractor's responsibility. They are defined here for completeness.
@@ -217,7 +217,7 @@ BLOOM_PATTERNS: list[tuple[re.Pattern, str, str]] = [
 ]
 
 # ---------------------------------------------------------------------------
-# OR criteria detection — from .md Section 10
+# OR criteria detection
 # ---------------------------------------------------------------------------
 _OR_PATTERN = re.compile(r"\bor\b", re.IGNORECASE)
 

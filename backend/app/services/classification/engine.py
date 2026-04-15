@@ -10,7 +10,7 @@ Entry point: run_classification(bfs) → ClassificationResult
 
 After running all three stages the engine:
   1. Writes results back to the BFS (Section 10 fields)
-  2. Calculates overall confidence (.md Section 9)
+  2. Calculates overall confidence (docs/taxonomy-rules.md)
   3. Builds and returns a ClassificationResult
 
 Governance log creation is handled by the calling route, not here,
@@ -145,7 +145,7 @@ def run_classification(bfs: BadgeFactSheet) -> ClassificationResult:
         bfs.level_signal_source = "structured_field"
 
     # ------------------------------------------------------------------
-    # Overall confidence (.md Section 9)
+    # Overall confidence (docs/taxonomy-rules.md)
     # ------------------------------------------------------------------
     overall_conf = _calculate_confidence(
         s1["confidence"], s2["confidence"], s3["confidence"], bfs
@@ -191,7 +191,7 @@ def run_classification(bfs: BadgeFactSheet) -> ClassificationResult:
 
 
 # ---------------------------------------------------------------------------
-# Confidence calculation — .md Section 9
+# Confidence calculation — docs/taxonomy-rules.md
 # ---------------------------------------------------------------------------
 
 def _calculate_confidence(

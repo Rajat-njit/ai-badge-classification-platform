@@ -16,7 +16,7 @@ Sequence numbers:
   03 → Third course  (Milestone)
   04 → Fourth course (Milestone)
 
-Defined in .md Section 15.
+Defined in docs/taxonomy-rules.md.
 """
 
 from typing import Optional

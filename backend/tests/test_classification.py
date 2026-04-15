@@ -8,7 +8,7 @@ Covers:
   - Confidence calculation: Low/Medium/High + downgrade conditions
   - Edge cases: missing issuer, OR criteria, level conflict, S2R07 flag
 
-Each test is named after the .md taxonomy combination it verifies.
+Each test is named after the taxonomy combination it verifies.
 """
 
 import pytest

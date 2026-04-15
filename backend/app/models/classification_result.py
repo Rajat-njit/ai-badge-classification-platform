@@ -6,7 +6,7 @@ Capstone Project — Spring 2026
 
 ClassificationResult — the structured output of the rule engine.
 
-Matches the API contract defined in .md Section 12.
+Matches the API contract defined in docs/architecture.md.
 This is a Pydantic model used for API responses only.
 The full BadgeFactSheet is the authoritative internal record.
 """
@@ -47,7 +47,7 @@ class ClassificationResult(BaseModel):
     """
     Full classification response returned by POST /classify.
 
-    Mirrors the JSON structure in .md Section 12.
+    Mirrors the JSON structure in docs/architecture.md.
     """
 
     badge_id: str

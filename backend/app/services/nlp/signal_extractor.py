@@ -6,7 +6,7 @@ Capstone Project — Spring 2026
 
 NLP Signal Extractor — orchestrates all four layers.
 
-Pipeline (.md Section 10):
+Pipeline (docs/nlp-phrase-dictionary.md):
   Layer 1: PhraseExtractor   — exact keyword phrases (highest confidence)
   Layer 2: PatternExtractor  — regex patterns for paraphrased language
   Layer 3: BloomExtractor    — spaCy verb → Bloom level

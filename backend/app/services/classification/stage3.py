@@ -8,7 +8,7 @@ Stage 3 — Badge Level classification.
 
 Determined by: Evidence, Bloom Level, and Pathway Position.
 CRITICAL: Level options depend entirely on Stage 2 Type result.
-Rules S3S01, S3A01–S3A14, S3SK01–S3SK05, S3C01–S3C05 from .md Section 8.
+Rules S3S01, S3A01–S3A14, S3SK01–S3SK05, S3C01–S3C05 from docs/taxonomy-rules.md.
 
 Branches:
   Souvenir    → single level "Souvenir"          (S3S01)
@@ -46,7 +46,7 @@ def classify_stage3(bfs: BadgeFactSheet, type_result: str) -> dict:
     Classify badge level by branching on the Stage 2 type result.
 
     CRITICAL: Level vocabularies are type-specific and must not be mixed
-    (.md Section 20). Each branch is fully independent.
+    (see docs/taxonomy-rules.md). Each branch is fully independent.
 
     Branch A — Souvenir (type_result == "Souvenir"):
       Single level "Souvenir". Always High confidence. No sub-rules needed.

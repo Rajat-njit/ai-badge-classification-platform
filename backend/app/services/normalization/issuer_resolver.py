@@ -6,7 +6,7 @@ Capstone Project — Spring 2026
 
 Issuer resolver — maps criteria_id_url to an NJIT issuer name.
 
-Rules IR01–IR07 from .md Section 7.
+Rules IR01–IR07 from docs/taxonomy-rules.md.
 
 NOTE: Since OBv2 is no longer supported, IR05 (badgr.io issuer_url)
 and IR06 (unmatched OBv2 issuer_url) are not applicable.

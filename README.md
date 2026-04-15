@@ -103,7 +103,7 @@ Raw Input (OBv3 / OBv2 / Form / Free Text)
 | 1 | Exact phrase matching | Level, assessment, audience, and purpose signals |
 | 2 | Regex patterns | Paraphrased level and assessment signals |
 | 3 | spaCy `en_core_web_sm` | Bloom's Taxonomy verb extraction |
-| 4 | LLM stub ( API) | Gap-filling — disabled by default (`USE_LLM=false`) |
+| 4 | LLM stub (future integration) | Gap-filling — disabled by default (`USE_LLM=false`) |
 
 ---
 
@@ -162,7 +162,7 @@ Level options are **type-dependent** and not interchangeable across types.
 
 ```
 ai-badge-classification-tool/
-├── .md                          # Architecture and taxonomy rules (source of truth)
+
 ├── README.md                          # This file
 ├── .env.example                       # Environment variable template
 │
@@ -434,7 +434,7 @@ Uses spaCy's dependency parser to extract verbs and map them to Bloom's Taxonomy
 
 ### Layer 4 — LLM Extractor (`llm_extractor.py`)
 
-Stub implementation connected to the Anthropic SDK. When `USE_LLM=true`, this layer queries the  API to fill any remaining `missing_signals` using structured prompting. Disabled by default to keep classification fully deterministic.
+Stub implementation for future LLM integration. When `USE_LLM=true`, this layer queries an external LLM API to fill any remaining `missing_signals` using structured prompting. Disabled by default to keep classification fully deterministic.
 
 ---
 
@@ -527,7 +527,7 @@ Copy `.env.example` to `backend/.env` before starting the server.
 | Variable | Default | Description |
 |---|---|---|
 | `DATABASE_URL` | `sqlite:///./badges.db` | SQLAlchemy database URL |
-| `USE_LLM` | `false` | Set to `true` to enable  API gap-filling |
+| `USE_LLM` | `false` | Set to `true` to enable LLM-based gap-filling |
 | `SPACY_MODEL` | `en_core_web_sm` | spaCy model name |
 | `ANTHROPIC_API_KEY` | *(empty)* | Required only when `USE_LLM=true` |
 | `API_HOST` | `0.0.0.0` | Uvicorn bind address |

@@ -7,7 +7,7 @@ Capstone Project — Spring 2026
 NLP Layer 3 — spaCy Bloom's Taxonomy verb extraction.
 
 Loads en_core_web_sm once at module level (expensive operation).
-Uses the full BLOOM_VERB_MAP from .md Section 10.
+Uses the full BLOOM_VERB_MAP from docs/nlp-phrase-dictionary.md.
 
 Strategy:
 - Tokenise up to the first 1000 characters (performance limit)
@@ -30,7 +30,7 @@ _nlp = spacy.load("en_core_web_sm")
 
 
 # ---------------------------------------------------------------------------
-# BLOOM_VERB_MAP — verbatim from .md Section 10
+# BLOOM_VERB_MAP
 # ---------------------------------------------------------------------------
 BLOOM_VERB_MAP: dict[str, str] = {
     # Remembering
@@ -134,7 +134,7 @@ class BloomExtractor:
     """
 
     def extract(self, bfs: BadgeFactSheet, text: str) -> BadgeFactSheet:
-        doc = _nlp(text[:1000])  # limit per .md
+        doc = _nlp(text[:1000])  # limit for performance
         detected_levels: list[str] = []
         verbs_found: list[str] = []
 

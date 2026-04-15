@@ -6,7 +6,7 @@ Capstone Project — Spring 2026
 
 POST /ingest — accepts raw badge input and returns a normalised BadgeFactSheet.
 
-Input contract (.md Section 12):
+Input contract (docs/architecture.md):
     {
         "input_type": "obv3_json" | "form" | "free_text",
         "payload": { ... } | "..."
