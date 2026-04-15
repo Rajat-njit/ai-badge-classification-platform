@@ -1,19 +1,27 @@
 """
 test_edge_cases.py
 
-Edge case tests — Upgrade 3 Categories 2 and 3.
+Edge case tests — Upgrade 3 Categories 1, 2, 3, and 4.
 
+Category 1: NLP accuracy (EC17–EC20) — exercised via POST /ingest + /classify.
 Category 2: Input validation (EC01–EC03) — exercised via POST /ingest.
 Category 3: Review workflow validation (EC26, EC29, EC30) — exercised via POST /review.
+Category 4: Pathway edge cases (EC24) — exercised via POST /ingest.
 
 EC01  Whitespace-only field detection
 EC02  Criteria identical to description
 EC03  Minimum content warning (warning-only, does not block)
+EC17  Word-boundary matching for level phrases (no substring false positives)
+EC18  Negated level phrase detection (negated phrase skipped)
+EC19  Conflicting level phrases flagged in confidence_notes
+EC20  Negated Bloom verb excluded from bloom_level extraction
+EC24  Implied series detection from badge title
 EC26  Identical override silently becomes acceptance
 EC29  Minimum override reason length (≥ 20 characters)
 EC30  Invalid taxonomy type+level combination rejected
 """
 
+import json
 import os
 import sys
 import tempfile
@@ -281,3 +289,254 @@ class TestEC26_IdenticalOverride:
         )
         assert resp.status_code == 200
         assert resp.json()["reviewer_status"] == "accepted"
+
+
+# ---------------------------------------------------------------------------
+# Helpers shared by EC17 / EC18 / EC19 / EC20
+# ---------------------------------------------------------------------------
+
+def _ingest_classify(client: TestClient, payload: dict) -> tuple[dict, dict]:
+    """
+    POST /ingest then POST /classify.
+    Returns (bfs_dict, classification_result_dict).
+    """
+    ingest_resp = client.post("/ingest", json={"input_type": "form", "payload": payload})
+    assert ingest_resp.status_code == 200, ingest_resp.text
+    bfs = ingest_resp.json()
+
+    classify_resp = client.post("/classify", json=bfs)
+    assert classify_resp.status_code == 200, classify_resp.text
+    return bfs, classify_resp.json()
+
+
+def _get_normalized_facts(client: TestClient, log_id: str) -> dict:
+    """GET /logs/{log_id} and return the parsed normalized_facts BFS dict."""
+    log_resp = client.get(f"/logs/{log_id}")
+    assert log_resp.status_code == 200, log_resp.text
+    return json.loads(log_resp.json()["normalized_facts"])
+
+
+# ---------------------------------------------------------------------------
+# EC17 — Word-boundary matching for level phrases
+# ---------------------------------------------------------------------------
+
+class TestEC17_WordBoundaryMatching:
+
+    def test_ec17_substring_does_not_match(self, client):
+        """
+        'precapstone' (one word) must NOT trigger the 'capstone' level phrase.
+        With pure substring matching this would incorrectly return Terminal.
+        NLP extraction happens in /classify, so we check normalized_facts.
+        """
+        _, result = _ingest_classify(client, {
+            "badge_title": "Workshop Badge",
+            "badge_description": (
+                "This precapstone course prepares students for advanced study."
+            ),
+            "issuer": "OSIL",
+            "earning_criteria_text": "Attend all required workshop sessions.",
+        })
+        facts = _get_normalized_facts(client, result["governance"]["log_id"])
+        assert facts.get("self_declared_level") != "Terminal", (
+            "'precapstone' must not trigger Terminal via substring match"
+        )
+
+    def test_ec17_whole_word_capstone_matches(self, client):
+        """
+        'capstone' as a standalone word must still trigger Terminal level.
+        NLP extraction happens in /classify, so we check normalized_facts.
+        """
+        _, result = _ingest_classify(client, {
+            "badge_title": "Capstone Badge",
+            "badge_description": (
+                "This capstone experience represents the culmination of the program."
+            ),
+            "issuer": "OSIL",
+            "earning_criteria_text": "Complete the capstone project and submit deliverables.",
+        })
+        facts = _get_normalized_facts(client, result["governance"]["log_id"])
+        assert facts.get("self_declared_level") == "Terminal"
+
+
+# ---------------------------------------------------------------------------
+# EC18 — Negated level phrase detection
+# ---------------------------------------------------------------------------
+
+class TestEC18_NegatedLevelPhrase:
+
+    def test_ec18_negated_capstone_not_matched(self, client):
+        """
+        'not a capstone' — 'capstone' is negated and must not set level via
+        phrase_dictionary.  Text is chosen to avoid matching pattern_rules.py
+        Terminal regex (which requires a second word: course/module/badge etc.).
+        NLP extraction happens in /classify, so we check normalized_facts.
+        """
+        _, result = _ingest_classify(client, {
+            "badge_title": "Participation Award",
+            "badge_description": (
+                "This is not a capstone. It recognizes attendance only."
+            ),
+            "issuer": "OSIL",
+            "earning_criteria_text": "Attend the workshop.",
+        })
+        facts = _get_normalized_facts(client, result["governance"]["log_id"])
+        assert facts.get("self_declared_level") != "Terminal", (
+            "Negated 'capstone' must not trigger Terminal level"
+        )
+
+    def test_ec18_positive_capstone_matched(self, client):
+        """
+        'capstone' without negation must still set level = Terminal.
+        NLP extraction happens in /classify, so we check normalized_facts.
+        """
+        _, result = _ingest_classify(client, {
+            "badge_title": "Program Badge",
+            "badge_description": (
+                "This badge marks the capstone achievement of the leadership series."
+            ),
+            "issuer": "OSIL",
+            "earning_criteria_text": "Complete all required activities.",
+        })
+        facts = _get_normalized_facts(client, result["governance"]["log_id"])
+        assert facts.get("self_declared_level") == "Terminal"
+
+
+# ---------------------------------------------------------------------------
+# EC19 — Conflicting level phrases
+# ---------------------------------------------------------------------------
+
+class TestEC19_ConflictingLevelPhrases:
+
+    def test_ec19_conflict_flagged_in_confidence_notes(self, client):
+        """
+        Text with both 'introductory' (→ Foundational) and 'capstone'
+        (→ Terminal) must produce a CONFLICT note in confidence_notes.
+        NLP extraction happens in /classify, so we check normalized_facts.
+        """
+        _, result = _ingest_classify(client, {
+            "badge_title": "Leadership Badge",
+            "badge_description": (
+                "An introductory overview that culminates in a capstone presentation."
+            ),
+            "issuer": "OSIL",
+            "earning_criteria_text": "Attend all sessions and complete the capstone.",
+        })
+        facts = _get_normalized_facts(client, result["governance"]["log_id"])
+        notes = facts.get("confidence_notes") or ""
+        assert "CONFLICT" in notes, (
+            f"Expected CONFLICT in confidence_notes; got: {notes!r}"
+        )
+
+    def test_ec19_no_conflict_for_consistent_signals(self, client):
+        """
+        Text with only Foundational phrases must NOT produce a CONFLICT note.
+        NLP extraction happens in /classify, so we check normalized_facts.
+        """
+        _, result = _ingest_classify(client, {
+            "badge_title": "Intro Badge",
+            "badge_description": (
+                "An introductory workshop designed for entry-level participants."
+            ),
+            "issuer": "OSIL",
+            "earning_criteria_text": "Attend the full workshop session.",
+        })
+        facts = _get_normalized_facts(client, result["governance"]["log_id"])
+        notes = facts.get("confidence_notes") or ""
+        assert "CONFLICT" not in notes, (
+            f"Unexpected CONFLICT in confidence_notes: {notes!r}"
+        )
+
+
+# ---------------------------------------------------------------------------
+# EC20 — Negated Bloom verb exclusion
+# ---------------------------------------------------------------------------
+
+class TestEC20_NegatedBloomVerb:
+
+    def test_ec20_negated_verb_excluded_from_bloom(self, client):
+        """
+        'do not demonstrate' — the negated verb must not contribute to
+        bloom_verbs_detected in the classified BFS.
+        """
+        payload = {
+            "badge_title": "Workshop Badge",
+            "badge_description": (
+                "Participants do not demonstrate advanced technical skills in this session."
+            ),
+            "issuer": "LDI",
+            "earning_criteria_text": "Attend all mandatory sessions.",
+        }
+        _, result = _ingest_classify(client, payload)
+        log_id = result["governance"]["log_id"]
+        facts = _get_normalized_facts(client, log_id)
+
+        bloom_verbs = facts.get("bloom_verbs_detected") or []
+        assert "demonstrate" not in bloom_verbs, (
+            f"Negated 'demonstrate' must not appear in bloom_verbs_detected; got {bloom_verbs}"
+        )
+
+    def test_ec20_positive_verb_included_in_bloom(self, client):
+        """
+        'demonstrate' (not negated) must appear in bloom_verbs_detected.
+        """
+        payload = {
+            "badge_title": "Skills Badge",
+            "badge_description": (
+                "Participants demonstrate proficiency in core professional techniques."
+            ),
+            "issuer": "LDI",
+            "earning_criteria_text": "Attend all mandatory sessions.",
+        }
+        _, result = _ingest_classify(client, payload)
+        log_id = result["governance"]["log_id"]
+        facts = _get_normalized_facts(client, log_id)
+
+        bloom_verbs = facts.get("bloom_verbs_detected") or []
+        assert "demonstrate" in bloom_verbs, (
+            f"Non-negated 'demonstrate' must appear in bloom_verbs_detected; got {bloom_verbs}"
+        )
+
+
+# ---------------------------------------------------------------------------
+# EC24 — Implied series detection from badge title
+# ---------------------------------------------------------------------------
+
+class TestEC24_ImpliedSeriesDetection:
+
+    def test_ec24_title_with_level_keyword_sets_progression_implied(self, client):
+        """
+        A title containing a series keyword ('Introduction to') without any
+        formal canvas_course_code or pathway_name must set
+        progression_implied = True and add a 'series progression' note.
+        """
+        bfs = _ingest(client, {
+            "badge_title": "Introduction to Data Science",
+            "badge_description": (
+                "A badge recognizing students who completed the introductory "
+                "data science workshop at NJIT."
+            ),
+            "issuer": "OSIL",
+            "earning_criteria_text": (
+                "Attend the full-day workshop and submit the reflection form."
+            ),
+        })
+        assert bfs["progression_implied"] is True
+        assert "series progression" in (bfs["confidence_notes"] or "")
+
+    def test_ec24_title_without_level_keyword_no_implied(self, client):
+        """
+        A generic title with no series keyword must leave
+        progression_implied = False (its default).
+        """
+        bfs = _ingest(client, {
+            "badge_title": "Data Science Workshop",
+            "badge_description": (
+                "A badge recognizing students who completed the data science "
+                "workshop at NJIT."
+            ),
+            "issuer": "OSIL",
+            "earning_criteria_text": (
+                "Attend the full-day workshop and submit the reflection form."
+            ),
+        })
+        assert bfs["progression_implied"] is False

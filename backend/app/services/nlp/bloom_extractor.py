@@ -109,6 +109,17 @@ BLOOM_HIERARCHY: list[str] = [
 ]
 
 
+def is_verb_negated(token) -> bool:
+    """
+    EC20 — Detect negated verbs via spaCy dependency parsing.
+
+    Returns True if the token has any child whose dependency label
+    is 'neg' (spaCy's negation modifier relation).
+    Example: "do not demonstrate" — 'not' is a 'neg' child of 'demonstrate'.
+    """
+    return any(child.dep_ == "neg" for child in token.children)
+
+
 class BloomExtractor:
     """
     Layer 3: spaCy-based Bloom's Taxonomy verb extraction.
@@ -124,6 +135,8 @@ class BloomExtractor:
 
         for token in doc:
             if token.pos_ == "VERB":
+                if is_verb_negated(token):      # EC20 — skip negated verbs
+                    continue
                 lemma = token.lemma_.lower()
                 if lemma in BLOOM_VERB_MAP:
                     bloom = BLOOM_VERB_MAP[lemma]

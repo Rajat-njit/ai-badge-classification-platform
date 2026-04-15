@@ -11,13 +11,52 @@ the updated BFS with signal fields populated.
 Matching rules:
 - Phrases are sorted longest-first so the most specific phrase wins.
   ("foundation-level badge" beats "foundation-level")
-- For LEVEL_PHRASES: first match only — stop scanning after one hit.
+- For LEVEL_PHRASES: word-boundary matching (EC17); negation-aware (EC18);
+  all matches collected to detect conflicts (EC19); first non-negated
+  match (longest) wins.
 - For ASSESSMENT_PHRASES: multiple matches allowed (type + threshold).
 - For AUDIENCE_PHRASES: first match wins.
 - For PURPOSE_PHRASES: multiple matches allowed (purpose + workflow).
 """
 
+import re
+
 from app.models.badge_fact_sheet import BadgeFactSheet
+
+# ---------------------------------------------------------------------------
+# EC18 — Negation words checked before a matched level phrase
+# ---------------------------------------------------------------------------
+NEGATION_WORDS: frozenset[str] = frozenset([
+    "not", "no", "never", "without", "non",
+    "doesn't", "don't", "isn't", "aren't", "wasn't", "weren't",
+    "cannot", "can't", "couldn't", "won't", "wouldn't",
+])
+
+
+def phrase_matches(phrase: str, text: str) -> "re.Match[str] | None":
+    """
+    EC17 — Word-boundary-aware matching for level phrases.
+
+    Returns the first Match object if `phrase` appears in `text` as a
+    whole-word sequence (\\b anchors on both ends), else None.
+    Always case-insensitive.
+    """
+    pattern = r'\b' + re.escape(phrase) + r'\b'
+    return re.search(pattern, text, re.IGNORECASE)
+
+
+def is_negated(text: str, match_start: int, window: int = 10) -> bool:
+    """
+    EC18 — Negation detection.
+
+    Inspects the `window` words immediately before `match_start` in `text`.
+    Returns True if any negation word is found in that window.
+    Punctuation attached to words is stripped before comparison.
+    """
+    prefix = text[:match_start]
+    words = prefix.split()
+    recent = words[-window:]
+    return any(w.strip(".,;:!?\"'()") in NEGATION_WORDS for w in recent)
 
 
 # ---------------------------------------------------------------------------
@@ -218,17 +257,48 @@ class PhraseExtractor:
     # ------------------------------------------------------------------
 
     def _extract_level(self, bfs: BadgeFactSheet, lower: str) -> BadgeFactSheet:
-        """First match wins — longest phrase has priority."""
+        """
+        EC17: Word-boundary matching (phrase_matches) instead of substring.
+        EC18: Skip negated phrase matches (is_negated).
+        EC19: Collect all non-negated matches; detect conflicting levels and
+              record them in confidence_notes; first (longest/highest-priority)
+              match still wins.
+        """
         if bfs.self_declared_level is not None:
             # Already set by a structured field — don't overwrite
             return bfs
 
+        all_matches: list[tuple[str, str, str]] = []  # (level, phrase, conf)
+
         for phrase, level, conf in _LEVEL_PHRASES_SORTED:
-            if phrase.lower() in lower:
-                bfs.self_declared_level = level
-                bfs.level_phrase_matched = phrase
-                bfs.level_signal_source = "keyword_rule"
-                return bfs
+            m = phrase_matches(phrase, lower)   # EC17 — word boundary
+            if m is None:
+                continue
+            if is_negated(lower, m.start()):    # EC18 — skip negated
+                continue
+            all_matches.append((level, phrase, conf))
+
+        if not all_matches:
+            return bfs
+
+        # EC19 — detect conflicting level signals
+        seen_levels: list[str] = []
+        for lvl, _, _ in all_matches:
+            if lvl not in seen_levels:
+                seen_levels.append(lvl)
+        if len(seen_levels) > 1:
+            conflict_note = (
+                f"CONFLICT: multiple level signals detected: {', '.join(seen_levels)}"
+            )
+            bfs.confidence_notes = (
+                (bfs.confidence_notes or "") + f" | {conflict_note}"
+            ).lstrip(" |").strip()
+
+        # Use the highest-priority match (longest phrase wins — list is sorted)
+        best_level, best_phrase, _ = all_matches[0]
+        bfs.self_declared_level = best_level
+        bfs.level_phrase_matched = best_phrase
+        bfs.level_signal_source = "keyword_rule"
 
         return bfs
 

@@ -110,6 +110,11 @@ def normalize(input_type: str, payload: Any) -> BadgeFactSheet:
     _check_minimum_content(bfs)        # EC03
 
     # ------------------------------------------------------------------
+    # Step 6b — Implied series detection from title (EC24)
+    # ------------------------------------------------------------------
+    _check_implied_series(bfs)         # EC24
+
+    # ------------------------------------------------------------------
     # Step 7 — Validate required fields; add to missing_signals
     # ------------------------------------------------------------------
     _check_required_fields(bfs)
@@ -226,4 +231,40 @@ def _check_minimum_content(bfs: BadgeFactSheet) -> None:
     if bfs.earning_criteria_text and len(bfs.earning_criteria_text.strip()) < 30:
         bfs.confidence_notes = (
             (bfs.confidence_notes or "") + " | WARN: criteria_too_short"
+        ).lstrip(" |").strip()
+
+
+# EC24 — keywords that imply a series/progression relationship
+_SERIES_KEYWORDS: list[str] = [
+    "foundational", "foundation", "intermediate",
+    "advanced", "capstone", "introduction to",
+    "part 1", "part 2", "part 3",
+    "level 1", "level 2", "level 3",
+    "course 1", "course 2", "course 3",
+]
+
+
+def _check_implied_series(bfs: BadgeFactSheet) -> None:
+    """
+    EC24 — Implied series detection from badge title.
+
+    When the title contains a level/position keyword that suggests a
+    series progression (e.g. "Introduction to", "Part 2", "Advanced"),
+    and no formal pathway has been established (no canvas_course_code
+    or pathway_name), set progression_implied = True and add a note.
+
+    This is advisory only — it does not block classification.
+    """
+    if not bfs.badge_title:
+        return
+    if bfs.canvas_course_code or bfs.pathway_name:
+        return
+
+    title_lower = bfs.badge_title.lower()
+    if any(kw in title_lower for kw in _SERIES_KEYWORDS):
+        bfs.progression_implied = True
+        bfs.confidence_notes = (
+            (bfs.confidence_notes or "")
+            + " | NOTE: title suggests series progression — "
+            "consider adding pathway information for better classification"
         ).lstrip(" |").strip()
