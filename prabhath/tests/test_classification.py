@@ -762,7 +762,7 @@ def test_all_48_badges():
     valid_categories = [
         "Academic", "Co-Curricular and Extra-Curricular",
         "Continuing & Professional Education", "Faculty & Staff Development",
-        "Uncategorized"
+        "Uncategorized", "Unknown - Open Question Q001"
     ]
     category_counts = {}
     for r in results:

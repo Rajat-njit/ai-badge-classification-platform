@@ -111,6 +111,7 @@ class BadgeFactSheet:
         default_factory=list
     )  # required previous badge names/IDs
     is_terminal: bool = False  # final badge in pathway
+    pathway_position: Optional[str] = None  # From Tanay's API: foundational/milestone/terminal
 
     # Optional metadata
     hours_to_complete: Optional[float] = None
@@ -136,6 +137,7 @@ class BadgeFactSheet:
             "bloom_levels": [b.value for b in self.bloom_levels],
             "prerequisites": self.prerequisites,
             "is_terminal": self.is_terminal,
+            "pathway_position": self.pathway_position,
             "hours_to_complete": self.hours_to_complete,
             "source_format": self.source_format,
             "confidence_scores": self.confidence_scores,

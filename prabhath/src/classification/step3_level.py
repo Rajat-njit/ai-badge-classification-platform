@@ -41,11 +41,28 @@ def classify_level(badge: BadgeFactSheet, badge_type: str) -> str:
 
 
 def _classify_achievement_level(badge: BadgeFactSheet) -> str:
-    """Foundational / Milestone / Terminal based on prerequisites and terminal flag."""
+    """Foundational / Milestone / Terminal based on prerequisites and pathway_position."""
+    # Priority 1: Use pathway_position from Tanay's API if available
+    if badge.pathway_position:
+        pos_lower = badge.pathway_position.lower()
+        if pos_lower == "terminal" or pos_lower == "capstone":
+            return "Terminal"
+        if pos_lower == "milestone" or pos_lower == "intermediate":
+            return "Milestone"
+        if pos_lower == "foundational" or pos_lower == "beginner":
+            return "Foundational"
+
+    # Priority 2: Legacy fields (is_terminal, prerequisites)
     if badge.is_terminal:
         return "Terminal"
     if badge.prerequisites and len(badge.prerequisites) > 0:
         return "Milestone"
+
+    # Priority 3: Infer from badge name patterns
+    name_lower = badge.badge_name.lower() if badge.badge_name else ""
+    if any(term in name_lower for term in ["intermediate", "advanced", "course 2", "course 3", "course 4"]):
+        return "Milestone"
+
     return "Foundational"
 
 

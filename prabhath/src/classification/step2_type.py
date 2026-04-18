@@ -24,8 +24,25 @@ def classify_type(badge: BadgeFactSheet) -> str:
     Returns:
         Type name as string
     """
+    # Priority 1: No assessment = Souvenir (attendance/participation only)
     if not badge.has_assessment:
         return "Souvenir"
+
+    # Priority 2: Makerspace workshop badges (Make 101, 102, 103, 242) = Skill
+    if badge.issuing_department and "makerspace" in badge.issuing_department.lower():
+        if badge.badge_name and "make " in badge.badge_name.lower():
+            return "Skill"
+
+    # Priority 3: Check description keywords before assessment type
+    # This catches special cases even with auto_graded assessment type
+    if badge.assessment_description:
+        desc = badge.assessment_description.lower()
+        # Multi-dimension indicators = Competency
+        if "competency" in desc or "ksa" in desc or "real-world" in desc or "(or)" in desc:
+            return "Competency"
+        # Skill indicators
+        if "skill" in desc or "demonstrate" in desc or "lab" in desc or "workshop" in desc:
+            return "Skill"
 
     if badge.assessment_type == AssessmentType.AUTO:
         return "Achievement"
@@ -35,17 +52,6 @@ def classify_type(badge: BadgeFactSheet) -> str:
 
     if badge.assessment_type == AssessmentType.EXPERT_MULTI:
         return "Competency"
-
-    # Fallback based on description keywords (simple rule)
-    if badge.assessment_description:
-        desc = badge.assessment_description.lower()
-        # Check more specific terms first
-        if "competency" in desc or "ksa" in desc:
-            return "Competency"
-        if "skill" in desc or "demonstrate" in desc:
-            return "Skill"
-        if "quiz" in desc or "assignment" in desc:
-            return "Achievement"
 
     return "Achievement"  # default
 

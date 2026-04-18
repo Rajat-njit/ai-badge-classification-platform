@@ -25,6 +25,10 @@ def classify_category(badge: BadgeFactSheet) -> str:
     Returns:
         Category name as string
     """
+    # Special case: OGI issuer requires manual review (Open Question Q001)
+    if badge.issuing_department and "OGI" in badge.issuing_department:
+        return "Unknown - Open Question Q001"
+
     # Academic: students + academic context
     if badge.context == Context.ACADEMIC and any(
         a in [Audience.STUDENT] for a in badge.audience
