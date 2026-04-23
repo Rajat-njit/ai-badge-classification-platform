@@ -250,13 +250,26 @@ def map_free_text_to_bfs(raw_text) -> BadgeFactSheet:
         bfs.issuer = detected_issuer
         bfs.governing_office = detected_issuer
 
-        # For LDI, refine audience_type from context words.
+        # Issuer-specific audience defaults.
         if detected_issuer == "LDI":
-            if any(kw in _lower for kw in ("faculty", " staff", "instructor")):
+            # Use self-referential phrases only — "an instructor watched me"
+            # should NOT mark the badge earner as njit_employee.
+            # Only phrases where the EARNER describes their own role trigger this.
+            _EMPLOYEE_SELF_REF = (
+                "i am a faculty", "i am an instructor", "i am a staff",
+                "as a faculty", "as an instructor", "as a staff",
+                "for faculty", "for staff", "for instructors",
+            )
+            if any(p in _lower for p in _EMPLOYEE_SELF_REF):
                 bfs.audience_type = "njit_employee"
             elif any(kw in _lower for kw in ("professional", "workforce", "industry")):
                 bfs.audience_type = "external_professional"
-            # else: leave None so NLP extraction can infer it later
+            # else: leave None — NLP will try to infer from context
+
+        elif detected_issuer == "Makerspace":
+            # Makerspace serves NJIT students; lock in now so NLP audience
+            # phrases (e.g. "instructor" appearing as evaluator) don't override.
+            bfs.audience_type = "njit_student"
 
     return bfs
 

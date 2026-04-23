@@ -207,6 +207,39 @@ ASSESSMENT_PATTERNS: list[tuple[re.Pattern, str, str]] = [
         re.IGNORECASE),
      "expert_scored", "High"),
 
+    # ---- Natural language expert evaluation — sets evaluator AND required flag ----
+    # type_key "expert_confirmed": sets assessment_evaluator="expert_scored" AND
+    # expert_evaluation_required=True (stronger signal than plain expert_scored).
+
+    # "instructor/supervisor/mentor/... watched/observed/confirmed/verified/..."
+    # No trailing \b on the verb group — partial stems (evaluat, assess) and
+    # conjugated forms (watched, confirmed) both need to match.
+    (re.compile(
+        r"\b(?:instructor|professor|supervisor|mentor|staff|expert)\b.{0,30}"
+        r"(?:watch|observ|confirm|verif|evaluat|assess|check)",
+        re.IGNORECASE),
+     "expert_confirmed", "High"),
+
+    # "watched/observed me/my/the student"
+    (re.compile(
+        r"\b(?:watch(?:ed|ing|es)?|observ(?:ed|ing|es)?)\b"
+        r".{0,20}\b(?:me|my|the student)\b",
+        re.IGNORECASE),
+     "expert_confirmed", "High"),
+
+    # "confirmed I could / I was / my ability / competency"
+    (re.compile(
+        r"\bconfirmed\b.{0,20}\b(?:i could|i was|my ability|competency)\b",
+        re.IGNORECASE),
+     "expert_confirmed", "High"),
+
+    # "in-person/hands-on assessment/evaluation/practical/demonstration"
+    (re.compile(
+        r"\b(?:in.person|hands.on)\b.{0,20}"
+        r"\b(?:assessment|evaluation|practical|demonstration)\b",
+        re.IGNORECASE),
+     "expert_confirmed", "High"),
+
     # ---- Portfolio / practical ----
     (re.compile(
         r"\b(?:portfolio|collection of work|body of work)\b",
@@ -350,6 +383,11 @@ class PatternExtractor:
             if type_key == "expert_scored":
                 if bfs.assessment_evaluator is None:
                     bfs.assessment_evaluator = "expert_scored"
+
+            elif type_key == "expert_confirmed":
+                # Stronger natural-language signal: sets both evaluator and required flag.
+                bfs.assessment_evaluator = "expert_scored"
+                bfs.expert_evaluation_required = True
 
             elif type_key == "no_assessment":
                 # Explicit negation of assessment — overrides "unknown" but

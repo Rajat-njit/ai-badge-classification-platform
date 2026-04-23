@@ -150,6 +150,24 @@ def classify_stage2(bfs: BadgeFactSheet) -> dict:
         }
 
     # ------------------------------------------------------------------
+    # S2R06b — Makerspace issuer + hands-on evidence → Skill
+    # Makerspace badges with practical/in-person/expert-evaluated criteria
+    # are almost always Skill type. This fires before S2R09 so that a
+    # practical assessment_type does not fall through to Achievement.
+    # ------------------------------------------------------------------
+    if bfs.issuer == "Makerspace" and (
+        bfs.assessment_type == "practical"
+        or bfs.expert_evaluation_required
+        or "in-person" in (bfs.earning_criteria_text or "").lower()
+        or "in person" in (bfs.earning_criteria_text or "").lower()
+    ):
+        return {
+            "type": "Skill",
+            "confidence": "High",
+            "rules_triggered": ["S2R06b"],
+        }
+
+    # ------------------------------------------------------------------
     # S2R09 — Canvas course code OR module-style assessment → Achievement
     # Moved before S2R07: canvas code / structured assessment type gives
     # enough signal to commit to Achievement at High confidence.
