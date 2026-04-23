@@ -290,16 +290,43 @@ const _FT_Q2 = {
   ],
 }
 
+// Q4 — shown only when level signal is genuinely missing.
+// Student-reported level uses confidence Medium and source "student_reported".
+const _FT_Q4 = {
+  label: 'Where does this badge fit in your learning journey?',
+  signal: 'self_declared_level',
+  options: [
+    {
+      text: 'It was my first time learning about this topic',
+      fields: { self_declared_level: 'Foundational', level_signal_source: 'student_reported' },
+    },
+    {
+      text: 'I had some background and this built on what I knew',
+      fields: { self_declared_level: 'Milestone', level_signal_source: 'student_reported' },
+    },
+    {
+      text: 'This was the final or most advanced step in the program',
+      fields: { self_declared_level: 'Terminal', level_signal_source: 'student_reported' },
+    },
+    // "I'm not sure" — never blocks; level stays Unknown; reviewer handles
+    { text: "I'm not sure", fields: null },
+  ],
+}
+
 function FreeTextFollowupPanel({ bfs, onClassify, loading }) {
   const missing = bfs.missing_signals || []
 
   const showQ1 = !bfs.issuer && missing.includes('issuer')
   const showQ2 = missing.includes('assessment_evaluator')
   const showQ3 = missing.includes('badge_title')
+  // Q4 — level is genuinely unknown: no NLP level phrase extracted AND
+  // no canvas_sequence_number to drive a structural level rule.
+  const showQ4 = !bfs.self_declared_level && bfs.canvas_sequence_number == null
 
   const [q1, setQ1] = useState(null)   // selected option object
   const [q2, setQ2] = useState(null)
   const [titleText, setTitleText] = useState('')
+  const [q4, setQ4] = useState(null)
 
   // Summary fields — what the NLP already extracted.
   // assessment_type is an internal derived field — never shown as a student concern.
@@ -314,6 +341,9 @@ function FreeTextFollowupPanel({ bfs, onClassify, loading }) {
     if (q1?.fields) Object.assign(extra, q1.fields)
     if (q2?.fields) Object.assign(extra, q2.fields)
     if (titleText.trim()) extra.badge_title = titleText.trim()
+    // Q4 — student-reported level uses Medium confidence, not High.
+    // "I'm not sure" leaves self_declared_level null; reviewer handles it.
+    if (q4?.fields) Object.assign(extra, q4.fields)
 
     // Derive audience_type from issuer when not already set by Q1 answer or BFS.
     // This covers issuers detected by Layer 0 keyword matching on the backend
@@ -339,6 +369,7 @@ function FreeTextFollowupPanel({ bfs, onClassify, loading }) {
     if (showQ1) updatedMissing = updatedMissing.filter(s => s !== 'issuer')
     if (showQ2) updatedMissing = updatedMissing.filter(s => s !== 'assessment_evaluator')
     updatedMissing = updatedMissing.filter(s => s !== 'badge_title')
+    if (showQ4) updatedMissing = updatedMissing.filter(s => s !== 'self_declared_level')
 
     return {
       ...bfs,
@@ -348,7 +379,7 @@ function FreeTextFollowupPanel({ bfs, onClassify, loading }) {
     }
   }
 
-  const questionCount = [showQ1, showQ2, showQ3].filter(Boolean).length
+  const questionCount = [showQ1, showQ2, showQ3, showQ4].filter(Boolean).length
 
   return (
     <div className="border border-gray-200 rounded-lg p-6 space-y-6">
@@ -419,6 +450,22 @@ function FreeTextFollowupPanel({ bfs, onClassify, loading }) {
             value={titleText}
             onChange={e => setTitleText(e.target.value)}
             placeholder="e.g. Leadership Workshop"
+          />
+        </div>
+      )}
+
+      {/* Question 4 — level (only when genuinely unknown) */}
+      {showQ4 && (
+        <div>
+          <p className="text-sm font-semibold text-gray-800 mb-2">{_FT_Q4.label}</p>
+          <p className="text-xs text-gray-500 mb-2">
+            Optional — helps us decide whether this is a beginner, intermediate, or advanced badge.
+          </p>
+          <RadioGroup
+            options={_FT_Q4.options.map(o => o.text)}
+            value={q4?.text || ''}
+            onChange={txt => setQ4(_FT_Q4.options.find(o => o.text === txt))}
+            name="ft_q4"
           />
         </div>
       )}
