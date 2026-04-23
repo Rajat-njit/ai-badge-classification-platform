@@ -65,6 +65,38 @@ def is_negated(text: str, match_start: int, window: int = 10) -> bool:
 
 
 # ---------------------------------------------------------------------------
+# Past-context blocking — prevents level phrases from firing when the phrase
+# appears as a description of a prerequisite or already-completed activity
+# rather than as a declaration of the badge's own level.
+#
+# Example blocked:
+#   "students who have already completed the introductory series"
+#   → "introductory" is a past-completed thing, not this badge's level.
+# ---------------------------------------------------------------------------
+PAST_CONTEXT_WORDS: list[str] = [
+    "completed", "finishing", "finished", "already",
+    "done with", "having finished", "after completing",
+    "having completed", "who have", "who has",
+]
+
+
+def is_past_context(text: str, match_start: int, window: int = 8) -> bool:
+    """
+    Past-context detection.
+
+    Inspects the `window` words immediately before `match_start` in `text`.
+    Returns True if any past-context phrase appears in that window, indicating
+    the level phrase describes a completed prerequisite rather than this badge.
+    Multi-word phrases are checked against the joined window string so that
+    "who have" and "after completing" are detected correctly.
+    """
+    words_before = text[:match_start].split()
+    recent_words = [w.lower().strip(".,;:!?\"'()") for w in words_before[-window:]]
+    joined = " ".join(recent_words)
+    return any(past in joined for past in PAST_CONTEXT_WORDS)
+
+
+# ---------------------------------------------------------------------------
 # LEVEL_PHRASES
 # Tuple: (level_value, confidence)
 # ---------------------------------------------------------------------------
@@ -73,6 +105,7 @@ LEVEL_PHRASES: dict[str, tuple[str, str]] = {
     "foundation-level badge":            ("Foundational", "High"),
     "this foundation-level":             ("Foundational", "High"),
     "foundation-level":                  ("Foundational", "High"),
+    "foundation level":                  ("Foundational", "High"),
     "foundational understanding":        ("Foundational", "High"),
     "foundational knowledge":            ("Foundational", "High"),
     "lays the groundwork":               ("Foundational", "High"),
@@ -323,6 +356,8 @@ class PhraseExtractor:
             if m is None:
                 continue
             if is_negated(lower, m.start()):    # EC18 — skip negated
+                continue
+            if is_past_context(lower, m.start()):  # skip past-completion context
                 continue
             all_matches.append((level, phrase, conf))
 
