@@ -76,7 +76,11 @@ def is_negated(text: str, match_start: int, window: int = 10) -> bool:
 PAST_CONTEXT_WORDS: list[str] = [
     "completed", "finishing", "finished", "already",
     "done with", "having finished", "after completing",
-    "having completed", "who have", "who has",
+    "having completed",
+    # "who have/has" alone is too broad — "who have never done" is a beginner
+    # audience description, not a past-completion context. Use specific forms.
+    "who have already", "who have completed", "who have finished",
+    "who has already", "who has completed", "who has finished",
 ]
 
 
@@ -125,6 +129,17 @@ LEVEL_PHRASES: dict[str, tuple[str, str]] = {
     "basics of":                         ("Foundational", "Medium"),
     "first in":                          ("Foundational", "Medium"),
     "first course":                      ("Foundational", "High"),
+    # Conversational / plain-language Foundational phrases
+    "never done this before":            ("Foundational", "High"),
+    "beginning of the journey":          ("Foundational", "Medium"),
+    "starting their journey":            ("Foundational", "Medium"),
+    "starting point":                    ("Foundational", "Medium"),
+    "entry point":                       ("Foundational", "Medium"),
+    "getting started with":              ("Foundational", "Medium"),
+    "just beginning to":                 ("Foundational", "Medium"),
+    "just starting":                     ("Foundational", "Medium"),
+    "new to this":                       ("Foundational", "Medium"),
+    "first time":                        ("Foundational", "Medium"),
 
     # Milestone
     "building on foundational concepts": ("Milestone", "High"),
@@ -143,6 +158,14 @@ LEVEL_PHRASES: dict[str, tuple[str, str]] = {
     "second course":                     ("Milestone", "High"),
     "second in":                         ("Milestone", "High"),
     "continues from":                    ("Milestone", "High"),
+    # Plain-language Milestone phrases
+    "more advanced than the first":      ("Milestone", "High"),
+    "second part":                       ("Milestone", "High"),
+    "building on what":                  ("Milestone", "Medium"),
+    "continuing from":                   ("Milestone", "Medium"),
+    "following up on":                   ("Milestone", "Medium"),
+    "taking it further":                 ("Milestone", "Medium"),
+    "next step":                         ("Milestone", "Medium"),
 
     # Terminal
     "after completing the foundational and intermediate": ("Terminal", "High"),
@@ -156,6 +179,15 @@ LEVEL_PHRASES: dict[str, tuple[str, str]] = {
     "completes the series":              ("Terminal", "High"),
     "final course":                      ("Terminal", "High"),
     "capstone":                          ("Terminal", "High"),
+    # Plain-language Terminal phrases
+    "everything comes together":         ("Terminal", "High"),
+    "putting it all together":           ("Terminal", "High"),
+    "completing the program":            ("Terminal", "High"),
+    "finishing the series":              ("Terminal", "High"),
+    "end of the program":                ("Terminal", "High"),
+    "last course":                       ("Terminal", "High"),
+    "final step":                        ("Terminal", "Medium"),
+    "the last thing needed":             ("Terminal", "Medium"),
 }
 
 # Pre-sorted: longest phrase first so the most specific match wins
