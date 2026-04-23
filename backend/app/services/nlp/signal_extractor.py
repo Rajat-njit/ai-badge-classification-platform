@@ -90,6 +90,10 @@ class SignalExtractor:
         # by the normalizer (e.g. "issuer", "badge_title")
         self._check_missing_signals(bfs)
 
+        # EC19 title-level conflict — compare badge_title keywords against
+        # the level extracted from description/criteria phrases.
+        self._check_title_level_conflict(bfs)
+
         return bfs
 
     # ------------------------------------------------------------------
@@ -126,6 +130,66 @@ class SignalExtractor:
 
         if bfs.missing_signals:
             bfs.needs_followup_questions = True
+
+    # ------------------------------------------------------------------
+    # EC19 title-level conflict detection
+    # ------------------------------------------------------------------
+
+    # Keywords in badge_title that hint at a broad level bucket.
+    _TITLE_LEVEL_KEYWORDS: dict[str, list[str]] = {
+        "high": ["advanced", "mastery", "expert", "senior"],
+        "mid":  ["intermediate"],
+        "low":  ["foundational", "foundation", "introduction",
+                 "introductory", "basic", "beginner"],
+    }
+
+    # Maps the self_declared_level (from description/criteria phrases) to the
+    # same three-bucket scale so title and description are comparable.
+    _DESCRIPTION_LEVEL_MAP: dict[str, str] = {
+        "Foundational": "low",
+        "Milestone":    "mid",
+        "Terminal":     "high",
+        "Mastery":      "high",
+    }
+
+    def _get_title_level_hint(self, badge_title: str | None) -> str | None:
+        """Return "high" / "mid" / "low" bucket for the badge title, or None."""
+        if not badge_title:
+            return None
+        title_lower = badge_title.lower()
+        for bucket, keywords in self._TITLE_LEVEL_KEYWORDS.items():
+            if any(kw in title_lower for kw in keywords):
+                return bucket
+        return None
+
+    def _check_title_level_conflict(self, bfs: BadgeFactSheet) -> None:
+        """
+        EC19 extension — title vs description level conflict.
+
+        When the badge title contains a level keyword (e.g. "Advanced")
+        and the description/criteria phrases yielded a contradicting level
+        (e.g. "Foundational"), record the conflict in confidence_notes.
+
+        The description signal is kept as primary (it has more context);
+        only a note is added — no field is overwritten.
+        """
+        title_hint = self._get_title_level_hint(bfs.badge_title)
+        if not title_hint or not bfs.self_declared_level:
+            return
+
+        desc_hint = self._DESCRIPTION_LEVEL_MAP.get(bfs.self_declared_level)
+        if not desc_hint or title_hint == desc_hint:
+            return
+
+        conflict_note = (
+            f"CONFLICT: badge title suggests {title_hint} level "
+            f"but description phrases suggest "
+            f"{bfs.self_declared_level} level. "
+            f"Description signal used as primary."
+        )
+        bfs.confidence_notes = (
+            (bfs.confidence_notes or "") + f" | {conflict_note}"
+        ).lstrip(" |").strip()
 
     def _new_missing_signals(self, bfs: BadgeFactSheet) -> list[str]:
         """
