@@ -149,24 +149,67 @@ _LEVEL_PHRASES_SORTED: list[tuple[str, str, str]] = sorted(
 #     → signals a downstream workflow exists (handled also by PURPOSE_PHRASES)
 # ---------------------------------------------------------------------------
 ASSESSMENT_PHRASES: dict[str, tuple[str, str | None, str]] = {
+    # ---- Final assessment — original strict phrases ----
     "passing the final assessment with an 80% or higher": ("final_assessment", "80%", "High"),
     "passing the final assessment with an 90% or higher": ("final_assessment", "90%", "High"),
+
+    # ---- Final assessment — flexible "pass the/a final X with Y%" variants ----
+    # Longer phrases first so the most specific match wins in sorted order.
+    "pass the final assessment with 80%":  ("final_assessment", "80%", "High"),
+    "pass the final assessment with 90%":  ("final_assessment", "90%", "High"),
+    "pass a final assessment with 80%":    ("final_assessment", "80%", "High"),
+    "pass a final assessment with 90%":    ("final_assessment", "90%", "High"),
+    "pass the final quiz with 80%":        ("final_assessment", "80%", "High"),
+    "pass the final exam with 80%":        ("final_assessment", "80%", "High"),
+
+    # ---- Score + explicit percentage ----
+    "80% or higher to earn":               ("final_assessment", "80%", "High"),
+    "80% or better":                       ("final_assessment", "80%", "High"),
+    "90% or higher to earn":               ("final_assessment", "90%", "High"),
+    "90% or better":                       ("final_assessment", "90%", "High"),
+    "score 80% or higher":                 ("final_assessment", "80%", "High"),
+    "score 90% or higher":                 ("final_assessment", "90%", "High"),
+    "score of 80":                         ("final_assessment", "80%", "High"),
+    "score of 90":                         ("final_assessment", "90%", "High"),
+
+    # Short bare-percentage phrases — lower specificity, useful as fallback.
+    # Longer phrases above will win when both appear in the same text.
+    "90% or higher":                       ("final_assessment", "90%", "High"),
+    "80% or higher":                       ("final_assessment", "80%", "High"),
+
+    # ---- Knowledge checks ----
     "passing knowledge checks with an 80% or higher":    ("knowledge_checks", "80%", "High"),
     "passing knowledge checks with a 80% or higher":     ("knowledge_checks", "80%", "High"),
+
+    # ---- Pre/post assessments ----
     "pre- and post-assessment":  ("pre_post_assessment", None, "High"),
     "pre and post assessment":   ("pre_post_assessment", None, "High"),
+
+    # ---- Project / presentation ----
     "capstone project and present": ("project_presentation", None, "High"),
-    "attend the full":           ("attendance", None, "High"),
-    "attended the full":         ("attendance", None, "High"),
-    "mandatory to apply":        ("compliance", None, "High"),
-    "required to apply":         ("compliance", None, "High"),
+
+    # ---- Attendance ----
+    "attend all sessions":        ("attendance", None, "High"),
+    "attend the full":            ("attendance", None, "High"),
+    "attended the full":          ("attendance", None, "High"),
+    "full attendance":            ("attendance", None, "High"),
+
+    # ---- Compliance / downstream ----
+    "mandatory to apply":         ("compliance", None, "High"),
+    "required to apply":          ("compliance", None, "High"),
     "share their digital badge to": ("downstream_workflow", None, "High"),
-    "module quizzes":            ("module_completion", None, "Medium"),
-    "in person practical":       ("practical", None, "High"),
-    "in-person practical":       ("practical", None, "High"),
-    "expert-verified":           ("expert_scored", None, "High"),
-    "evaluated by":              ("expert_scored", None, "Medium"),
-    "assessed by":               ("expert_scored", None, "Medium"),
+
+    # ---- Module / practical ----
+    "module quizzes":             ("module_completion", None, "Medium"),
+    "in person practical":        ("practical", None, "High"),
+    "in-person practical":        ("practical", None, "High"),
+
+    # ---- Expert scored ----
+    "expert-verified":            ("expert_scored", None, "High"),
+    "graded by instructor":       ("expert_scored", None, "High"),
+    "reviewed by mentor":         ("expert_scored", None, "High"),
+    "evaluated by":               ("expert_scored", None, "Medium"),
+    "assessed by":                ("expert_scored", None, "Medium"),
 }
 
 _ASSESSMENT_PHRASES_SORTED: list[tuple[str, str, str | None, str]] = sorted(

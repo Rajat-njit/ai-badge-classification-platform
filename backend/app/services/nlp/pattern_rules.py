@@ -132,18 +132,58 @@ LEVEL_PATTERNS: list[tuple[re.Pattern, str, str]] = [
 # For patterns with a capture group (threshold %), group 1 is the number.
 # ---------------------------------------------------------------------------
 ASSESSMENT_PATTERNS: list[tuple[re.Pattern, str, str]] = [
+    # ---- Passing a final/summative assessment (with optional % capture) ----
+    # Matches: "passing the final assessment with 80%", etc.
     (re.compile(
         r"\bpassing\b.{0,10}\b(?:final|end.of.course|summative)\b.{0,20}"
         r"\b(?:assessment|exam|test)\b.{0,20}\b(\d+)%",
         re.IGNORECASE),
      "final_assessment", "High"),
 
+    # "pass/passing the/a final/summative/end-of-course assessment/exam/test/quiz"
+    # (with optional percentage capture group 1)
+    (re.compile(
+        r"\bpass(?:ing)?\b.{0,20}\b(?:final|end.of.course|summative)\b.{0,20}"
+        r"\b(?:assessment|exam|test|quiz)\b(?:.{0,20}(\d{2,3})%)?",
+        re.IGNORECASE),
+     "final_assessment", "High"),
+
+    # ---- Percentage threshold — "X% or higher/above/better" ----
+    # type_key "threshold_only": only sets assessment_pass_threshold (and
+    # assessment_required="yes" / assessment_type="final_assessment" when unset).
+    (re.compile(
+        r"\b(\d{2,3})%\s*or\s*(?:higher|above|better)\b",
+        re.IGNORECASE),
+     "threshold_only", "High"),
+
+    # ---- Score patterns ----
+    # "score at least/minimum/of X% / X out of Y"
     (re.compile(
         r"\bscore\b.{0,20}\b(?:at least|minimum|of)\b.{0,20}"
         r"\b(\d+)\b.{0,10}\b(?:out of|%|percent)\b",
         re.IGNORECASE),
      "scored_assessment", "High"),
 
+    # "achieve X% or higher/above" — captures the percentage
+    (re.compile(
+        r"\bachieve\b.{0,20}\b(\d{2,3})%\b.{0,10}\b(?:or\s+(?:higher|above|better))?\b",
+        re.IGNORECASE),
+     "threshold_only", "High"),
+
+    # "at least X%" (without preceding "score") — e.g. "at least 80% on the exam"
+    # No \b after % — % is non-word so word boundary never fires after it.
+    (re.compile(
+        r"\bat\s+least\s+(\d{2,3})%",
+        re.IGNORECASE),
+     "threshold_only", "High"),
+
+    # "minimum score of X%" or "minimum of X%"
+    (re.compile(
+        r"\bminimum\b.{0,20}(\d{2,3})%",
+        re.IGNORECASE),
+     "threshold_only", "High"),
+
+    # ---- Attendance ----
     (re.compile(
         r"\b(?:show up|attend(?:ing)?|presence at|participating in)\b.{0,20}"
         r"\b(?:event|session|workshop|forum)\b",
@@ -151,16 +191,23 @@ ASSESSMENT_PATTERNS: list[tuple[re.Pattern, str, str]] = [
      "attendance", "High"),
 
     (re.compile(
+        r"\battend\s+all\b.{0,20}\b(?:sessions?|classes?|meetings?|modules?)\b",
+        re.IGNORECASE),
+     "attendance", "High"),
+
+    # ---- Expert / evaluator patterns ----
+    (re.compile(
         r"\bexpert.{0,10}(?:scored|evaluated|assessed|verified|reviewed)\b",
         re.IGNORECASE),
      "expert_scored", "High"),
 
     (re.compile(
         r"\b(?:faculty|instructor|mentor|supervisor|assessor)\b.{0,20}"
-        r"\b(?:evaluat|assess|review|score)\b",
+        r"\b(?:evaluat|assess|review|score|verif)\b",
         re.IGNORECASE),
      "expert_scored", "High"),
 
+    # ---- Portfolio / practical ----
     (re.compile(
         r"\b(?:portfolio|collection of work|body of work)\b",
         re.IGNORECASE),
@@ -259,6 +306,10 @@ _ASSESSMENT_TYPE_VALUES = {
     "practical", "portfolio", "scored_assessment",
 }
 
+# threshold_only is not a type — handled separately: sets pass_threshold only,
+# and implies final_assessment + assessment_required="yes" when unset.
+_THRESHOLD_ONLY = "threshold_only"
+
 
 class PatternExtractor:
     """
@@ -307,6 +358,18 @@ class PatternExtractor:
                     bfs.assessment_required = "no"
                 if bfs.assessment_type is None:
                     bfs.assessment_type = "attendance"
+
+            elif type_key == _THRESHOLD_ONLY:
+                # threshold_only: set pass threshold from capture group 1.
+                # Also implies an assessed activity — set assessment_type to
+                # final_assessment and assessment_required="yes" when unset,
+                # so a lone "80% or higher" still moves the needle.
+                if bfs.assessment_pass_threshold is None and m.lastindex:
+                    bfs.assessment_pass_threshold = f"{m.group(1)}%"
+                if bfs.assessment_required in (None, "unknown"):
+                    bfs.assessment_required = "yes"
+                if bfs.assessment_type is None:
+                    bfs.assessment_type = "final_assessment"
 
             elif type_key in _ASSESSMENT_TYPE_VALUES:
                 if bfs.assessment_type is None:
