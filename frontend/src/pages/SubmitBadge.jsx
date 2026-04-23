@@ -273,7 +273,7 @@ const _FT_Q1 = {
     { text: 'It was a student club, leadership, or involvement program',         fields: { issuer: 'OSIL', audience_type: 'njit_student' } },
     { text: 'It was in the Makerspace (3D printing, laser cutting, etc.)',        fields: { issuer: 'Makerspace', audience_type: 'njit_student' } },
     { text: 'It was part of a class or academic program',                         fields: { issuer: 'NCE', audience_type: 'njit_student' } },
-    { text: 'It was an administrative requirement (visa, work authorization)',    fields: { issuer: 'OGI' } },
+    { text: 'It was an administrative requirement (visa, work authorization)',    fields: { issuer: 'OGI', audience_type: 'njit_student' } },
     { text: "I'm not sure", fields: null },
   ],
 }
@@ -301,10 +301,10 @@ function FreeTextFollowupPanel({ bfs, onClassify, loading }) {
   const [q2, setQ2] = useState(null)
   const [titleText, setTitleText] = useState('')
 
-  // Summary fields — what the NLP already extracted
+  // Summary fields — what the NLP already extracted.
+  // assessment_type is an internal derived field — never shown as a student concern.
   const summaryFields = [
     ['issuer',           'Issuer'],
-    ['assessment_type',  'Assessment Type'],
     ['audience_type',    'Audience Type'],
     ['badge_description','Description (first 120 chars)'],
   ]
@@ -314,6 +314,24 @@ function FreeTextFollowupPanel({ bfs, onClassify, loading }) {
     if (q1?.fields) Object.assign(extra, q1.fields)
     if (q2?.fields) Object.assign(extra, q2.fields)
     if (titleText.trim()) extra.badge_title = titleText.trim()
+
+    // Derive audience_type from issuer when not already set by Q1 answer or BFS.
+    // This covers issuers detected by Layer 0 keyword matching on the backend
+    // where Q1 was never shown (issuer already present in BFS).
+    const effectiveIssuer = extra.issuer ?? bfs.issuer
+    const effectiveAudience = extra.audience_type ?? bfs.audience_type
+    if (!effectiveAudience && effectiveIssuer) {
+      const _ISSUER_AUDIENCE = {
+        OSIL:       'njit_student',
+        Makerspace: 'njit_student',
+        NCE:        'njit_student',
+        OGI:        'njit_student',
+        // LDI: left null — backend Layer 0 infers from faculty/professional context
+      }
+      if (_ISSUER_AUDIENCE[effectiveIssuer]) {
+        extra.audience_type = _ISSUER_AUDIENCE[effectiveIssuer]
+      }
+    }
 
     // Remove from missing_signals any field we showed a question for — whether
     // the student answered it or chose "I'm not sure" or left it blank.
