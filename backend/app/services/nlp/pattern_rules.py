@@ -271,6 +271,33 @@ ASSESSMENT_PATTERNS: list[tuple[re.Pattern, str, str]] = [
 ]
 
 # ---------------------------------------------------------------------------
+# REAL_WORLD_PATTERNS
+# Set bfs.real_world_context = True when any pattern matches.
+# These indicate the badge criteria involve real-world activity outside a
+# classroom — a key signal for Competency type detection (S2R08 / S2R08b).
+# ---------------------------------------------------------------------------
+REAL_WORLD_PATTERNS: list[re.Pattern] = [
+    re.compile(
+        r'\b(?:launched|founded|co-founded)\b.{0,20}\b(?:startup|company|venture)\b',
+        re.IGNORECASE),
+    re.compile(
+        r'\b(?:pitch|pitched)\b.{0,20}\b(?:audience|panel|investors?|competition)\b',
+        re.IGNORECASE),
+    re.compile(
+        r'\b(?:competed|competing|participated)\b.{0,20}\b(?:hackathon|competition|event)\b',
+        re.IGNORECASE),
+    re.compile(
+        r'\binternship\b.{0,20}\b(?:startup|company|industry|employer|experience)\b',
+        re.IGNORECASE),
+    re.compile(
+        r'\breal[- ]world\b.{0,20}\b(?:experience|project|practice|application|context)\b',
+        re.IGNORECASE),
+    # standalone high-signal terms that unambiguously indicate real-world context
+    re.compile(r'\b(?:hackathon|startup|pitch\s+competition|venture)\b', re.IGNORECASE),
+]
+
+
+# ---------------------------------------------------------------------------
 # BLOOM_PATTERNS
 # Used as a lightweight fallback if spaCy is unavailable.
 # PatternExtractor does NOT set bloom fields from these — that is
@@ -356,6 +383,7 @@ class PatternExtractor:
         bfs = self._extract_level(bfs, text)
         bfs = self._extract_assessment(bfs, text)
         bfs = self._extract_criteria_logic(bfs)
+        bfs = self._extract_real_world_context(bfs, text)
         return bfs
 
     def _extract_level(self, bfs: BadgeFactSheet, text: str) -> BadgeFactSheet:
@@ -422,4 +450,19 @@ class PatternExtractor:
     def _extract_criteria_logic(self, bfs: BadgeFactSheet) -> BadgeFactSheet:
         if bfs.criteria_logic is None and bfs.earning_criteria_text:
             bfs.criteria_logic = detect_criteria_logic(bfs.earning_criteria_text)
+        return bfs
+
+    def _extract_real_world_context(
+        self, bfs: BadgeFactSheet, text: str
+    ) -> BadgeFactSheet:
+        """Set real_world_context = True if any REAL_WORLD_PATTERNS match.
+
+        Only sets to True — never clears a True already set by form input.
+        """
+        if bfs.real_world_context:
+            return bfs
+        for pattern in REAL_WORLD_PATTERNS:
+            if pattern.search(text):
+                bfs.real_world_context = True
+                return bfs
         return bfs

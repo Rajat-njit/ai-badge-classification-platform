@@ -187,9 +187,13 @@ def map_free_text_to_bfs(raw_text) -> BadgeFactSheet:
     _ISSUER_KEYWORDS: list[tuple[str, list[str]]] = [
         # OSIL — longer/more-specific strings first
         ("OSIL", [
+            "center for student entrepreneurship",
+            "student entrepreneurship center",
             "office of student involvement",
             "student involvement and leadership",
             "student involvement office",
+            "entrepreneurship program",
+            "entrepreneurship center",
             "student leadership",
             "student involvement",
         ]),
@@ -246,6 +250,11 @@ def map_free_text_to_bfs(raw_text) -> BadgeFactSheet:
                 detected_issuer = issuer_name
                 break
 
+    # 3. Multi-word abbreviation "CSE NJIT" — checked as plain substring
+    #    (already specific enough; word-boundary not needed for a two-word phrase).
+    if detected_issuer is None and ("cse njit" in _lower or "njit cse" in _lower):
+        detected_issuer = "OSIL"
+
     if detected_issuer:
         bfs.issuer = detected_issuer
         bfs.governing_office = detected_issuer
@@ -266,9 +275,9 @@ def map_free_text_to_bfs(raw_text) -> BadgeFactSheet:
                 bfs.audience_type = "external_professional"
             # else: leave None — NLP will try to infer from context
 
-        elif detected_issuer == "Makerspace":
-            # Makerspace serves NJIT students; lock in now so NLP audience
-            # phrases (e.g. "instructor" appearing as evaluator) don't override.
+        elif detected_issuer in ("Makerspace", "OSIL", "NCE", "OGI"):
+            # These issuers serve NJIT students; lock in now so NLP audience
+            # phrases (e.g. "instructor" as evaluator) don't override.
             bfs.audience_type = "njit_student"
 
     return bfs

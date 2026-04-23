@@ -204,6 +204,30 @@ def classify_stage2(bfs: BadgeFactSheet) -> dict:
         }
 
     # ------------------------------------------------------------------
+    # S2R08b — OR criteria + real-world context → Competency/Medium
+    # Catches badges where achievement_type is not explicitly "Competency"
+    # but the criteria pattern clearly indicates competency-style evaluation.
+    # Placed before S2R11 so it is a positive signal, not a fallback.
+    # ------------------------------------------------------------------
+    _RW_PHRASES = (
+        "internship", "startup", "pitch", "hackathon",
+        "competition", "real-world", "launched", "founded",
+    )
+    if bfs.criteria_logic == "OR" and (
+        bfs.real_world_context
+        or any(p in criteria_lower for p in _RW_PHRASES)
+    ):
+        return {
+            "type": "Competency",
+            "confidence": "Medium",
+            "rules_triggered": ["S2R08b"],
+            "flag": (
+                "OR-based real-world criteria suggests Competency type "
+                "— reviewer should confirm"
+            ),
+        }
+
+    # ------------------------------------------------------------------
     # S2R11 — No rule matched
     # ------------------------------------------------------------------
     return {
