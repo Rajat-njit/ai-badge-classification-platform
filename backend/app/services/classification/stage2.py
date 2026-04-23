@@ -228,6 +228,26 @@ def classify_stage2(bfs: BadgeFactSheet) -> dict:
         }
 
     # ------------------------------------------------------------------
+    # S2R11d — Issuer-based type defaults when all signal rules failed.
+    # Applied immediately before the Unknown fallback so any positive
+    # assessment signal above still takes precedence.
+    # ------------------------------------------------------------------
+    _ISSUER_DEFAULTS: dict[str, tuple[str, str]] = {
+        "OSIL":       ("Achievement", "Defaulted based on OSIL issuer pattern"),
+        "LDI":        ("Achievement", "Defaulted based on LDI issuer pattern"),
+        "OGI":        ("Achievement", "Defaulted based on OGI issuer pattern"),
+        "Makerspace": ("Skill",       "Defaulted based on Makerspace issuer pattern"),
+    }
+    if bfs.issuer in _ISSUER_DEFAULTS:
+        _default_type, _default_note = _ISSUER_DEFAULTS[bfs.issuer]
+        return {
+            "type": _default_type,
+            "confidence": "Medium",
+            "rules_triggered": ["S2R11d"],
+            "flag": _default_note,
+        }
+
+    # ------------------------------------------------------------------
     # S2R11 — No rule matched
     # ------------------------------------------------------------------
     return {
