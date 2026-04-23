@@ -227,10 +227,17 @@ def _check_duplicate_content(bfs: BadgeFactSheet) -> None:
 
     When earning_criteria_text and badge_description contain exactly the same
     text, the criteria field provides no additional signal. Flag for follow-up.
+
+    Skipped for free_text input: map_free_text_to_bfs() intentionally stores
+    the same raw text in both fields so the NLP layers have maximum surface
+    area. Flagging it as missing would incorrectly degrade confidence for
+    every free-text submission.
     """
     if not (bfs.earning_criteria_text and bfs.badge_description):
         return
     if bfs.earning_criteria_text.strip() != bfs.badge_description.strip():
+        return
+    if bfs.structured_source_type == "free_text":
         return
     if "criteria_identical_to_description" not in (bfs.confidence_notes or ""):
         bfs.confidence_notes = (
