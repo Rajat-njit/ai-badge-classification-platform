@@ -175,25 +175,88 @@ def map_free_text_to_bfs(raw_text) -> BadgeFactSheet:
     # Layer 0 — issuer keyword detection.
     # Checked before URL-based resolver so explicit mentions take precedence.
     # Order matters: longer / more specific strings first to avoid false matches.
+    # Space-padded abbreviations (e.g. " ldi ") miss start/end of text and
+    # punctuation — use word-boundary helper _word_in() instead.
     _lower = raw_text.lower()
+
+    def _word_in(abbr: str) -> bool:
+        """True if abbr appears as a whole word (not substring of another word)."""
+        import re as _re
+        return bool(_re.search(r"(?<![a-z])" + _re.escape(abbr) + r"(?![a-z])", _lower))
+
     _ISSUER_KEYWORDS: list[tuple[str, list[str]]] = [
-        ("OSIL",      ["student involvement and leadership",
-                       "student involvement office",
-                       "student involvement",
-                       "osil"]),
-        ("LDI",       ["learning and development institute",
-                       "learning and development office",
-                       "continuing education office",
-                       " ldi "]),
-        ("Makerspace", ["makerspace"]),
-        ("NCE",       ["newark college of engineering"]),
-        ("OGI",       ["office of global initiatives",
-                       " ogi "]),
+        # OSIL — longer/more-specific strings first
+        ("OSIL", [
+            "office of student involvement",
+            "student involvement and leadership",
+            "student involvement office",
+            "student leadership",
+            "student involvement",
+        ]),
+        # LDI — covers full name, initiative variant, and program-type keywords
+        ("LDI", [
+            "learning and development initiative",
+            "learning and development institute",
+            "learning and development office",
+            "learning and development",
+            "continuing education office",
+            "continuing education",
+            "workforce development",
+            "non-credit",
+        ]),
+        # Makerspace
+        ("Makerspace", [
+            "njit makerspace",
+            "maker space",
+            "makerspace",
+        ]),
+        # NCE — longer first
+        ("NCE", [
+            "newark college of engineering",
+            "college of engineering",
+        ]),
+        # OGI — longer first
+        ("OGI", [
+            "office of global initiatives",
+            "global initiatives",
+            "international student",
+        ]),
     ]
+
+    # Short abbreviations matched as whole words only (word-boundary safe).
+    _ABBR_ISSUERS: list[tuple[str, str]] = [
+        ("osil", "OSIL"),
+        ("ldi",  "LDI"),
+        ("nce",  "NCE"),
+        ("ogi",  "OGI"),
+    ]
+
+    detected_issuer: str | None = None
+
+    # 1. Phrase match (longer phrases already ordered first per issuer).
     for issuer_name, keywords in _ISSUER_KEYWORDS:
         if any(kw in _lower for kw in keywords):
-            bfs.issuer = issuer_name
+            detected_issuer = issuer_name
             break
+
+    # 2. Abbreviation word-boundary match (only if phrase match found nothing).
+    if detected_issuer is None:
+        for abbr, issuer_name in _ABBR_ISSUERS:
+            if _word_in(abbr):
+                detected_issuer = issuer_name
+                break
+
+    if detected_issuer:
+        bfs.issuer = detected_issuer
+        bfs.governing_office = detected_issuer
+
+        # For LDI, refine audience_type from context words.
+        if detected_issuer == "LDI":
+            if any(kw in _lower for kw in ("faculty", " staff", "instructor")):
+                bfs.audience_type = "njit_employee"
+            elif any(kw in _lower for kw in ("professional", "workforce", "industry")):
+                bfs.audience_type = "external_professional"
+            # else: leave None so NLP extraction can infer it later
 
     return bfs
 
