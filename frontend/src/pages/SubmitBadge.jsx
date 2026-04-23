@@ -259,6 +259,163 @@ function BfsConfirmPanel({ bfs, inputMode, onConfirm, onFollowupChange, loading 
   )
 }
 
+// ── Free Text Student Follow-up Panel ────────────────────────────────────────
+//
+// Shown instead of BfsConfirmPanel when input_type === "free_text".
+// Asks plain-language student questions (max 3), merges answers, then
+// calls classify immediately — no second confirmation round.
+
+const _FT_Q1 = {
+  label: 'Where did this activity or training take place at NJIT?',
+  signal: 'issuer',
+  options: [
+    { text: 'It was a professional development or continuing education program', fields: { issuer: 'LDI', audience_type: 'external_professional' } },
+    { text: 'It was a student club, leadership, or involvement program',         fields: { issuer: 'OSIL', audience_type: 'njit_student' } },
+    { text: 'It was in the Makerspace (3D printing, laser cutting, etc.)',        fields: { issuer: 'Makerspace', audience_type: 'njit_student' } },
+    { text: 'It was part of a class or academic program',                         fields: { issuer: 'NCE', audience_type: 'njit_student' } },
+    { text: 'It was an administrative requirement (visa, work authorization)',    fields: { issuer: 'OGI' } },
+    { text: "I'm not sure", fields: null },
+  ],
+}
+
+const _FT_Q2 = {
+  label: 'How was your work or participation checked?',
+  signal: 'assessment_evaluator',
+  options: [
+    { text: 'I took an online quiz or test',                               fields: { assessment_evaluator: 'auto_assessed',  assessment_type: 'final_assessment' } },
+    { text: 'A person watched me do something and said I passed',          fields: { assessment_evaluator: 'expert_scored',  expert_evaluation_required: true, assessment_type: 'practical' } },
+    { text: 'I submitted a project or portfolio that someone reviewed',    fields: { assessment_evaluator: 'expert_scored',  expert_evaluation_required: true, assessment_type: 'portfolio' } },
+    { text: 'I just showed up — no grading was required',                  fields: { assessment_evaluator: null, assessment_type: 'attendance', assessment_required: 'no' } },
+    { text: "I'm not sure", fields: null },
+  ],
+}
+
+function FreeTextFollowupPanel({ bfs, onClassify, loading }) {
+  const missing = bfs.missing_signals || []
+
+  const showQ1 = !bfs.issuer && missing.includes('issuer')
+  const showQ2 = missing.includes('assessment_evaluator')
+  const showQ3 = missing.includes('badge_title')
+
+  const [q1, setQ1] = useState(null)   // selected option object
+  const [q2, setQ2] = useState(null)
+  const [titleText, setTitleText] = useState('')
+
+  // Summary fields — what the NLP already extracted
+  const summaryFields = [
+    ['issuer',           'Issuer'],
+    ['assessment_type',  'Assessment Type'],
+    ['audience_type',    'Audience Type'],
+    ['badge_description','Description (first 120 chars)'],
+  ]
+
+  function buildMergedBfs() {
+    const extra = {}
+    if (q1?.fields) Object.assign(extra, q1.fields)
+    if (q2?.fields) Object.assign(extra, q2.fields)
+    if (titleText.trim()) extra.badge_title = titleText.trim()
+
+    // Remove from missing_signals any field we showed a question for — whether
+    // the student answered it or chose "I'm not sure" or left it blank.
+    let updatedMissing = [...missing]
+    if (showQ1) updatedMissing = updatedMissing.filter(s => s !== 'issuer')
+    if (showQ2) updatedMissing = updatedMissing.filter(s => s !== 'assessment_evaluator')
+    updatedMissing = updatedMissing.filter(s => s !== 'badge_title')
+
+    return {
+      ...bfs,
+      ...extra,
+      missing_signals: updatedMissing,
+      needs_followup_questions: updatedMissing.length > 0,
+    }
+  }
+
+  const questionCount = [showQ1, showQ2, showQ3].filter(Boolean).length
+
+  return (
+    <div className="border border-gray-200 rounded-lg p-6 space-y-6">
+      <div>
+        <h2 className="text-lg font-semibold text-njit-navy">Almost there!</h2>
+        <p className="text-sm text-gray-600 mt-1">
+          {questionCount > 0
+            ? `We extracted what we could. Answer ${questionCount === 1 ? 'this quick question' : `these ${questionCount} quick questions`} to get a better classification.`
+            : 'We extracted everything we need. Click Classify to continue.'}
+        </p>
+      </div>
+
+      {/* What NLP already found */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+        {summaryFields.map(([field, label]) => {
+          const raw = bfs[field]
+          const hasVal = raw !== null && raw !== undefined && raw !== ''
+          const display = hasVal
+            ? (field === 'badge_description' ? String(raw).slice(0, 120) + (String(raw).length > 120 ? '…' : '') : String(raw))
+            : null
+          return (
+            <div key={field} className="rounded p-2 text-sm border bg-gray-50 border-gray-200">
+              <span className="font-medium text-gray-600">{label}: </span>
+              <span className={display ? 'text-gray-900' : 'text-gray-400 italic'}>
+                {display || 'not detected'}
+              </span>
+            </div>
+          )
+        })}
+      </div>
+
+      {/* Question 1 — issuer */}
+      {showQ1 && (
+        <div>
+          <p className="text-sm font-semibold text-gray-800 mb-2">{_FT_Q1.label}</p>
+          <RadioGroup
+            options={_FT_Q1.options.map(o => o.text)}
+            value={q1?.text || ''}
+            onChange={txt => setQ1(_FT_Q1.options.find(o => o.text === txt))}
+            name="ft_q1"
+          />
+        </div>
+      )}
+
+      {/* Question 2 — assessment_evaluator */}
+      {showQ2 && (
+        <div>
+          <p className="text-sm font-semibold text-gray-800 mb-2">{_FT_Q2.label}</p>
+          <RadioGroup
+            options={_FT_Q2.options.map(o => o.text)}
+            value={q2?.text || ''}
+            onChange={txt => setQ2(_FT_Q2.options.find(o => o.text === txt))}
+            name="ft_q2"
+          />
+        </div>
+      )}
+
+      {/* Question 3 — badge_title */}
+      {showQ3 && (
+        <div>
+          <p className="text-sm font-semibold text-gray-800 mb-1">
+            What would you call this badge or achievement?
+          </p>
+          <p className="text-xs text-gray-500 mb-2">
+            Optional — for example: Leadership Workshop, AI Training, Laser Cutting Certification
+          </p>
+          <Input
+            value={titleText}
+            onChange={e => setTitleText(e.target.value)}
+            placeholder="e.g. Leadership Workshop"
+          />
+        </div>
+      )}
+
+      <button
+        onClick={() => onClassify(buildMergedBfs())}
+        disabled={loading}
+        className="bg-njit-red text-white px-6 py-2 rounded font-medium hover:bg-njit-red-dark disabled:opacity-50"
+      >
+        {loading ? 'Classifying…' : 'Classify →'}
+      </button>
+    </div>
+  )
+}
+
 // ── Tab 1: Guided Form (replaces Proposal Form) ───────────────────────────────
 
 const STEP_TITLES = [
@@ -819,6 +976,16 @@ export default function SubmitBadge() {
   const [classifyError, setClassifyError] = useState('')
 
   function handleIngested(bfsData, mode, meta = {}) {
+    // For free_text: NLP runs at /classify time, so assessment_evaluator is never
+    // flagged as missing at /ingest time even when it is null. Add it here so
+    // FreeTextFollowupPanel's condition missing_signals.includes('assessment_evaluator')
+    // works correctly.
+    if (mode === 'free_text' && bfsData.assessment_evaluator == null) {
+      const ms = bfsData.missing_signals || []
+      if (!ms.includes('assessment_evaluator')) {
+        bfsData = { ...bfsData, missing_signals: [...ms, 'assessment_evaluator'] }
+      }
+    }
     setBfs(bfsData)
     setInputMode(mode)
     setFollowupValues({})
@@ -833,6 +1000,22 @@ export default function SubmitBadge() {
       setFollowupValues(v => ({ ...v, ...fieldsOrField }))
     } else {
       setFollowupValues(v => ({ ...v, [fieldsOrField]: val }))
+    }
+  }
+
+  // Free-text path: receives a fully merged BFS from FreeTextFollowupPanel,
+  // classifies immediately, navigates directly to the review page.
+  async function handleFreeTextClassify(mergedBfs) {
+    setClassifying(true)
+    setClassifyError('')
+    try {
+      const result = await classifyBadge(mergedBfs, {})
+      const logId = result.governance.log_id
+      navigate(`/review/${logId}`, { state: { result, bfs: mergedBfs } })
+    } catch (err) {
+      setClassifyError(err.message)
+    } finally {
+      setClassifying(false)
     }
   }
 
@@ -896,18 +1079,26 @@ export default function SubmitBadge() {
         {activeTab === 2 && <FreeTextTab onIngested={handleIngested} />}
       </div>
 
-      {/* BFS confirmation panel */}
+      {/* Post-ingest panel — student follow-ups for free text, BFS confirm for others */}
       {bfs && (
         <>
           <hr className="border-gray-200" />
           <ErrorBanner message={classifyError} />
-          <BfsConfirmPanel
-            bfs={bfs}
-            inputMode={inputMode}
-            onConfirm={handleConfirmClassify}
-            onFollowupChange={handleFollowupChange}
-            loading={classifying}
-          />
+          {inputMode === 'free_text' ? (
+            <FreeTextFollowupPanel
+              bfs={bfs}
+              onClassify={handleFreeTextClassify}
+              loading={classifying}
+            />
+          ) : (
+            <BfsConfirmPanel
+              bfs={bfs}
+              inputMode={inputMode}
+              onConfirm={handleConfirmClassify}
+              onFollowupChange={handleFollowupChange}
+              loading={classifying}
+            />
+          )}
         </>
       )}
     </div>

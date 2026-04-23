@@ -127,7 +127,7 @@ def map_form_to_bfs(form_data: Dict[str, Any]) -> BadgeFactSheet:
     return bfs
 
 
-def map_free_text_to_bfs(raw_text: str) -> BadgeFactSheet:
+def map_free_text_to_bfs(raw_text) -> BadgeFactSheet:
     """
     Wrap a plain-text description into a minimal BFS.
 
@@ -139,7 +139,29 @@ def map_free_text_to_bfs(raw_text: str) -> BadgeFactSheet:
     mentions a known NJIT office by name or abbreviation — avoids
     a mandatory follow-up question for straightforward free-text
     submissions.
+
+    Handles double-wrapping: the normalizer receives a dict payload
+    like {"text": "..."} from the frontend and json.dumps it before
+    calling this function. Both the dict form and the JSON-stringified
+    form are unwrapped to extract the actual text value.
     """
+    # Unwrap case 1: called directly with a dict {"text": "..."}
+    if isinstance(raw_text, dict):
+        raw_text = raw_text.get("text", "") or raw_text.get("free_text", str(raw_text))
+
+    # Unwrap case 2: normalizer passed json.dumps({"text": "..."})
+    if isinstance(raw_text, str):
+        try:
+            parsed = json.loads(raw_text)
+            if isinstance(parsed, dict):
+                extracted = parsed.get("text", "") or parsed.get("free_text", "")
+                if extracted:
+                    raw_text = extracted
+        except (json.JSONDecodeError, TypeError):
+            pass  # Not a JSON wrapper — use raw_text as-is
+
+    raw_text = str(raw_text).strip()
+
     bfs = BadgeFactSheet()
     bfs.structured_source_type = "free_text"
     bfs.obv_version = None
@@ -147,8 +169,8 @@ def map_free_text_to_bfs(raw_text: str) -> BadgeFactSheet:
     bfs.obv_fields_present = []
 
     # For free text, treat the whole blob as both description and criteria
-    bfs.badge_description = raw_text.strip()
-    bfs.earning_criteria_text = raw_text.strip()
+    bfs.badge_description = raw_text
+    bfs.earning_criteria_text = raw_text
 
     # Layer 0 — issuer keyword detection.
     # Checked before URL-based resolver so explicit mentions take precedence.
