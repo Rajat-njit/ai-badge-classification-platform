@@ -1,5 +1,5 @@
 NJIT AI-Assisted Digital Badge Classification Tool
-Copyright (c) 2026 Rajat Ravindra Pednekar
+Copyright (c) 2026
 
 Developed as a capstone project at
 New Jersey Institute of Technology
@@ -10,6 +10,4 @@ Permission is hereby granted to NJIT and its authorized
 representatives to use, modify, and distribute this software
 for institutional badge classification purposes.
 
-This software was designed and developed solely by:
-Rajat Ravindra Pednekar (rp2348@njit.edu)
 NJIT — Spring 2026
