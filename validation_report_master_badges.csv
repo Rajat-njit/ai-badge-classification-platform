@@ -1,0 +1,30 @@
+ID,Badge Title,Matched Badge Title,Match Score,Taxonomy Complete,Confidence Present,Reviewer Status Present,Enrichment Columns Present,Overall Validation Status
+B001,2026 Infrastructure Forum,2026 Infrastructure Forum,1.0,PASS,PASS,PASS,PASS,PASS
+B002,AI in the Workplace,AI in the Workplace,1.0,PASS,PASS,PASS,PASS,PASS
+B003,AI for Administrative Efficiency,AI for Administrative Efficiency,1.0,PASS,PASS,PASS,PASS,PASS
+B004,Introduction to AI in Education,Introduction to AI in Education,1.0,PASS,PASS,PASS,PASS,PASS
+B005,AI-Enhanced Instructional Practices,AI-Enhanced Instructional Practices,1.0,PASS,PASS,PASS,PASS,PASS
+B006,Adaptability & Lifelong Learning with AI,Adaptability & Lifelong Learning with AI,1.0,PASS,PASS,PASS,PASS,PASS
+B007,AI Literacy and Fundamentals,AI Literacy and Fundamentals,1.0,PASS,PASS,PASS,PASS,PASS
+B008,AI in Context: History & Interdisciplinary,AI in Context: History and Interdisciplinary Perspectives,1.0,PASS,PASS,PASS,PASS,PASS
+B009,PM Healthcare — Course 1: Introduction,Project Management in Healthcare – Course 1: Introduction,1.0,PASS,PASS,PASS,PASS,PASS
+B010,PM Healthcare — Course 2: Intermediate,Project Management in Healthcare – Course 2: Intermediate,1.0,PASS,PASS,PASS,PASS,PASS
+B011,PM Healthcare — Course 3: Advanced,Project Management in Healthcare – Course 3: Advanced,1.0,PASS,PASS,PASS,PASS,PASS
+B012,PM Healthcare — Course 4: Agile,Project Management in Healthcare – Course 4: Agile,1.0,PASS,PASS,PASS,PASS,PASS
+B013,Make 101: Introduction to Makerspace,Make 101: Introduction to the Makerspace,1.0,PASS,PASS,PASS,PASS,PASS
+B014,Make 102: Introduction to CO2 Laser Cutting,Make 102: Introduction to CO2 Laser Cutting,1.0,PASS,PASS,PASS,PASS,PASS
+B015,Make 103: Introduction to 3D Printing,Make 103: Introduction to 3D Printing,1.0,PASS,PASS,PASS,PASS,PASS
+B016,Make 242: Introduction to Woodshop,Make 242: Introduction to the Woodshop,0.943,PASS,PASS,PASS,PASS,PASS
+B017,MakerSpeak: Iterate to Innovate,MakerSpeak: Iterate to Innovate,1.0,PASS,PASS,PASS,PASS,PASS
+B018,Change Management Capstone,Change Management Capstone,1.0,PASS,PASS,PASS,PASS,PASS
+B019,Change Management — Foundational,Change Management - Foundational,1.0,PASS,PASS,PASS,PASS,PASS
+B020,Strategic Thinking Capstone,Strategic Thinking - Capstone,1.0,PASS,PASS,PASS,PASS,PASS
+B021,Change Management — Intermediate,Change Management Intermediate,1.0,PASS,PASS,PASS,PASS,PASS
+B022,Entrepreneurial Experience Badge,Entrepreneurial Experience Badge,1.0,PASS,PASS,PASS,PASS,PASS
+B023,Workplace Readiness Capstone,Workplace Readiness - Capstone,1.0,PASS,PASS,PASS,PASS,PASS
+B024,Entrepreneurship Essentials Badge,Entrepreneurship Essentials Badge,1.0,PASS,PASS,PASS,PASS,PASS
+B025,NJIT/NYSCC Formulation Workshop,NJIT/NYSCC Formulation Workshop,1.0,PASS,PASS,PASS,PASS,PASS
+B026,CPT Course,CPT Course,1.0,PASS,PASS,PASS,PASS,PASS
+B027,AI Literacy Microcredential,AI Literacy,1.0,PASS,PASS,PASS,PASS,PASS
+B028,PM Healthcare Microcredential,Project Management In Healthcare Microcredential,0.753,PASS,PASS,PASS,PASS,PASS
+B029,AI for Educators Microcredential,AI for Educators,1.0,PASS,PASS,PASS,PASS,PASS
