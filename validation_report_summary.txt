@@ -1,0 +1,14 @@
+Validation Report Summary
+
+Master badges validated: 29
+Overall PASS count: 29
+Rows needing review: 0
+Unified test set rows: 179
+Master dataset rows: 29
+Provided dataset rows: 150
+
+Generated deliverables:
+- validation_report_master_badges.csv
+- unified_test_set.csv
+- enriched_master_dataset.csv
+- standardized_badge_dataset.csv
