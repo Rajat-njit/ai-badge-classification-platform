@@ -1,6 +1,6 @@
 """
 NJIT AI-Assisted Digital Badge Classification Tool
-Author: R
+Author:
 Institution: New Jersey Institute of Technology
 Capstone Project — Spring 2026
 
@@ -59,6 +59,44 @@ LEVEL_PATTERNS: list[tuple[re.Pattern, str, str]] = [
         re.IGNORECASE),
      "Foundational", "Medium"),
 
+    # ---- Student-friendly natural language — Foundational ----
+    (re.compile(
+        r"\b(?:just starting|getting started|brand new|complete beginner)\b"
+        r".{0,20}\b(?:this|the|our|your)\b",
+        re.IGNORECASE),
+     "Foundational", "Medium"),
+
+    (re.compile(
+        r"\b(?:no|zero|minimal|limited)\b.{0,10}"
+        r"\b(?:experience|background|knowledge|skills)\b"
+        r".{0,20}\b(?:required|needed|necessary|expected)\b",
+        re.IGNORECASE),
+     "Foundational", "High"),
+
+    (re.compile(
+        r"\b(?:open to|welcomes|for|designed for)\b.{0,20}"
+        r"\b(?:beginners|newcomers|novices|newbies)\b",
+        re.IGNORECASE),
+     "Foundational", "High"),
+
+    (re.compile(
+        r"\b(?:first time|first-time)\b.{0,20}"
+        r"\b(?:learners|students|participants)\b",
+        re.IGNORECASE),
+     "Foundational", "High"),
+
+    (re.compile(
+        r"\b(?:learn|learning)\b.{0,10}"
+        r"\b(?:from scratch|the basics|fundamentals|ground up)\b",
+        re.IGNORECASE),
+     "Foundational", "Medium"),
+
+    (re.compile(
+        r"\b(?:101|intro|introduction|basics|fundamentals)\b.{0,5}"
+        r"\b(?:class|course|badge|workshop)\b",
+        re.IGNORECASE),
+     "Foundational", "High"),
+
     # ---- Milestone ----
     (re.compile(
         r"\b(?:builds?|building)\b.{0,20}\b(?:on|upon)\b.{0,30}"
@@ -89,6 +127,42 @@ LEVEL_PATTERNS: list[tuple[re.Pattern, str, str]] = [
      "Milestone", "Medium"),
 
     (re.compile(r"\b(?:intermediate|mid.?level|mid.?course)\b", re.IGNORECASE),
+     "Milestone", "High"),
+
+    # ---- Student-friendly natural language — Milestone ----
+    (re.compile(
+        r"\b(?:already|previously)\b.{0,20}"
+        r"\b(?:completed|finished|taken|passed)\b.{0,20}"
+        r"\b(?:first|previous|introductory|basic)\b",
+        re.IGNORECASE),
+     "Milestone", "High"),
+
+    (re.compile(
+        r"\b(?:next level|level up|take the next step|move forward|move on)\b",
+        re.IGNORECASE),
+     "Milestone", "Medium"),
+
+    (re.compile(
+        r"\b(?:not beginner|not a beginner|not for beginners|beyond basics)\b",
+        re.IGNORECASE),
+     "Milestone", "Medium"),
+
+    (re.compile(
+        r"\b(?:step two|step 2|part two|part 2|second part|next phase)\b",
+        re.IGNORECASE),
+     "Milestone", "High"),
+
+    (re.compile(
+        r"\b(?:some|prior|previous)\b.{0,10}"
+        r"\b(?:experience|knowledge|understanding|familiarity)\b"
+        r".{0,20}\b(?:required|expected|recommended|needed)\b",
+        re.IGNORECASE),
+     "Milestone", "High"),
+
+    (re.compile(
+        r"\b(?:builds|expands|extends|develops)\b.{0,20}"
+        r"\b(?:previous|prior|earlier|introductory)\b",
+        re.IGNORECASE),
      "Milestone", "High"),
 
     # ---- Terminal ----
@@ -124,82 +198,32 @@ LEVEL_PATTERNS: list[tuple[re.Pattern, str, str]] = [
         re.IGNORECASE),
      "Terminal", "High"),
 
-    # ---- Student-friendly natural language patterns for levels ----
-    # Foundational patterns
+    # ---- Student-friendly natural language — Terminal ----
     (re.compile(
-        r"\b(?:just starting|getting started|brand new|complete beginner)\b"
-        r".{0,20}\b(?:this|the|our|your)\b",
-        re.IGNORECASE),
-     "Foundational", "Medium"),
-    (re.compile(
-        r"\b(?:no|zero|minimal|limited)\b.{0,10}\b(?:experience|background|knowledge|skills)\b"
-        r".{0,20}\b(?:required|needed|necessary|expected)\b",
-        re.IGNORECASE),
-     "Foundational", "High"),
-    (re.compile(
-        r"\b(?:open to|welcomes|for|designed for)\b.{0,20}\b(?:beginners|newcomers|novices|newbies)\b",
-        re.IGNORECASE),
-     "Foundational", "High"),
-    (re.compile(
-        r"\b(?:first time|first-time)\b.{0,20}\b(?:learners|students|participants)\b",
-        re.IGNORECASE),
-     "Foundational", "High"),
-    (re.compile(
-        r"\b(?:learn|learning)\b.{0,10}\b(?:from scratch|the basics|fundamentals|ground up)\b",
-        re.IGNORECASE),
-     "Foundational", "Medium"),
-    (re.compile(
-        r"\b(?:101|intro|introduction|basics|fundamentals)\b.{0,5}\b(?:class|course|badge|workshop)\b",
-        re.IGNORECASE),
-     "Foundational", "High"),
-
-    # Milestone patterns
-    (re.compile(
-        r"\b(?:already|previously)\b.{0,20}\b(?:completed|finished|taken|passed)\b"
-        r".{0,20}\b(?:first|previous|introductory|basic)\b",
-        re.IGNORECASE),
-     "Milestone", "High"),
-    (re.compile(
-        r"\b(?:next level|level up|take the next step|move forward|move on)\b",
-        re.IGNORECASE),
-     "Milestone", "Medium"),
-    (re.compile(
-        r"\b(?:not beginner|not a beginner|not for beginners|beyond basics)\b",
-        re.IGNORECASE),
-     "Milestone", "Medium"),
-    (re.compile(
-        r"\b(?:step two|step 2|part two|part 2|second part|next phase)\b",
-        re.IGNORECASE),
-     "Milestone", "High"),
-    (re.compile(
-        r"\b(?:some|prior|previous)\b.{0,10}\b(?:experience|knowledge|understanding|familiarity)\b"
-        r".{0,20}\b(?:required|expected|recommended|needed)\b",
-        re.IGNORECASE),
-     "Milestone", "High"),
-    (re.compile(
-        r"\b(?:builds|expands|extends|develops)\b.{0,20}\b(?:previous|prior|earlier|introductory)\b",
-        re.IGNORECASE),
-     "Milestone", "High"),
-
-    # Terminal patterns
-    (re.compile(
-        r"\b(?:capstone|culminating|final)\b.{0,20}\b(?:project|course|badge|experience|program)\b",
+        r"\b(?:capstone|culminating|final)\b.{0,20}"
+        r"\b(?:project|course|badge|experience|program)\b",
         re.IGNORECASE),
      "Terminal", "High"),
+
     (re.compile(
-        r"\b(?:synthesis|integration)\b.{0,20}\b(?:all|everything|entire|whole)\b"
-        r".{0,20}\b(?:program|curriculum|series|pathway)\b",
+        r"\b(?:synthesis|integration)\b.{0,20}"
+        r"\b(?:all|everything|entire|whole)\b.{0,20}"
+        r"\b(?:program|curriculum|series|pathway)\b",
         re.IGNORECASE),
      "Terminal", "High"),
+
     (re.compile(
         r"\b(?:put it all together|bring it together|tie it together)\b",
         re.IGNORECASE),
      "Terminal", "Medium"),
+
     (re.compile(
-        r"\b(?:after completing|upon completion of)\b.{0,30}\b(?:all|every|full|entire)\b"
-        r".{0,20}\b(?:series|program|pathway|curriculum|courses)\b",
+        r"\b(?:after completing|upon completion of)\b.{0,30}"
+        r"\b(?:all|every|full|entire)\b.{0,20}"
+        r"\b(?:series|program|pathway|curriculum|courses)\b",
         re.IGNORECASE),
      "Terminal", "High"),
+
     (re.compile(
         r"\b(?:graduation|graduate|graduating|senior level|advanced level)\b"
         r".{0,20}\b(?:requirement|course|badge|status|achievement)\b",
@@ -274,20 +298,6 @@ ASSESSMENT_PATTERNS: list[tuple[re.Pattern, str, str]] = [
 
     (re.compile(
         r"\battend\s+all\b.{0,20}\b(?:sessions?|classes?|meetings?|modules?)\b",
-        re.IGNORECASE),
-     "attendance", "High"),
-
-    # ---- Student-friendly attendance patterns ----
-    (re.compile(
-        r"\b(?:just show up|just come|just be there|just show)\b",
-        re.IGNORECASE),
-     "attendance", "Medium"),
-    (re.compile(
-        r"\b(?:physical presence|in-person attendance|in person attendance)\b",
-        re.IGNORECASE),
-     "attendance", "High"),
-    (re.compile(
-        r"\b(?:be present|being present|present at)\b.{0,20}\b(?:session|class|meeting|event|workshop)\b",
         re.IGNORECASE),
      "attendance", "High"),
 
@@ -390,37 +400,6 @@ REAL_WORLD_PATTERNS: list[re.Pattern] = [
         re.IGNORECASE),
     # standalone high-signal terms that unambiguously indicate real-world context
     re.compile(r'\b(?:hackathon|startup|pitch\s+competition|venture)\b', re.IGNORECASE),
-    # ---- Student-friendly real-world patterns ----
-    re.compile(
-        r'\b(?:workplace|job site|clinical setting|field work|fieldwork)\b',
-        re.IGNORECASE),
-    re.compile(
-        r'\b(?:client project|client work|client meeting|stakeholder)\b',
-        re.IGNORECASE),
-    re.compile(
-        r'\b(?:industry project|industry partner|industry collaboration)\b',
-        re.IGNORECASE),
-    re.compile(
-        r'\b(?:community project|community service|volunteer work|service learning)\b',
-        re.IGNORECASE),
-    re.compile(
-        r'\b(?:practicum|practical training|clinical rotation|clinical placement)\b',
-        re.IGNORECASE),
-    re.compile(
-        r'\b(?:co.op|coop|co-op|work placement|work experience|job shadowing)\b',
-        re.IGNORECASE),
-    re.compile(
-        r'\b(?:professional setting|professional environment|professional context)\b',
-        re.IGNORECASE),
-    re.compile(
-        r'\b(?:applied project|applied research|applied learning|applied skills)\b',
-        re.IGNORECASE),
-    re.compile(
-        r'\b(?:case stud(?:y|ies)|case-based|scenario-based|problem-based|project-based)\b',
-        re.IGNORECASE),
-    re.compile(
-        r'\b(?:portfolio|portfolio project|portfolio review)\b',
-        re.IGNORECASE),
 ]
 
 

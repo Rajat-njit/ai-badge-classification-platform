@@ -107,8 +107,13 @@ def run_classification(bfs: BadgeFactSheet) -> ClassificationResult:
     # ------------------------------------------------------------------
     s2 = classify_stage2(bfs)
 
-    # Propagate Stage 2 flag to BFS if evaluator is missing
-    if s2.get("flag") and "assessment_evaluator" not in bfs.missing_signals:
+    # Propagate Stage 2 flag only when S2R07 fires — that rule's flag
+    # specifically means the evaluator is unknown and blocks Skill detection.
+    # Other Stage 2 flags (S2R11d issuer defaults, S2R08b OR-criteria notes)
+    # are informational only and must NOT add assessment_evaluator to
+    # missing_signals, which would force confidence to Low.
+    _S2R07_FLAG = "Skill possible — confirm assessment_evaluator"
+    if s2.get("flag") == _S2R07_FLAG and "assessment_evaluator" not in bfs.missing_signals:
         bfs.missing_signals.append("assessment_evaluator")
         bfs.needs_followup_questions = True
 
@@ -134,6 +139,10 @@ def run_classification(bfs: BadgeFactSheet) -> ClassificationResult:
     bfs.level_result = s3["level"]
     bfs.level_branch_used = s3.get("level_branch_used")
     bfs.triggered_rules = all_rules
+
+    # Propagate any confidence note from stage3 (e.g. Souvenir no-level note)
+    if s3.get("confidence_notes") and not bfs.confidence_notes:
+        bfs.confidence_notes = s3["confidence_notes"]
 
     # If Stage 3 used a canvas/structural rule, override level_signal_source
     # so NLP regex signals don't contaminate confidence for canvas-decided badges.

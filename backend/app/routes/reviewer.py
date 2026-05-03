@@ -152,42 +152,58 @@ def get_review_by_token(
     db: Session = Depends(get_db),
 ) -> dict:
     """
-    Validate a review_token and return the full log data for the reviewer UI.
+    Load a log for the reviewer UI — accepts either a review_token or a log ID.
+
+    Lookup order:
+      1. review_token match — enforces expiry and 409-already-reviewed guards
+      2. log ID match (fallback) — used when navigating from the dashboard to
+         already-reviewed records that have no review_token; skips expiry and
+         already-reviewed guards so reviewers can read historical decisions
 
     Error responses:
-      404 — token not found
-      410 — token expired
-      409 — already reviewed
+      404 — neither token nor ID found
+      410 — review_token expired
+      409 — already reviewed (only when looked up by review_token)
     """
     import json
 
+    # --- Primary lookup: by review_token ---
     log: Optional[GovernanceLog] = (
         db.query(GovernanceLog)
         .filter(GovernanceLog.review_token == token)
         .first()
     )
 
+    looked_up_by_token = log is not None
+
+    # --- Fallback: treat `token` as a log ID ---
+    if log is None:
+        log = db.get(GovernanceLog, token)
+
     if log is None:
         raise HTTPException(status_code=404, detail="Review token not found.")
 
-    # Check expiry
-    if log.review_token_expires_at:
-        try:
-            expires = datetime.fromisoformat(log.review_token_expires_at)
-            if datetime.now(timezone.utc) > expires:
-                raise HTTPException(
-                    status_code=410,
-                    detail="This review link has expired. Contact the submitter for a new link.",
-                )
-        except ValueError:
-            pass  # Malformed date — let it through
+    # Expiry and already-reviewed guards only apply to token-based access.
+    # When accessed by log ID from the dashboard, reviewers can view any record.
+    if looked_up_by_token:
+        # Check expiry
+        if log.review_token_expires_at:
+            try:
+                expires = datetime.fromisoformat(log.review_token_expires_at)
+                if datetime.now(timezone.utc) > expires:
+                    raise HTTPException(
+                        status_code=410,
+                        detail="This review link has expired. Contact the submitter for a new link.",
+                    )
+            except ValueError:
+                pass  # Malformed date — let it through
 
-    # Already reviewed
-    if log.reviewer_status in ("accepted", "overridden"):
-        raise HTTPException(
-            status_code=409,
-            detail=f"This badge has already been reviewed ({log.reviewer_status}).",
-        )
+        # Already reviewed
+        if log.reviewer_status in ("accepted", "overridden"):
+            raise HTTPException(
+                status_code=409,
+                detail=f"This badge has already been reviewed ({log.reviewer_status}).",
+            )
 
     # Parse normalized_facts to reconstruct BFS-like signal data
     bfs_dict: dict = {}

@@ -107,10 +107,11 @@ def classify_stage3(bfs: BadgeFactSheet, type_result: str) -> dict:
 
 def _branch_souvenir() -> dict:
     return {
-        "level": "Souvenir",
+        "level": None,
         "confidence": "High",
         "rules_triggered": ["S3S01"],
-        "level_branch_used": "souvenir",
+        "level_branch_used": "none",
+        "confidence_notes": "Souvenir type has no level — single tier badge",
     }
 
 

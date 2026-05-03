@@ -214,6 +214,15 @@ def _element2_type(bfs: BadgeFactSheet, result: ClassificationResult) -> str:
 
 
 def _element3_level(bfs: BadgeFactSheet, result: ClassificationResult) -> str:
+    # Souvenir is a single-tier type — no level classification exists
+    if result.classification.type == "Souvenir":
+        s3_rules = [r for r in result.rules_triggered if r.startswith("S3")]
+        rule_str = ", ".join(s3_rules) if s3_rules else "none"
+        return (
+            f"LEVEL: Not applicable. Souvenir badges are a single-tier type — "
+            f"no level classification exists. Rule fired: {rule_str}."
+        )
+
     level = result.classification.level or "Unknown"
     branch = result.classification.level_branch_used or "unknown"
     s3_rules = [r for r in result.rules_triggered if r.startswith("S3")]
@@ -496,7 +505,8 @@ def _element8_review(bfs: BadgeFactSheet, result: ClassificationResult) -> str:
     if result.classification.type is None:
         review_reasons.append("badge type could not be determined")
 
-    if result.classification.level is None:
+    # Souvenir has no level by design — do not flag as unresolved
+    if result.classification.level is None and result.classification.type != "Souvenir":
         review_reasons.append("badge level could not be determined")
 
     if review_reasons:

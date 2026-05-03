@@ -118,10 +118,14 @@ def classify_stage2(bfs: BadgeFactSheet) -> dict:
     # ------------------------------------------------------------------
     # S2R06 — Expert evaluation present → Skill
     # Simplified per Phase 5 spec: expert_evaluation_required OR expert_scored
+    # OSIL excluded: OSIL badges with expert evaluation fall through to
+    # S2R10 (OSIL pre_post → Achievement) or S2R09 (module completion →
+    # Achievement). OSIL panels facilitate review, not skill scoring.
     # ------------------------------------------------------------------
     if (
         (bfs.expert_evaluation_required or bfs.assessment_evaluator == "expert_scored")
         and bfs.assessment_type != "pre_post_assessment"
+        and bfs.issuer != "OSIL"
     ):
         return {
             "type": "Skill",

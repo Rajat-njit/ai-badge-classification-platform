@@ -58,7 +58,7 @@ def classify_badge(
     Steps:
       1. Run NLP signal extraction (idempotent — skips already-filled fields)
       2. Run classification engine (Stage 1 → 2 → 3)
-      3. Generate review token (if reviewer_email provided)
+      3. Generate review token (always — reviewer_email is optional)
       4. Print console notifications
       5. Create governance log record
       6. Return ClassificationResult with log_id
@@ -84,15 +84,11 @@ def classify_badge(
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Classification error: {e}")
 
-    # Step 3 — Review token (generated when reviewer_email provided)
-    review_token: Optional[str] = None
-    review_token_expires_at: Optional[str] = None
+    # Step 3 — Review token (always generated so dashboard can link to any badge)
+    review_token: str = str(uuid4())
+    expires = datetime.now(timezone.utc) + timedelta(days=30)
+    review_token_expires_at: str = expires.isoformat()
     notification_sent_at: Optional[str] = None
-
-    if req.reviewer_email:
-        review_token = str(uuid4())
-        expires = datetime.now(timezone.utc) + timedelta(days=30)
-        review_token_expires_at = expires.isoformat()
 
     # Step 4 — Console notifications (replace with real email in production)
     now_iso = datetime.now(timezone.utc).isoformat()
@@ -108,7 +104,7 @@ def classify_badge(
             f"your badge '{title}' has been classified and is pending review."
         )
 
-    if req.reviewer_email and review_token:
+    if req.reviewer_email:
         print(
             f"  [EMAIL → reviewer]  {req.reviewer_email} — "
             f"badge '{title}' is ready for your review. "
