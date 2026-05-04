@@ -90,7 +90,7 @@ def _run_badge(badge_id: str) -> dict:
 # ---------------------------------------------------------------------------
 
 class TestB001:
-    """OSIL event souvenir — no assessment, Co-Curricular | Souvenir | Souvenir."""
+    """OSIL event souvenir — no assessment, Co-Curricular | Souvenir | None (no level)."""
 
     def test_category(self):
         r = _run_badge("B001")
@@ -102,7 +102,7 @@ class TestB001:
 
     def test_level(self):
         r = _run_badge("B001")
-        assert r["classification"]["level"] == "Souvenir"
+        assert r["classification"]["level"] is None
 
     def test_confidence(self):
         r = _run_badge("B001")

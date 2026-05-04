@@ -378,7 +378,7 @@ class TestStage3Souvenir:
         )
         r = classify(bfs, extractor)
         assert r.classification.type == "Souvenir"
-        assert r.classification.level == "Souvenir"
+        assert r.classification.level is None
         assert "S3S01" in r.rules_triggered
 
 
@@ -462,7 +462,7 @@ class TestTaxonomyCombinations:
         r = classify(bfs, extractor)
         assert r.classification.category == "Continuing & Professional Education"
         assert r.classification.type == "Souvenir"
-        assert r.classification.level == "Souvenir"
+        assert r.classification.level is None
 
     def test_T02_cpe_achievement_foundational(self, extractor):
         bfs = BadgeFactSheet(
@@ -507,7 +507,7 @@ class TestTaxonomyCombinations:
         r = classify(bfs, extractor)
         assert r.classification.category == "Faculty & Staff Development"
         assert r.classification.type == "Souvenir"
-        assert r.classification.level == "Souvenir"
+        assert r.classification.level is None
 
     def test_T15_cocurricular_souvenir(self, extractor):
         bfs = BadgeFactSheet(
@@ -519,7 +519,7 @@ class TestTaxonomyCombinations:
         r = classify(bfs, extractor)
         assert r.classification.category == "Co-Curricular and Extra-Curricular"
         assert r.classification.type == "Souvenir"
-        assert r.classification.level == "Souvenir"
+        assert r.classification.level is None
 
     def test_T18_cocurricular_achievement_terminal(self, extractor):
         bfs = BadgeFactSheet(

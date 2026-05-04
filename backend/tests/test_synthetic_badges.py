@@ -38,7 +38,7 @@ def _classify_form(file_path: Path) -> tuple:
 
 
 # ---------------------------------------------------------------------------
-# HP01 — CPE | Souvenir | Souvenir
+# HP01 — CPE | Souvenir | None (no level)
 # ---------------------------------------------------------------------------
 
 class TestHP01_CPE_Souvenir:
@@ -55,7 +55,7 @@ class TestHP01_CPE_Souvenir:
         assert result.classification.type == "Souvenir"
 
     def test_level(self, result):
-        assert result.classification.level == "Souvenir"
+        assert result.classification.level is None
 
     def test_confidence(self, result):
         assert result.classification.confidence == "High"
@@ -149,7 +149,7 @@ class TestHP04_FacultyDev_Achievement_Terminal:
 
 
 # ---------------------------------------------------------------------------
-# HP05 — Faculty Dev | Souvenir | Souvenir (faculty attendance)
+# HP05 — Faculty Dev | Souvenir | None (no level — faculty attendance)
 # ---------------------------------------------------------------------------
 
 class TestHP05_FacultyDev_Souvenir:
@@ -166,7 +166,7 @@ class TestHP05_FacultyDev_Souvenir:
         assert result.classification.type == "Souvenir"
 
     def test_level(self, result):
-        assert result.classification.level == "Souvenir"
+        assert result.classification.level is None
 
     def test_confidence(self, result):
         assert result.classification.confidence == "High"

@@ -98,7 +98,7 @@ class TestExplanationStructure:
 
 
 # ---------------------------------------------------------------------------
-# B001 — Infrastructure Forum (CPE / Souvenir / Souvenir)
+# B001 — Infrastructure Forum (CPE / Souvenir / None — no level)
 # Attendance-only, PDH credits, LDI
 # ---------------------------------------------------------------------------
 

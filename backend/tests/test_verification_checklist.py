@@ -8,7 +8,7 @@ and asserts on the ClassificationResult (and occasionally the ingest BFS).
 
 Tests
 -----
-T01  B001 Infrastructure Forum (OBv3 JSON)   — IR01c LDI URL fix, Souvenir
+T01  B001 Infrastructure Forum (OBv3 JSON)   — IR01c LDI URL fix, Souvenir (no level)
 T02  Change Management Foundational (form)   — OSIL Achievement Foundational
 T03  Makerspace Laser Cutting (form)         — Academic Skill Application
 T04  Entrepreneurial Experience (form)       — OSIL Competency Demonstrated
@@ -115,7 +115,7 @@ class TestT01_B001_InfrastructureForum:
 
     def test_level(self, client):
         _, result = _pipeline(client, "obv3_json", self.PAYLOAD)
-        assert result["classification"]["level"] == "Souvenir"
+        assert result["classification"]["level"] is None
 
     def test_rule_S1R02(self, client):
         _, result = _pipeline(client, "obv3_json", self.PAYLOAD)
@@ -394,7 +394,7 @@ class TestT07_FreeTextLeadershipWorkshop:
 
     def test_level(self, client):
         _, result = _pipeline(client, "free_text", {"text": self.TEXT})
-        assert result["classification"]["level"] == "Souvenir"
+        assert result["classification"]["level"] is None
 
 
 # ===========================================================================

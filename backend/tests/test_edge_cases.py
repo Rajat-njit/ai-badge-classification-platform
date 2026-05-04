@@ -151,7 +151,7 @@ class TestEC03_MinimumContentWarnings:
 # Helpers shared by EC26 / EC29 / EC30 tests
 # ---------------------------------------------------------------------------
 
-# A minimal OSIL attendance badge — classifies as Co-Curricular / Souvenir / Souvenir.
+# A minimal OSIL attendance badge — classifies as Co-Curricular / Souvenir / None (no level).
 _SOUVENIR_FORM = {
     "badge_title": "Leadership Workshop",
     "badge_description": (

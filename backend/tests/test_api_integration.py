@@ -189,7 +189,7 @@ class TestClassifyValidation:
     def test_classify_souvenir_full_result(self):
         result = _full_pipeline(_MINIMAL_SOUVENIR)
         assert result["classification"]["type"] == "Souvenir"
-        assert result["classification"]["level"] == "Souvenir"
+        assert result["classification"]["level"] is None
         assert result["explanation"] != ""
         assert result["governance"]["reviewer_status"] == "pending"
         assert result["governance"]["log_id"] != ""
