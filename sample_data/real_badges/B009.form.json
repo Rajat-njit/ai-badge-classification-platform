@@ -1,0 +1,14 @@
+{
+  "badge_title": "PM Healthcare Course 1 Introduction",
+  "badge_description": "This badge recognizes completion of the introductory course in Project Management for Healthcare Professionals.",
+  "issuer": "LDI",
+  "audience_type": "external_professional",
+  "earning_criteria_text": "Complete all modules and associated activities.",
+  "assessment_required": "yes",
+  "assessment_type": "module_completion",
+  "assessment_evaluator": "auto_assessed",
+  "expert_evaluation_required": false,
+  "canvas_course_code": "MCHC.001.01",
+  "canvas_sequence_number": 1,
+  "canvas_pathway_length": 4
+}

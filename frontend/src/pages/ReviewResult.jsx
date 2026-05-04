@@ -103,10 +103,11 @@ function SignalPanel({ bfs, missingSignals }) {
 
 function ClassificationPanel({ result }) {
   const { classification, rules_triggered } = result
+  const isSouvenir = classification.type === 'Souvenir'
   const stages = [
     { label: 'Stage 1 — Category', value: classification.category },
     { label: 'Stage 2 — Type', value: classification.type },
-    { label: 'Stage 3 — Level', value: classification.level },
+    { label: 'Stage 3 — Level', value: isSouvenir ? 'N/A' : classification.level },
   ]
   const s1Rules = rules_triggered.filter(r => r.startsWith('S1') || r.startsWith('IR'))
   const s2Rules = rules_triggered.filter(r => r.startsWith('S2'))
@@ -123,14 +124,21 @@ function ClassificationPanel({ result }) {
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        {stages.map(({ label, value }, i) => (
-          <div key={label} className="border border-gray-200 rounded-lg p-4 space-y-2 text-center">
-            <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">{label}</p>
-            <p className="text-lg font-bold text-njit-navy">{value || '—'}</p>
-            <ConfBadge level={classification.confidence} />
-            <p className="text-xs text-gray-400">{ruleGroups[i].join(', ') || '—'}</p>
-          </div>
-        ))}
+        {stages.map(({ label, value }, i) => {
+          const isLevelStage = i === 2
+          return (
+            <div key={label} className="border border-gray-200 rounded-lg p-4 space-y-2 text-center">
+              <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">{label}</p>
+              <p className="text-lg font-bold text-njit-navy">{value || '—'}</p>
+              {isLevelStage && isSouvenir ? (
+                <p className="text-xs text-gray-400 italic">Souvenir badges have no level</p>
+              ) : (
+                <ConfBadge level={classification.confidence} />
+              )}
+              <p className="text-xs text-gray-400">{ruleGroups[i].join(', ') || '—'}</p>
+            </div>
+          )
+        })}
       </div>
     </div>
   )

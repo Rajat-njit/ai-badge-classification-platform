@@ -1,0 +1,11 @@
+{
+  "badge_title": "Entrepreneurship Essentials Badge",
+  "badge_description": "This foundation-level badge recognizes students who have completed the Entrepreneurship Essentials program. Earners develop introductory knowledge of entrepreneurial concepts and skills through hands-on workshop activities.",
+  "issuer": "OSIL",
+  "audience_type": "njit_student",
+  "earning_criteria_text": "Complete all required workshop sessions and pass the end of program quiz.",
+  "assessment_required": "yes",
+  "assessment_type": "final_assessment",
+  "assessment_evaluator": "auto_assessed",
+  "expert_evaluation_required": false
+}

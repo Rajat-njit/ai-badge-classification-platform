@@ -1,0 +1,14 @@
+{
+  "badge_title": "PM Healthcare Course 2 Intermediate",
+  "badge_description": "Building on the foundational series, this badge recognizes intermediate project management skills for healthcare professionals.",
+  "issuer": "LDI",
+  "audience_type": "external_professional",
+  "earning_criteria_text": "Complete all modules and pass the module quizzes.",
+  "assessment_required": "yes",
+  "assessment_type": "module_completion",
+  "assessment_evaluator": "auto_assessed",
+  "expert_evaluation_required": false,
+  "canvas_course_code": "MCHC.001.02",
+  "canvas_sequence_number": 2,
+  "canvas_pathway_length": 4
+}

@@ -5,7 +5,7 @@
     "file": "real_badges/B001.form.json",
     "expected_category": "Co-Curricular and Extra-Curricular",
     "expected_type": "Souvenir",
-    "expected_level": "Souvenir",
+    "expected_level": null,
     "expected_confidence": "High",
     "expected_rules": ["S1R04", "S2R05", "S3S01"]
   },
@@ -39,6 +39,86 @@
     "expected_confidence": "High",
     "expected_rules": ["S1R02", "S2R01", "S3A01"]
   },
+  "B006": {
+    "description": "Adaptability and Lifelong Learning with AI — LDI faculty, MCAI.001.03 (3rd in 3-course pathway)",
+    "input_type": "form",
+    "file": "real_badges/B006.form.json",
+    "expected_category": "Faculty & Staff Development",
+    "expected_type": "Achievement",
+    "expected_level": "Milestone",
+    "expected_confidence": "High",
+    "expected_rules": ["S1R01", "S2R09", "S3A07"]
+  },
+  "B007": {
+    "description": "AI Literacy and Fundamentals — LDI faculty, MCAI.001.02 (2nd in 3-course pathway)",
+    "input_type": "form",
+    "file": "real_badges/B007.form.json",
+    "expected_category": "Faculty & Staff Development",
+    "expected_type": "Achievement",
+    "expected_level": "Milestone",
+    "expected_confidence": "High",
+    "expected_rules": ["S1R01", "S2R09", "S3A06"]
+  },
+  "B008": {
+    "description": "AI in Context — LDI faculty, MCAI.001.01 (1st in 3-course pathway)",
+    "input_type": "form",
+    "file": "real_badges/B008.form.json",
+    "expected_category": "Faculty & Staff Development",
+    "expected_type": "Achievement",
+    "expected_level": "Foundational",
+    "expected_confidence": "High",
+    "expected_rules": ["S1R01", "S2R09", "S3A05"]
+  },
+  "B009": {
+    "description": "PM Healthcare Course 1 Introduction — LDI external professional, 1st in 4-course pathway",
+    "input_type": "form",
+    "file": "real_badges/B009.form.json",
+    "expected_category": "Continuing & Professional Education",
+    "expected_type": "Achievement",
+    "expected_level": "Foundational",
+    "expected_confidence": "High",
+    "expected_rules": ["S1R02", "S2R09", "S3A05"]
+  },
+  "B010": {
+    "description": "PM Healthcare Course 2 Intermediate — LDI external professional, 2nd in 4-course pathway",
+    "input_type": "form",
+    "file": "real_badges/B010.form.json",
+    "expected_category": "Continuing & Professional Education",
+    "expected_type": "Achievement",
+    "expected_level": "Milestone",
+    "expected_confidence": "High",
+    "expected_rules": ["S1R02", "S2R09", "S3A06"]
+  },
+  "B013": {
+    "description": "Make 101 Introduction to Makerspace — orientation safety knowledge badge",
+    "input_type": "form",
+    "file": "real_badges/B013.form.json",
+    "expected_category": "Academic",
+    "expected_type": "Skill",
+    "expected_level": "Awareness",
+    "expected_confidence": "High",
+    "expected_rules": ["S1R05", "S2R06", "S3SK03"]
+  },
+  "B014": {
+    "description": "Make 102 CO2 Laser Cutting — Makerspace practical skill, Application level",
+    "input_type": "form",
+    "file": "real_badges/B014.form.json",
+    "expected_category": "Academic",
+    "expected_type": "Skill",
+    "expected_level": "Application",
+    "expected_confidence": "High",
+    "expected_rules": ["S1R05", "S2R06", "S3SK02"]
+  },
+  "B017": {
+    "description": "MakerSpeak Iterate to Innovate — Makerspace attendance event, no assessment",
+    "input_type": "form",
+    "file": "real_badges/B017.form.json",
+    "expected_category": "Academic",
+    "expected_type": "Souvenir",
+    "expected_level": null,
+    "expected_confidence": "High",
+    "expected_rules": ["S1R05", "S2R05", "S3S01"]
+  },
   "B018": {
     "description": "OSIL Capstone Badge — co-curricular terminal achievement",
     "input_type": "form",
@@ -47,7 +127,7 @@
     "expected_type": "Achievement",
     "expected_level": "Terminal",
     "expected_confidence": "High",
-    "expected_rules": ["S1R04", "S2R09", "S3A04"]
+    "expected_rules": ["S1R04", "S2R09", "S3A03"]
   },
   "B019": {
     "description": "OSIL Foundational Achievement — first step in co-curricular pathway",
@@ -59,6 +139,26 @@
     "expected_confidence": "High",
     "expected_rules": ["S1R04", "S2R09", "S3A10"]
   },
+  "B020": {
+    "description": "Strategic Thinking Capstone — OSIL co-curricular terminal achievement with prerequisite badges",
+    "input_type": "form",
+    "file": "real_badges/B020.form.json",
+    "expected_category": "Co-Curricular and Extra-Curricular",
+    "expected_type": "Achievement",
+    "expected_level": "Terminal",
+    "expected_confidence": "High",
+    "expected_rules": ["S1R04", "S2R09", "S3A04"]
+  },
+  "B021": {
+    "description": "Change Management Intermediate — OSIL badge with prerequisite, Milestone level",
+    "input_type": "form",
+    "file": "real_badges/B021.form.json",
+    "expected_category": "Co-Curricular and Extra-Curricular",
+    "expected_type": "Achievement",
+    "expected_level": "Milestone",
+    "expected_confidence": "High",
+    "expected_rules": ["S1R04", "S2R09", "S3A11"]
+  },
   "B022": {
     "description": "Makerspace Skill Badge — expert-scored with applying Bloom level",
     "input_type": "form",
@@ -68,6 +168,26 @@
     "expected_level": "Application",
     "expected_confidence": "High",
     "expected_rules": ["S1R05", "S2R06", "S3SK02"]
+  },
+  "B024": {
+    "description": "Entrepreneurship Essentials — OSIL foundational co-curricular achievement",
+    "input_type": "form",
+    "file": "real_badges/B024.form.json",
+    "expected_category": "Co-Curricular and Extra-Curricular",
+    "expected_type": "Achievement",
+    "expected_level": "Foundational",
+    "expected_confidence": "High",
+    "expected_rules": ["S1R04", "S2R09", "S3A10"]
+  },
+  "B025": {
+    "description": "NJIT NYSCC Formulation Workshop — NCE academic skill, Awareness level",
+    "input_type": "form",
+    "file": "real_badges/B025.form.json",
+    "expected_category": "Academic",
+    "expected_type": "Skill",
+    "expected_level": "Awareness",
+    "expected_confidence": "High",
+    "expected_rules": ["S1R06", "S2R06", "S3SK03"]
   },
   "B026": {
     "description": "OGI CPT Compliance Course — compliance badge, category unknown",

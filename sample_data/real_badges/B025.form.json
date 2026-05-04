@@ -1,0 +1,12 @@
+{
+  "badge_title": "NJIT NYSCC Formulation Workshop",
+  "badge_description": "This badge recognizes engineering students who participated in the NJIT and New York Society of Cosmetic Chemists collaborative formulation workshop.",
+  "issuer": "NCE",
+  "audience_type": "njit_student",
+  "earning_criteria_text": "Students will identify and describe key formulation principles through active participation in laboratory sessions. Faculty experts observe and record student proficiency.",
+  "assessment_required": "yes",
+  "assessment_type": "practical",
+  "assessment_evaluator": "expert_scored",
+  "expert_evaluation_required": true,
+  "evidence_type": "observed"
+}

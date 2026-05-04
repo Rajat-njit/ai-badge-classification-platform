@@ -192,7 +192,12 @@ function PlainLanguageFollowups({ bfs, inputMode, onAnswer }) {
   )
 }
 
-function BfsConfirmPanel({ bfs, inputMode, onConfirm, onFollowupChange, loading }) {
+function BfsConfirmPanel({ bfs, inputMode, onConfirm, onFollowupChange, loading, showEmailStep = false }) {
+  const [emailStep, setEmailStep] = useState(false)
+  const [submitterEmail, setSubmitterEmail] = useState('')
+  const [reviewerEmail, setReviewerEmail] = useState('')
+  const [emailErrors, setEmailErrors] = useState({})
+
   const keyFields = [
     ['badge_title', 'Badge Title'],
     ['issuer', 'Issuer'],
@@ -248,13 +253,74 @@ function BfsConfirmPanel({ bfs, inputMode, onConfirm, onFollowupChange, loading 
         onAnswer={onFollowupChange}
       />
 
-      <button
-        onClick={onConfirm}
-        disabled={loading}
-        className="bg-njit-red text-white px-6 py-2 rounded font-medium hover:bg-njit-red-dark disabled:opacity-50"
-      >
-        {loading ? 'Classifying…' : 'Confirm & Classify →'}
-      </button>
+      {/* Email collection step for JSON paste mode */}
+      {showEmailStep && emailStep ? (
+        <div className="border border-gray-200 rounded-lg p-5 space-y-4 bg-gray-50">
+          <div>
+            <p className="text-base font-semibold text-njit-navy">Almost done! Where should we send updates?</p>
+            <p className="text-sm text-gray-500 mt-0.5">The reviewer will check and confirm this classification.</p>
+          </div>
+
+          <FieldGroup label="Your email address *">
+            <Input
+              type="email"
+              value={submitterEmail}
+              error={emailErrors.submitter}
+              onChange={e => { setSubmitterEmail(e.target.value); setEmailErrors(ev => ({ ...ev, submitter: '' })) }}
+              placeholder="you@njit.edu"
+            />
+            <FieldError message={emailErrors.submitter} />
+          </FieldGroup>
+
+          <FieldGroup
+            label="Reviewer email (optional)"
+            helper="If provided, reviewer will be notified. Otherwise classification appears in reviewer dashboard."
+          >
+            <Input
+              type="email"
+              value={reviewerEmail}
+              error={emailErrors.reviewer}
+              onChange={e => { setReviewerEmail(e.target.value); setEmailErrors(ev => ({ ...ev, reviewer: '' })) }}
+              placeholder="reviewer@njit.edu"
+            />
+            <FieldError message={emailErrors.reviewer} />
+          </FieldGroup>
+
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => setEmailStep(false)}
+              className="px-4 py-2 rounded border border-gray-300 text-sm text-gray-700 hover:bg-white"
+            >
+              ← Back
+            </button>
+            <button
+              disabled={loading}
+              onClick={() => {
+                const errs = {}
+                if (!submitterEmail.trim()) errs.submitter = 'Required'
+                else if (!EMAIL_RE.test(submitterEmail)) errs.submitter = 'Valid email required'
+                if (reviewerEmail.trim() && !EMAIL_RE.test(reviewerEmail)) errs.reviewer = 'Valid email required'
+                if (Object.keys(errs).length) { setEmailErrors(errs); return }
+                onConfirm({
+                  submitter_email: submitterEmail.trim(),
+                  reviewer_email: reviewerEmail.trim() || null,
+                })
+              }}
+              className="bg-njit-red text-white px-6 py-2 rounded font-medium hover:bg-njit-red-dark disabled:opacity-50"
+            >
+              {loading ? 'Classifying…' : 'Submit for Review →'}
+            </button>
+          </div>
+        </div>
+      ) : (
+        <button
+          onClick={showEmailStep ? () => setEmailStep(true) : () => onConfirm()}
+          disabled={loading}
+          className="bg-njit-red text-white px-6 py-2 rounded font-medium hover:bg-njit-red-dark disabled:opacity-50"
+        >
+          {loading ? 'Classifying…' : 'Confirm & Classify →'}
+        </button>
+      )}
     </div>
   )
 }
@@ -267,6 +333,7 @@ function BfsConfirmPanel({ bfs, inputMode, onConfirm, onFollowupChange, loading 
 
 const _FT_Q1 = {
   label: 'Where did this activity or training take place at NJIT?',
+  helper: 'Select the closest match — your reviewer will confirm.',
   signal: 'issuer',
   options: [
     { text: 'It was a professional development or continuing education program', fields: { issuer: 'LDI', audience_type: 'external_professional' } },
@@ -274,19 +341,18 @@ const _FT_Q1 = {
     { text: 'It was in the Makerspace (3D printing, laser cutting, etc.)',        fields: { issuer: 'Makerspace', audience_type: 'njit_student' } },
     { text: 'It was part of a class or academic program',                         fields: { issuer: 'NCE', audience_type: 'njit_student' } },
     { text: 'It was an administrative requirement (visa, work authorization)',    fields: { issuer: 'OGI', audience_type: 'njit_student' } },
-    { text: "I'm not sure", fields: null },
   ],
 }
 
 const _FT_Q2 = {
   label: 'How was your work or participation checked?',
+  helper: 'Choose the option that best describes how you were evaluated.',
   signal: 'assessment_evaluator',
   options: [
     { text: 'I took an online quiz or test',                               fields: { assessment_evaluator: 'auto_assessed',  assessment_type: 'final_assessment' } },
     { text: 'A person watched me do something and said I passed',          fields: { assessment_evaluator: 'expert_scored',  expert_evaluation_required: true, assessment_type: 'practical' } },
     { text: 'I submitted a project or portfolio that someone reviewed',    fields: { assessment_evaluator: 'expert_scored',  expert_evaluation_required: true, assessment_type: 'portfolio' } },
     { text: 'I just showed up — no grading was required',                  fields: { assessment_evaluator: null, assessment_type: 'attendance', assessment_required: 'no' } },
-    { text: "I'm not sure", fields: null },
   ],
 }
 
@@ -308,25 +374,66 @@ const _FT_Q4 = {
       text: 'This was the final or most advanced step in the program',
       fields: { self_declared_level: 'Terminal', level_signal_source: 'student_reported' },
     },
-    // "I'm not sure" — never blocks; level stays Unknown; reviewer handles
-    { text: "I'm not sure", fields: null },
+    // Reviewer handles Unknown level — never blocks classification
+    { text: "Not sure — reviewer will confirm", fields: null },
   ],
 }
 
 function FreeTextFollowupPanel({ bfs, onClassify, loading }) {
   const missing = bfs.missing_signals || []
 
+  // ── Suppression logic ────────────────────────────────────────────────────────
   const showQ1 = !bfs.issuer && missing.includes('issuer')
   const showQ2 = missing.includes('assessment_evaluator')
   const showQ3 = missing.includes('badge_title')
   // Q4 — level is genuinely unknown: no NLP level phrase extracted AND
-  // no canvas_sequence_number to drive a structural level rule.
-  const showQ4 = !bfs.self_declared_level && bfs.canvas_sequence_number == null
+  // no canvas_sequence_number or canvas_pathway_code to drive a structural level rule AND
+  // the full description text does not already contain a recognisable level keyword that
+  // the backend NLP will resolve at classify time.
+  // NOTE: self_declared_level is always null at ingest time (NLP runs at classify time),
+  // so we must scan bfs.badge_description directly to avoid always showing Q4.
+  const _Q4_SUPPRESS_KEYWORDS = [
+    // Foundational indicators
+    'no prior experience', 'new to the topic', 'people who are new',
+    'designed for people who are new', 'brand new', 'getting started',
+    'beginners', 'beginner', 'entry level', 'entry-level', 'starting point',
+    'introduction to', 'introductory', 'foundational', 'foundation-level',
+    'foundation level', 'first course', 'first in the series', 'course 1',
+    'part 1', 'level 1', 'awareness level',
+    // Milestone / intermediate indicators
+    'intermediate', 'building on', 'prior knowledge', 'prerequisite',
+    'second course', 'course 2', 'part 2', 'level 2',
+    // Terminal indicators
+    'capstone', 'final course', 'last course', 'advanced', 'third course',
+    'course 3', 'part 3', 'level 3', 'completing all', 'after completing',
+  ]
+  const _descLower = (bfs.badge_description || '').toLowerCase()
+  const _levelInDesc = _Q4_SUPPRESS_KEYWORDS.some(kw => _descLower.includes(kw))
+  const showQ4 = !bfs.self_declared_level
+    && bfs.canvas_sequence_number == null
+    && !bfs.canvas_pathway_code
+    && !_levelInDesc
 
+  // ── Question queue (built once from suppression flags) ───────────────────────
+  const questionQueue = []
+  if (showQ1) questionQueue.push('Q1')
+  if (showQ2) questionQueue.push('Q2')
+  if (showQ3) questionQueue.push('Q3')
+  if (showQ4) questionQueue.push('Q4')
+
+  // ── Answer state ─────────────────────────────────────────────────────────────
+  const [currentStep, setCurrentStep] = useState(0)
   const [q1, setQ1] = useState(null)   // selected option object
   const [q2, setQ2] = useState(null)
   const [titleText, setTitleText] = useState('')
   const [q4, setQ4] = useState(null)
+  const [currentError, setCurrentError] = useState('')
+
+  // ── Email collection step ────────────────────────────────────────────────────
+  const [emailStep, setEmailStep] = useState(false)
+  const [submitterEmail, setSubmitterEmail] = useState('')
+  const [reviewerEmail, setReviewerEmail] = useState('')
+  const [emailErrors, setEmailErrors] = useState({})
 
   // Summary fields — what the NLP already extracted.
   // assessment_type is an internal derived field — never shown as a student concern.
@@ -336,14 +443,34 @@ function FreeTextFollowupPanel({ bfs, onClassify, loading }) {
     ['badge_description','Description (first 120 chars)'],
   ]
 
+  // ── buildMergedBfs (reads q1/q2/titleText/q4 — unchanged) ───────────────────
   function buildMergedBfs() {
     const extra = {}
     if (q1?.fields) Object.assign(extra, q1.fields)
     if (q2?.fields) Object.assign(extra, q2.fields)
     if (titleText.trim()) extra.badge_title = titleText.trim()
     // Q4 — student-reported level uses Medium confidence, not High.
-    // "I'm not sure" leaves self_declared_level null; reviewer handles it.
+    // "Not sure — reviewer will confirm" leaves self_declared_level null; reviewer handles it.
     if (q4?.fields) Object.assign(extra, q4.fields)
+
+    // Context-aware Q2 override for "A person watched me do something and said I passed".
+    // The default fields set expert_evaluation_required=true which fires S2R06 → Skill.
+    // OSIL panels facilitate review, not expert skill scoring → override to prevent
+    // misclassification as Skill. Makerspace/NCE keep expert_evaluation_required=true.
+    const _WATCHED_TEXT = 'A person watched me do something and said I passed'
+    if (q2?.text === _WATCHED_TEXT) {
+      const effectiveIssuer = extra.issuer ?? bfs.issuer
+      if (effectiveIssuer === 'OSIL') {
+        extra.assessment_type = 'project_presentation'
+        extra.assessment_evaluator = 'expert_scored'
+        extra.expert_evaluation_required = false
+      } else if (effectiveIssuer === 'Makerspace' || effectiveIssuer === 'NCE') {
+        extra.assessment_type = 'practical'
+        extra.assessment_evaluator = 'expert_scored'
+        extra.expert_evaluation_required = true
+      }
+      // Unknown issuer: keep defaults (practical, expert_scored, expert_evaluation_required=true)
+    }
 
     // Derive audience_type from issuer when not already set by Q1 answer or BFS.
     // This covers issuers detected by Layer 0 keyword matching on the backend
@@ -364,22 +491,180 @@ function FreeTextFollowupPanel({ bfs, onClassify, loading }) {
     }
 
     // Remove from missing_signals any field we showed a question for — whether
-    // the student answered it or chose "I'm not sure" or left it blank.
+    // the student answered it or left it blank.
     let updatedMissing = [...missing]
     if (showQ1) updatedMissing = updatedMissing.filter(s => s !== 'issuer')
     if (showQ2) updatedMissing = updatedMissing.filter(s => s !== 'assessment_evaluator')
     updatedMissing = updatedMissing.filter(s => s !== 'badge_title')
     if (showQ4) updatedMissing = updatedMissing.filter(s => s !== 'self_declared_level')
 
+    // Defensive: if assessment_evaluator has been resolved (set to a non-null value
+    // by Q2 answer or context-aware override), ensure it is not in missing_signals
+    // regardless of how it was removed above. This prevents a stale missing_signals
+    // entry from forcing confidence to Low on the backend.
+    const resolvedEvaluator = extra.assessment_evaluator ?? bfs.assessment_evaluator
+    if (resolvedEvaluator != null) {
+      updatedMissing = updatedMissing.filter(s => s !== 'assessment_evaluator')
+    }
+
+    // Explicitly carry all Q2-derived assessment fields into the merged BFS so
+    // the backend never sees null for a field the student already answered.
+    const mergedAssessment = {}
+    if (extra.assessment_evaluator != null)      mergedAssessment.assessment_evaluator      = extra.assessment_evaluator
+    if (extra.expert_evaluation_required != null) mergedAssessment.expert_evaluation_required = extra.expert_evaluation_required
+    if (extra.assessment_type != null)            mergedAssessment.assessment_type            = extra.assessment_type
+    if (extra.assessment_required != null)        mergedAssessment.assessment_required        = extra.assessment_required
+    // When student confirmed any form of assessment was performed, mark as required
+    // so S2R05 (no-assessment → Souvenir) does not fire incorrectly.
+    if (q2 && q2.fields && q2.fields.assessment_required !== 'no' && resolvedEvaluator != null) {
+      mergedAssessment.assessment_required = mergedAssessment.assessment_required ?? 'yes'
+    }
+
     return {
       ...bfs,
       ...extra,
+      ...mergedAssessment,
       missing_signals: updatedMissing,
       needs_followup_questions: updatedMissing.length > 0,
     }
   }
 
-  const questionCount = [showQ1, showQ2, showQ3, showQ4].filter(Boolean).length
+  // ── Step navigation helpers ───────────────────────────────────────────────────
+  const allDone = currentStep >= questionQueue.length
+
+  // Display text for each answered question (shown in the summary row above current Q)
+  function getAnswerSummary(qid) {
+    switch (qid) {
+      case 'Q1': return q1?.text || null
+      case 'Q2': return q2?.text || null
+      case 'Q3': return titleText.trim() || '(skipped)'
+      case 'Q4': return q4?.text || '(skipped)'
+      default:   return null
+    }
+  }
+
+  // Advance to the next question; validate required questions first
+  function handleContinue() {
+    const qid = questionQueue[currentStep]
+    if (qid === 'Q1' && !q1) {
+      setCurrentError('Please select where this activity took place')
+      return
+    }
+    if (qid === 'Q2' && !q2) {
+      setCurrentError('Please select how your work was evaluated')
+      return
+    }
+    setCurrentError('')
+    setCurrentStep(s => s + 1)
+  }
+
+  // Skip Q3 without saving any typed text
+  function handleSkipQ3() {
+    setTitleText('')
+    setCurrentError('')
+    setCurrentStep(s => s + 1)
+  }
+
+  // ── Render question body ──────────────────────────────────────────────────────
+  function renderQuestion(qid) {
+    switch (qid) {
+      case 'Q1':
+        return (
+          <div>
+            <p className="text-sm font-semibold text-gray-800 mb-1">{_FT_Q1.label}</p>
+            <p className="text-xs text-gray-500 mb-2">{_FT_Q1.helper}</p>
+            <RadioGroup
+              options={_FT_Q1.options.map(o => o.text)}
+              value={q1?.text || ''}
+              onChange={txt => { setQ1(_FT_Q1.options.find(o => o.text === txt)); setCurrentError('') }}
+              name="ft_q1"
+              error={!!currentError}
+            />
+            <FieldError message={currentError} />
+          </div>
+        )
+      case 'Q2':
+        return (
+          <div>
+            <p className="text-sm font-semibold text-gray-800 mb-1">{_FT_Q2.label}</p>
+            <p className="text-xs text-gray-500 mb-2">{_FT_Q2.helper}</p>
+            <RadioGroup
+              options={_FT_Q2.options.map(o => o.text)}
+              value={q2?.text || ''}
+              onChange={txt => { setQ2(_FT_Q2.options.find(o => o.text === txt)); setCurrentError('') }}
+              name="ft_q2"
+              error={!!currentError}
+            />
+            <FieldError message={currentError} />
+          </div>
+        )
+      case 'Q3':
+        return (
+          <div>
+            <p className="text-sm font-semibold text-gray-800 mb-1">
+              What would you call this badge or achievement?
+            </p>
+            <p className="text-xs text-gray-500 mb-2">
+              Optional — for example: Leadership Workshop, AI Training, Laser Cutting Certification
+            </p>
+            <Input
+              value={titleText}
+              onChange={e => setTitleText(e.target.value)}
+              placeholder="e.g. Leadership Workshop"
+            />
+          </div>
+        )
+      case 'Q4':
+        return (
+          <div>
+            <p className="text-sm font-semibold text-gray-800 mb-2">{_FT_Q4.label}</p>
+            <p className="text-xs text-gray-500 mb-2">
+              Optional — helps us decide whether this is a beginner, intermediate, or advanced badge.
+            </p>
+            <RadioGroup
+              options={_FT_Q4.options.map(o => o.text)}
+              value={q4?.text || ''}
+              onChange={txt => setQ4(_FT_Q4.options.find(o => o.text === txt))}
+              name="ft_q4"
+            />
+          </div>
+        )
+      default:
+        return null
+    }
+  }
+
+  // ── Render Continue / Skip buttons for the active question ───────────────────
+  function renderStepButtons(qid) {
+    if (qid === 'Q3') {
+      return (
+        <div className="flex items-center gap-3 pt-1">
+          <button
+            onClick={handleSkipQ3}
+            className="px-4 py-2 rounded border border-gray-300 text-sm text-gray-700 hover:bg-gray-50"
+          >
+            Skip
+          </button>
+          <button
+            onClick={handleContinue}
+            className="bg-njit-red text-white px-6 py-2 rounded font-medium hover:bg-njit-red-dark text-sm"
+          >
+            Continue →
+          </button>
+        </div>
+      )
+    }
+    return (
+      <button
+        onClick={handleContinue}
+        className="bg-njit-red text-white px-6 py-2 rounded font-medium hover:bg-njit-red-dark text-sm mt-1"
+      >
+        Continue →
+      </button>
+    )
+  }
+
+  const questionCount = questionQueue.length
 
   return (
     <div className="border border-gray-200 rounded-lg p-6 space-y-6">
@@ -411,72 +696,100 @@ function FreeTextFollowupPanel({ bfs, onClassify, loading }) {
         })}
       </div>
 
-      {/* Question 1 — issuer */}
-      {showQ1 && (
-        <div>
-          <p className="text-sm font-semibold text-gray-800 mb-2">{_FT_Q1.label}</p>
-          <RadioGroup
-            options={_FT_Q1.options.map(o => o.text)}
-            value={q1?.text || ''}
-            onChange={txt => setQ1(_FT_Q1.options.find(o => o.text === txt))}
-            name="ft_q1"
-          />
+      {/* Answered question summaries — one line per answered step */}
+      {questionQueue.slice(0, currentStep).map((qid, idx) => (
+        <div key={qid} className="flex items-center justify-between text-sm">
+          <span className="text-gray-700">
+            <span className="text-green-600 mr-1.5">✅</span>
+            {getAnswerSummary(qid)}
+          </span>
+          <button
+            onClick={() => { setCurrentError(''); setCurrentStep(idx) }}
+            className="text-xs text-gray-400 hover:text-njit-red ml-4 underline flex-shrink-0"
+          >
+            Change
+          </button>
+        </div>
+      ))}
+
+      {/* Current active question — one at a time */}
+      {!allDone && !emailStep && (
+        <div className="space-y-3">
+          {renderQuestion(questionQueue[currentStep])}
+          {renderStepButtons(questionQueue[currentStep])}
         </div>
       )}
 
-      {/* Question 2 — assessment_evaluator */}
-      {showQ2 && (
-        <div>
-          <p className="text-sm font-semibold text-gray-800 mb-2">{_FT_Q2.label}</p>
-          <RadioGroup
-            options={_FT_Q2.options.map(o => o.text)}
-            value={q2?.text || ''}
-            onChange={txt => setQ2(_FT_Q2.options.find(o => o.text === txt))}
-            name="ft_q2"
-          />
-        </div>
-      )}
+      {/* After all questions: email step or Classify button */}
+      {allDone && (
+        emailStep ? (
+          <div className="border border-gray-200 rounded-lg p-5 space-y-4 bg-gray-50">
+            <div>
+              <p className="text-base font-semibold text-njit-navy">Almost done! Where should we send updates?</p>
+              <p className="text-sm text-gray-500 mt-0.5">The reviewer will check and confirm this classification.</p>
+            </div>
 
-      {/* Question 3 — badge_title */}
-      {showQ3 && (
-        <div>
-          <p className="text-sm font-semibold text-gray-800 mb-1">
-            What would you call this badge or achievement?
-          </p>
-          <p className="text-xs text-gray-500 mb-2">
-            Optional — for example: Leadership Workshop, AI Training, Laser Cutting Certification
-          </p>
-          <Input
-            value={titleText}
-            onChange={e => setTitleText(e.target.value)}
-            placeholder="e.g. Leadership Workshop"
-          />
-        </div>
-      )}
+            <FieldGroup label="Your email address *">
+              <Input
+                type="email"
+                value={submitterEmail}
+                error={emailErrors.submitter}
+                onChange={e => { setSubmitterEmail(e.target.value); setEmailErrors(ev => ({ ...ev, submitter: '' })) }}
+                placeholder="you@njit.edu"
+              />
+              <FieldError message={emailErrors.submitter} />
+            </FieldGroup>
 
-      {/* Question 4 — level (only when genuinely unknown) */}
-      {showQ4 && (
-        <div>
-          <p className="text-sm font-semibold text-gray-800 mb-2">{_FT_Q4.label}</p>
-          <p className="text-xs text-gray-500 mb-2">
-            Optional — helps us decide whether this is a beginner, intermediate, or advanced badge.
-          </p>
-          <RadioGroup
-            options={_FT_Q4.options.map(o => o.text)}
-            value={q4?.text || ''}
-            onChange={txt => setQ4(_FT_Q4.options.find(o => o.text === txt))}
-            name="ft_q4"
-          />
-        </div>
-      )}
+            <FieldGroup
+              label="Reviewer email (optional)"
+              helper="If provided, reviewer will be notified. Otherwise classification appears in reviewer dashboard."
+            >
+              <Input
+                type="email"
+                value={reviewerEmail}
+                error={emailErrors.reviewer}
+                onChange={e => { setReviewerEmail(e.target.value); setEmailErrors(ev => ({ ...ev, reviewer: '' })) }}
+                placeholder="reviewer@njit.edu"
+              />
+              <FieldError message={emailErrors.reviewer} />
+            </FieldGroup>
 
-      <button
-        onClick={() => onClassify(buildMergedBfs())}
-        disabled={loading}
-        className="bg-njit-red text-white px-6 py-2 rounded font-medium hover:bg-njit-red-dark disabled:opacity-50"
-      >
-        {loading ? 'Classifying…' : 'Classify →'}
-      </button>
+            <div className="flex items-center gap-3">
+              <button
+                onClick={() => setEmailStep(false)}
+                className="px-4 py-2 rounded border border-gray-300 text-sm text-gray-700 hover:bg-white"
+              >
+                ← Back
+              </button>
+              <button
+                disabled={loading}
+                onClick={() => {
+                  const errs = {}
+                  if (!submitterEmail.trim()) errs.submitter = 'Required'
+                  else if (!EMAIL_RE.test(submitterEmail)) errs.submitter = 'Valid email required'
+                  if (reviewerEmail.trim() && !EMAIL_RE.test(reviewerEmail)) errs.reviewer = 'Valid email required'
+                  if (Object.keys(errs).length) { setEmailErrors(errs); return }
+                  onClassify(buildMergedBfs(), {
+                    submitter_email: submitterEmail.trim(),
+                    reviewer_email: reviewerEmail.trim() || null,
+                  })
+                }}
+                className="bg-njit-red text-white px-6 py-2 rounded font-medium hover:bg-njit-red-dark disabled:opacity-50"
+              >
+                {loading ? 'Classifying…' : 'Submit for Review →'}
+              </button>
+            </div>
+          </div>
+        ) : (
+          <button
+            onClick={() => setEmailStep(true)}
+            disabled={loading}
+            className="bg-njit-red text-white px-6 py-2 rounded font-medium hover:bg-njit-red-dark disabled:opacity-50"
+          >
+            Classify →
+          </button>
+        )
+      )}
     </div>
   )
 }
@@ -566,8 +879,7 @@ function GuidedForm({ onIngested }) {
       if (!answers.submitter_email.trim()) e.submitter_email = 'Required'
       else if (!EMAIL_RE.test(answers.submitter_email))
         e.submitter_email = 'Valid email required'
-      if (!answers.reviewer_email.trim()) e.reviewer_email = 'Required'
-      else if (!EMAIL_RE.test(answers.reviewer_email))
+      if (answers.reviewer_email.trim() && !EMAIL_RE.test(answers.reviewer_email))
         e.reviewer_email = 'Valid email required'
     }
     return e
@@ -848,8 +1160,8 @@ function GuidedForm({ onIngested }) {
           </FieldGroup>
 
           <FieldGroup
-            label="Reviewer email address *"
-            helper="The person who will review and approve this classification."
+            label="Reviewer email (optional)"
+            helper="If provided, reviewer will be notified. Otherwise classification appears in reviewer dashboard."
           >
             <Input
               type="email"
@@ -957,12 +1269,39 @@ function JsonPasteTab({ onIngested }) {
 
       {parseError && <p className="text-red-600 text-sm">{parseError}</p>}
 
-      {parsed && (
-        <div className="bg-green-50 border border-green-200 rounded p-3 text-sm text-green-800">
-          <strong>Valid JSON detected.</strong>{' '}
-          Fields found: {Object.keys(parsed).join(', ')}
-        </div>
-      )}
+      {parsed && (() => {
+        // Extract summary fields from common OBv3 shapes
+        const name = parsed.name || parsed.badge?.name || null
+        const issuerRaw = parsed.issuer
+        const issuerName = typeof issuerRaw === 'string'
+          ? issuerRaw
+          : (issuerRaw?.name || issuerRaw?.id || null)
+        const achievementType = parsed.achievementType || parsed.badge?.achievementType || null
+        const hasCriteria = !!(parsed.criteria || parsed.badge?.criteria || parsed.credentialSubject?.achievement?.criteria)
+        const alignments = parsed.alignment || parsed.badge?.alignment || []
+        const alignCount = Array.isArray(alignments) ? alignments.length : 0
+        return (
+          <div className="bg-green-50 border border-green-200 rounded p-4 text-sm space-y-2">
+            <p className="font-semibold text-green-800">Valid JSON detected</p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              {[
+                ['Badge name', name],
+                ['Issuer', issuerName],
+                ['Achievement type', achievementType],
+                ['Has criteria', hasCriteria ? 'Yes' : 'No'],
+                ['Alignments', alignCount > 0 ? `${alignCount} found` : 'None'],
+              ].map(([label, val]) => (
+                <div key={label} className="rounded p-2 border bg-white border-green-200">
+                  <span className="font-medium text-gray-600">{label}: </span>
+                  <span className={val && val !== 'No' && val !== 'None' ? 'text-gray-900' : 'text-gray-400 italic'}>
+                    {val ?? 'not detected'}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )
+      })()}
 
       <div className="flex gap-3">
         <button
@@ -1041,11 +1380,9 @@ export default function SubmitBadge() {
   const [classifyError, setClassifyError] = useState('')
 
   function handleIngested(bfsData, mode, meta = {}) {
-    // For free_text: NLP runs at /classify time, so assessment_evaluator is never
-    // flagged as missing at /ingest time even when it is null. Add it here so
-    // FreeTextFollowupPanel's condition missing_signals.includes('assessment_evaluator')
-    // works correctly.
-    if (mode === 'free_text' && bfsData.assessment_evaluator == null) {
+    // For free_text and json: NLP may not flag assessment_evaluator as missing even
+    // when it is null. Add it here so follow-up question conditions work correctly.
+    if ((mode === 'free_text' || mode === 'json') && bfsData.assessment_evaluator == null) {
       const ms = bfsData.missing_signals || []
       if (!ms.includes('assessment_evaluator')) {
         bfsData = { ...bfsData, missing_signals: [...ms, 'assessment_evaluator'] }
@@ -1059,6 +1396,26 @@ export default function SubmitBadge() {
     window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' })
   }
 
+  // Remove fields from missing_signals that now have a resolved value.
+  // Applied as a final cleanup step before every classifyBadge() call so that
+  // stale missing_signals entries (added at ingest time or augmented by handleIngested)
+  // do not force needs_followup_questions = true and drive confidence to Low.
+  function cleanMissingSignals(bfsObj) {
+    const fieldsToCheck = ['issuer', 'assessment_evaluator', 'audience_type', 'badge_title']
+    let missing = bfsObj.missing_signals ? [...bfsObj.missing_signals] : []
+    fieldsToCheck.forEach(field => {
+      const val = bfsObj[field]
+      if (val !== null && val !== undefined && val !== '') {
+        missing = missing.filter(s => s !== field)
+      }
+    })
+    return {
+      ...bfsObj,
+      missing_signals: missing,
+      needs_followup_questions: missing.length > 0,
+    }
+  }
+
   // Accepts either a multi-field object or (field, val) for backward compat
   function handleFollowupChange(fieldsOrField, val) {
     if (typeof fieldsOrField === 'object' && fieldsOrField !== null) {
@@ -1068,15 +1425,27 @@ export default function SubmitBadge() {
     }
   }
 
-  // Free-text path: receives a fully merged BFS from FreeTextFollowupPanel,
-  // classifies immediately, navigates directly to the review page.
-  async function handleFreeTextClassify(mergedBfs) {
+  // Free-text path: receives merged BFS + email meta from FreeTextFollowupPanel.
+  // Navigates to SubmissionConfirmation when emails are present.
+  async function handleFreeTextClassify(mergedBfs, emailMeta = {}) {
     setClassifying(true)
     setClassifyError('')
     try {
-      const result = await classifyBadge(mergedBfs, {})
+      const cleanedBfs = cleanMissingSignals(mergedBfs)
+      const result = await classifyBadge(cleanedBfs, emailMeta)
       const logId = result.governance.log_id
-      navigate(`/review/${logId}`, { state: { result, bfs: mergedBfs } })
+      if (emailMeta.submitter_email || emailMeta.reviewer_email) {
+        navigate('/submit/confirmation', {
+          state: {
+            badgeTitle: result.badge_title || cleanedBfs.badge_title,
+            submitterEmail: emailMeta.submitter_email,
+            reviewerEmail: emailMeta.reviewer_email,
+            logId,
+          },
+        })
+      } else {
+        navigate(`/review/${logId}`, { state: { result, bfs: cleanedBfs } })
+      }
     } catch (err) {
       setClassifyError(err.message)
     } finally {
@@ -1084,19 +1453,20 @@ export default function SubmitBadge() {
     }
   }
 
-  async function handleConfirmClassify() {
+  async function handleConfirmClassify(emailMeta = {}) {
     setClassifying(true)
     setClassifyError('')
     try {
-      const enrichedBfs = { ...bfs, ...followupValues }
-      const result = await classifyBadge(enrichedBfs, submissionMeta)
+      const enrichedBfs = cleanMissingSignals({ ...bfs, ...followupValues })
+      const meta = { ...submissionMeta, ...emailMeta }
+      const result = await classifyBadge(enrichedBfs, meta)
       const logId = result.governance.log_id
-      if (submissionMeta.submitter_email || submissionMeta.reviewer_email) {
+      if (meta.submitter_email || meta.reviewer_email) {
         navigate('/submit/confirmation', {
           state: {
             badgeTitle: result.badge_title || enrichedBfs.badge_title,
-            submitterEmail: submissionMeta.submitter_email,
-            reviewerEmail: submissionMeta.reviewer_email,
+            submitterEmail: meta.submitter_email,
+            reviewerEmail: meta.reviewer_email,
             logId,
           },
         })
@@ -1162,6 +1532,7 @@ export default function SubmitBadge() {
               onConfirm={handleConfirmClassify}
               onFollowupChange={handleFollowupChange}
               loading={classifying}
+              showEmailStep={inputMode === 'json'}
             />
           )}
         </>

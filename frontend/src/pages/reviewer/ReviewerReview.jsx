@@ -17,7 +17,7 @@ import { useParams, useNavigate } from 'react-router-dom'
 import { getLogByToken, submitReview } from '../../services/api'
 
 const LEVEL_OPTIONS = {
-  Souvenir:   ['Souvenir'],
+  Souvenir:   ['N/A'],
   Achievement:['Foundational', 'Milestone', 'Terminal'],
   Skill:      ['Awareness', 'Application', 'Mastery'],
   Competency: ['Demonstrated', 'Integrated', 'Exemplary'],
@@ -39,12 +39,12 @@ function ConfBadge({ level }) {
   return <span className={`text-xs font-semibold px-2 py-0.5 rounded border ${cls}`}>{level || '—'}</span>
 }
 
-function ClassificationCard({ label, value, rules, confidence }) {
+function ClassificationCard({ label, value, rules, confidence, subtitle }) {
   return (
     <div className="border border-gray-200 rounded-lg p-4 space-y-2 text-center">
       <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">{label}</p>
       <p className="text-lg font-bold text-njit-navy">{value || '—'}</p>
-      <ConfBadge level={confidence} />
+      {confidence ? <ConfBadge level={confidence} /> : subtitle ? <p className="text-xs text-gray-400 italic">{subtitle}</p> : null}
       <p className="text-xs text-gray-400">{rules.join(', ') || '—'}</p>
     </div>
   )
@@ -56,7 +56,8 @@ export default function ReviewerReview() {
 
   const [logData, setLogData] = useState(null)
   const [loading, setLoading] = useState(true)
-  const [error, setError] = useState('')
+  const [error, setError] = useState('')      // message string
+  const [errorStatus, setErrorStatus] = useState(null)  // HTTP status code
 
   const [reviewerName, setReviewerName] = useState('')
   const [overrideOpen, setOverrideOpen] = useState(false)
@@ -75,14 +76,18 @@ export default function ReviewerReview() {
         setOverrideType(data.recommended_type || '')
         setOverrideLevel(data.recommended_level || '')
       })
-      .catch(err => setError(err.message))
+      .catch(err => { setError(err.message); setErrorStatus(err.status ?? null) })
       .finally(() => setLoading(false))
   }, [token])
 
   function handleTypeChange(t) {
     setOverrideType(t)
-    const opts = LEVEL_OPTIONS[t] || []
-    if (!opts.includes(overrideLevel)) setOverrideLevel(opts[0] || '')
+    if (t === 'Souvenir') {
+      setOverrideLevel('')
+    } else {
+      const opts = LEVEL_OPTIONS[t] || []
+      if (!opts.includes(overrideLevel)) setOverrideLevel(opts[0] || '')
+    }
   }
 
   async function handleAccept() {
@@ -133,6 +138,45 @@ export default function ReviewerReview() {
   }
 
   if (error) {
+    // 409 — badge already reviewed: show a helpful summary instead of a plain error
+    if (errorStatus === 409) {
+      // Parse the status out of the detail string e.g.
+      // "This badge has already been reviewed (accepted)."
+      const statusMatch = error.match(/\((\w+)\)/)
+      const reviewedStatus = statusMatch ? statusMatch[1] : 'reviewed'
+      return (
+        <div className="max-w-2xl mx-auto py-8 px-4">
+          <div className="border border-gray-200 rounded-lg p-6 space-y-4">
+            <div className="flex items-center gap-2">
+              <span className="text-green-600 text-xl">✓</span>
+              <h2 className="text-lg font-semibold text-njit-navy">This badge has already been reviewed</h2>
+            </div>
+            <p className="text-sm text-gray-600">
+              Status: <span className="font-medium capitalize">{reviewedStatus}</span>
+            </p>
+            <p className="text-sm text-gray-500">
+              To see the full decision details — category, type, level, and who reviewed it — open the Governance Logs.
+            </p>
+            <div className="flex items-center gap-3 pt-1">
+              <button
+                onClick={() => navigate('/reviewer/dashboard')}
+                className="px-4 py-2 rounded border border-gray-300 text-sm text-gray-700 hover:bg-gray-50"
+              >
+                ← Back to Dashboard
+              </button>
+              <button
+                onClick={() => navigate('/logs')}
+                className="bg-njit-navy text-white px-4 py-2 rounded text-sm font-medium hover:opacity-90"
+              >
+                View in Logs →
+              </button>
+            </div>
+          </div>
+        </div>
+      )
+    }
+
+    // Generic error
     return (
       <div className="max-w-2xl mx-auto py-8 px-4">
         <div className="bg-red-50 border border-red-300 text-red-800 rounded p-5 space-y-2">
@@ -195,9 +239,10 @@ export default function ReviewerReview() {
           />
           <ClassificationCard
             label="Stage 3 — Level"
-            value={logData?.recommended_level}
+            value={logData?.recommended_type === 'Souvenir' ? 'N/A' : logData?.recommended_level}
             rules={s3Rules}
-            confidence={logData?.confidence}
+            confidence={logData?.recommended_type === 'Souvenir' ? null : logData?.confidence}
+            subtitle={logData?.recommended_type === 'Souvenir' ? 'Souvenir badges have no level' : null}
           />
         </div>
       </div>
@@ -273,10 +318,14 @@ export default function ReviewerReview() {
                 <select
                   value={overrideLevel}
                   onChange={e => setOverrideLevel(e.target.value)}
-                  className="w-full border border-gray-300 rounded px-2 py-1.5 text-sm bg-white"
+                  disabled={overrideType === 'Souvenir'}
+                  className={`w-full border rounded px-2 py-1.5 text-sm ${overrideType === 'Souvenir' ? 'border-gray-200 bg-gray-100 text-gray-400 cursor-not-allowed' : 'border-gray-300 bg-white'}`}
                 >
                   {(LEVEL_OPTIONS[overrideType] || []).map(l => <option key={l}>{l}</option>)}
                 </select>
+                {overrideType === 'Souvenir' && (
+                  <p className="text-xs text-gray-400 mt-1">Souvenir badges have no level</p>
+                )}
               </div>
             </div>
             <div>

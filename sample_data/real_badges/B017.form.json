@@ -1,0 +1,11 @@
+{
+  "badge_title": "MakerSpeak Iterate to Innovate",
+  "badge_description": "This badge recognizes attendance and participation in the MakerSpeak Iterate to Innovate event at the NJIT Makerspace.",
+  "issuer": "Makerspace",
+  "audience_type": "njit_student",
+  "earning_criteria_text": "Attend the full MakerSpeak event and participate in all sessions.",
+  "assessment_required": "no",
+  "assessment_type": "attendance",
+  "assessment_evaluator": null,
+  "expert_evaluation_required": false
+}

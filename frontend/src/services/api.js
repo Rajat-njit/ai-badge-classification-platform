@@ -18,12 +18,17 @@ const http = axios.create({
   headers: { 'Content-Type': 'application/json' },
 })
 
-/** Extract a human-readable error message from an axios error. */
+/** Extract a human-readable error message from an axios error, preserving status. */
 function apiError(err) {
   const detail = err?.response?.data?.detail
-  if (typeof detail === 'string') return new Error(detail)
-  if (Array.isArray(detail)) return new Error(detail.map(d => d.msg).join('; '))
-  return new Error(err.message || 'Unknown API error')
+  const msg = typeof detail === 'string'
+    ? detail
+    : Array.isArray(detail)
+      ? detail.map(d => d.msg).join('; ')
+      : (err.message || 'Unknown API error')
+  const e = new Error(msg)
+  e.status = err?.response?.status ?? null
+  return e
 }
 
 /**
