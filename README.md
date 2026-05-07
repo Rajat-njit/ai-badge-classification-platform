@@ -9,10 +9,15 @@
 
 > A rule-based, explainable, and auditable web prototype that operationalizes NJIT's digital badge taxonomy into a structured, human-in-the-loop classification workflow.
 
-**Capstone Project — Spring 2026**
-**New Jersey Institute of Technology**
-**Faculty Advisor:** Prabhat Vaish &nbsp;|&nbsp; **Supervisor:** Kerry Eberhardt
-**Team Members**
+**Capstone Project:** Spring 2026
+
+**Institution:** New Jersey Institute of Technology
+
+**Faculty Advisor:** Prabhat Vaish
+
+**Supervisor:** Kerry Eberhardt
+
+**Team Members:**
 
 1. Rajat Pednekar
 2. Prabhath Vipparthi
