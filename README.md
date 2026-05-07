@@ -13,10 +13,11 @@
 **New Jersey Institute of Technology**
 **Faculty Advisor:** Prabhat Vaish &nbsp;|&nbsp; **Supervisor:** Kerry Eberhardt
 **Team Members**
-**1. Rajat Pednekar**
-**2. Prabhath Vipparthi**
-**3. Tanay Yadav**
-**4. Shivani Kushanapalli**
+
+1. Rajat Pednekar
+2. Prabhath Vipparthi
+3. Tanay Yadav
+4. Shivani Kushanapalli
 
 ---
 
