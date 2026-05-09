@@ -22,7 +22,7 @@
 1. Rajat Pednekar
 2. Prabhath Vipparthi
 3. Tanay Yadav
-4. Shivani Kushanapalli
+4. Sai Shivani Kushanapalli
 
 ---
 
