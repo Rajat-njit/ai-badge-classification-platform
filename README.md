@@ -20,7 +20,7 @@
 **Team Members:**
 
 1. Rajat Pednekar
-2. Prabhath Vipparthi
+2. Prabhath Vinay Vipparthi
 3. Tanay Yadav
 4. Sai Shivani Kushanapalli
 
