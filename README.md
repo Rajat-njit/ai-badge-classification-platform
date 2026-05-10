@@ -724,7 +724,7 @@ These rules govern every design decision and every line of code in this system:
 |---|---|---|
 | **Rajat Ravindra Pednekar** | System Architecture, NLP Pipeline Development, Schema Design| rp2348@njit.edu |
 | **Sai Shivani K** | Taxonomy Documentation, Frontend Implementation | sk3764@njit.edu |
-| **Prabhath Vinay Vipparthi** | Rule Engine, Testing, Validation, Sample Data Curation | pv342@njit.edu |
+| **Prabhath Vinay Vipparthi** | NLP Phrase Dictionary, Pattern Rules, Classification Engine, AI/NLP Pipeline, Testing & Validation, Sample Data Curation | pv342@njit.edu |
 | **Tanay** | Backend Design, Governance Design, Feedback Loop | ty233@njit.edu |
 
 **Faculty Advisor:** Prabhat Vaish
